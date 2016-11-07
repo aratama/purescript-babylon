@@ -1,0 +1,15 @@
+{
+  "name": "purescript-babylon",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/**/*.purs && psc-bundle --module Main --main Main --output public/index.js output/**/*.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "directories": {
+    "example": "example"
+  },
+  "description": ""
+}
