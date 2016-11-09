@@ -61,3 +61,11 @@ exports.setSpecularColor = function(value){
         }
     }
 }
+
+exports.setSpecularPower = function(specularPower){
+    return function(mat){
+        return function(){
+            mat.specularPower = specularPower;
+        }
+    }
+}

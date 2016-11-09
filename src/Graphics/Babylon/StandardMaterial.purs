@@ -26,4 +26,6 @@ foreign import setDisableLighting :: forall eff. Boolean -> StandardMaterial -> 
 
 foreign import setDiffuseColor :: forall eff. Color3 -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setSpecularColor  :: forall eff. Color3 -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit
+foreign import setSpecularColor :: forall eff. Color3 -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setSpecularPower :: forall eff. Number -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit

@@ -37,7 +37,7 @@ import Graphics.Babylon.Material (setFogEnabled)
 import Graphics.Babylon.Mesh (Mesh, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
 import Graphics.Babylon.Scene (setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
-import Graphics.Babylon.StandardMaterial (StandardMaterial, setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
+import Graphics.Babylon.StandardMaterial (StandardMaterial, setSpecularPower, setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Vector3 (createVector3)
 import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
@@ -69,9 +69,10 @@ generateChunkAff ww boxMat waterBoxMat cx cz scene renderList = makeAff \reject 
         applyToMesh terrainMesh false =<< createVertexData (verts)
         setRenderingGroupId 1 terrainMesh
         pushToRenderList terrainMesh renderList
-        when (abs cx + abs cz < 2) do
-            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+        when (abs cx + abs cz < 1) do
             setReceiveShadows true terrainMesh
+        when (abs cx + abs cz < 3) do
+            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
         setMaterial (standardMaterialToMaterial mat) terrainMesh
         pure terrainMesh
 
@@ -160,6 +161,9 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             boxTex <- createTexture "grass-block.png" scene
             boxMat <- createStandardMaterial "grass-block" scene
+            grassSpecular <- createColor3 0.0 0.0 0.0
+            setSpecularColor grassSpecular boxMat
+            -- setSpecularPower 0.0 boxMat
             setDiffuseTexture boxTex boxMat
 
             waterBoxTex <- createTexture "water-block.png" scene
