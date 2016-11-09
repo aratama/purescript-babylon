@@ -21,6 +21,7 @@ import Data.Nullable (toMaybe)
 import Data.Ord (compare, abs)
 import Data.Ring (negate)
 import Data.Unit (Unit)
+import Data.Int (floor) as Int
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (setCheckCollisions, abstractMeshToNode) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
@@ -187,6 +188,9 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                 when (getName (AbstractMesh.abstractMeshToNode mesh) /= "cursor") do
                     let point = getPickedPoint pickingInfo
                     p <- runVector3 point
+                    let ix = Int.floor p.x
+                    let iy = Int.floor p.y
+                    let iz = Int.floor p.z 
                     r <- createVector3 (floor p.x) (floor p.y) (floor p.z)
                     setPosition r cursor
 

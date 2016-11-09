@@ -15,6 +15,7 @@ import Test.StrongCheck (SC, quickCheck)
 
 import PerlinNoise (createNoise, simplex2)
 import Graphics.Babylon (BABYLON)
+import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import Graphics.Babylon.Example.Terrain (BlockType(..))
 
 main :: SC (babylon :: BABYLON) Unit
@@ -35,7 +36,7 @@ main = do
 
             dat = createTerrainST map
         in case dat of
-            VertexDataPropsData props -> all (\index -> index < div (length props.grassBlocks.positions) 3) props.grassBlocks.indices
+            VertexDataPropsData props@{ grassBlocks: VertexDataProps grassBlocks } -> all (\index -> index < div (length grassBlocks.positions) 3) grassBlocks.indices
 
     pure unit
 

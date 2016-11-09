@@ -8,14 +8,41 @@ html, body {
     box-sizing: border-box;
 }
 
-#renderCanvas {
+#content {
     width   : 1280px;
     height  : 720px;
-    touch-action: none;
     position: absolute;
     top: 0;
     bottom: 0;
     left: 0;
     right: 0;
     margin: auto;
+}
+
+#renderCanvas {
+    width   : 1280px;
+    height  : 720px;
+    touch-action: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+
+#buttons {
+    margin: 10px;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    display: flex;
+    flex-direction: row;
+}
+
+#buttons button {
+    width: 100px;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: solid 1px white;
+    color: white;
+    margin: 10px;
+    padding: 8px;
 }

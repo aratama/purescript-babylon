@@ -2,21 +2,25 @@ module Graphics.Babylon.Example.Terrain where
 
 import Control.Alt (void)
 import Control.Bind (bind)
+import Control.Monad.Except (except)
 import Control.Monad.Rec.Class (tailRecM, Step(Loop, Done), tailRecM2)
 import Control.Monad.ST (writeSTRef, readSTRef, modifySTRef, newSTRef, pureST)
+import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
-import Data.Foreign (toForeign, unsafeFromForeign)
-import Data.Foreign.Class (class AsForeign, class IsForeign)
+import Data.Either (Either(Left))
+import Data.Foreign (readArray, ForeignError(ForeignError), readInt, toForeign, unsafeFromForeign)
+import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
 import Data.Generic (gShow, class Generic)
 import Data.Int (toNumber)
 import Data.List (List(Cons, Nil))
-import Data.Map (Map, toList, member)
+import Data.Map (values, mapWithKey, fromFoldable, toUnfoldable, Map, toList, member)
 import Data.Ord (compare, class Ord)
 import Data.Ring (negate)
+import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
-import Graphics.Babylon.VertexData (VertexDataProps)
-import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#))
+import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
+import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#), (>>=))
 
 data Index3D = Index3D Int Int Int
 
@@ -28,6 +32,17 @@ derive instance generic_BlockType :: Generic BlockType
 
 instance show_BlockType :: Show BlockType where
     show = gShow
+
+instance asForeign_BlockType :: AsForeign BlockType where
+    write value = toForeign case value of
+        GrassBlock -> 0
+        WaterBlock -> 1
+
+instance isForeign :: IsForeign BlockType where
+    read fn = readInt fn >>= case _ of
+        0 -> pure GrassBlock
+        1 -> pure WaterBlock
+        _ -> except (Left (pure (ForeignError "Invalid prop")))
 
 instance eq_Index3D :: Eq Index3D where
     eq (Index3D ax ay az) (Index3D bx by bz) = (ax == bx) && (ay == by) && (az == bz)
@@ -45,16 +60,31 @@ vec x y z = { x, y, z }
 type TerrainMap = Map Index3D BlockType
 
 newtype VertexDataPropsData = VertexDataPropsData {
+    blocks :: Map Index3D BlockType,
     grassBlocks :: VertexDataProps,
     waterBlocks :: VertexDataProps
 }
 
 instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
     read value = do
-        pure $ VertexDataPropsData (unsafeFromForeign value)
+        blocks <- do
+            blocksFn <- readProp "blocks" value >>= readArray
+            for blocksFn \block -> do
+                x <- readProp "x" block
+                y <- readProp "y" block
+                z <- readProp "z" block
+                blockType <- readProp "blockType" block
+                pure (Tuple (Index3D x y z) blockType)
+        grassBlocks <- readProp "grassBlocks" value
+        waterBlocks <- readProp "waterBlocks" value
+        pure $ VertexDataPropsData { blocks: fromFoldable blocks, grassBlocks, waterBlocks }
 
 instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
-    write (VertexDataPropsData value) = toForeign value
+    write (VertexDataPropsData value) = toForeign {
+        blocks: Array.fromFoldable (values (mapWithKey (\(Index3D x y z) v -> { x, y, z, blockType: write v }) value.blocks)),
+        grassBlocks: value.grassBlocks,
+        waterBlocks: value.waterBlocks
+    }
 
 
 chunkSize :: Int
@@ -136,9 +166,9 @@ createTerrainST map = pureST do
             pure (Loop tail)
 
 
-    let freezeStore store = { indices: _, positions: _, normals:_, uvs: _ } <$> freeze store.indices <*> freeze store.positions <*> freeze store.normals <*> freeze store.uvs
+    let freezeStore store = VertexDataProps <$> ({ indices: _, positions: _, normals:_, uvs: _ } <$> freeze store.indices <*> freeze store.positions <*> freeze store.normals <*> freeze store.uvs)
 
     grassBlocks <- freezeStore grass
     waterBlocks <- freezeStore water
 
-    pure $ VertexDataPropsData { grassBlocks, waterBlocks }
+    pure $ VertexDataPropsData { blocks: map, grassBlocks, waterBlocks }
