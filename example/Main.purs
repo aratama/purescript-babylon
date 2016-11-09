@@ -1,116 +1,69 @@
 module Main where
 
+import Graphics.Babylon.Example.Terrain
 import Control.Bind (bind, (>>=))
-import Control.Monad (join)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log, error)
+import Control.Monad.Eff.Console (errorShow, CONSOLE, log, error)
+import Control.Monad.Eff.Exception (catchException)
+import Control.Monad.Except (runExcept)
 import DOM (DOM)
-import Data.Array (length, foldM)
-import Data.HeytingAlgebra (not)
-import Data.Int (toNumber, floor)
-import Data.List ((..))
-import Data.Map (Map, size, fromFoldable)
+import Data.Array (length, (..))
+import Data.Either (Either(..))
+import Data.Foldable (for_)
+import Data.Foreign.Class (write, read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
 import Data.Ring (negate)
-import Data.Traversable (for)
-import Data.Tuple (Tuple(Tuple))
-import Data.Unit (unit, Unit)
+import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
+import Graphics.Babylon.Example.Message (Command(..))
 import Graphics.Babylon.FreeCamera (createFreeCamera, setTarget, attachControl)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Mesh (setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
-import Graphics.Babylon.Scene (createScene, render)
-import Graphics.Babylon.ShadowGenerator (pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
+import Graphics.Babylon.Scene (Scene, createScene, render)
+import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
 import Graphics.Babylon.StandardMaterial (setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (sKYBOX_MODE, setCoordinatesMode, createTexture)
 import Graphics.Babylon.Vector3 (createVector3)
-import Graphics.Babylon.VertexData (VertexData, applyToMesh, getIndices, createVertexData, merge)
-import PerlinNoise (createNoise, simplex2)
-import Prelude (show, pure, (#), (/), (<>), (*), (+), (<$>), ($), (*>), (-))
-
-import Graphics.Babylon.Example.Terrain
-
-createTerrain :: forall eff. { x :: Number, y :: Number, z :: Number } -> { nx :: Boolean, px :: Boolean, ny :: Boolean, py :: Boolean, nz :: Boolean, pz :: Boolean } -> Eff (babylon :: BABYLON | eff) VertexData
-createTerrain p props = do
-
-    let createEmpty = createVertexData { indices: [], positions: [], normals: [], uvs: [] }
-
-    let square e n uvs = if not e
-            then createEmpty
-            else do
-
-                let a = vec n.y n.z n.x
-                let b = vec (a.y * n.z - a.y * n.x) (a.z * n.x - a.x * n.z) (a.x * n.y - a.y * n.x)
-
-                let d = vec (n.x * 0.5) (n.y * 0.5) (n.z * 0.5)
-                let s = vec (a.x * 0.5) (a.y * 0.5) (a.z * 0.5)
-                let t = vec (b.x * 0.5) (b.y * 0.5) (b.z * 0.5)
-
-                let v = vec (p.x + d.x) (p.y + d.y) (p.z + d.z)
-
-                createVertexData {
-                    indices: [
-                        0, 1, 2,
-                        0, 2, 3
-                    ],
-                    positions: [
-                        v.x - s.x - t.x, v.y - s.y - t.y, v.z - s.z - t.z,
-                        v.x + s.x - t.x, v.y + s.y - t.y, v.z + s.z - t.z,
-                        v.x + s.x + t.x, v.y + s.y + t.y, v.z + s.z + t.z,
-                        v.x - s.x + t.x, v.y - s.y + t.y, v.z - s.z + t.z
-                    ],
-                    normals: [
-                        n.x, n.y, n.z,
-                        n.x, n.y, n.z,
-                        n.x, n.y, n.z,
-                        n.x, n.y, n.z
-                    ],
-                    uvs: uvs
-                }
-
-    pys <- square props.py (vec 0.0 1.0 0.0)          [
-                0.005, 0.755,
-                0.245, 0.755,
-                0.245, 0.995,
-                0.005, 0.995]
-    nys <- square props.ny (vec 0.0 (negate 1.0) 0.0) [
-        0.005, 0.505,
-        0.245, 0.505,
-        0.245, 0.745,
-        0.005, 0.745]
-    pxs <- square props.px (vec 1.0 0.0 0.0)          [
-        0.005, 0.505,
-        0.245, 0.505,
-        0.245, 0.745,
-        0.005, 0.745]
-    nxs <- square props.nx (vec (negate 1.0) 0.0 0.0) [
-        0.005, 0.505,
-        0.245, 0.505,
-        0.245, 0.745,
-        0.005, 0.745
-    ]
-    pzs <- square props.pz (vec 0.0 0.0 1.0)          [
-        0.245, 0.505,
-        0.245, 0.745,
-        0.005, 0.745,
-        0.005, 0.505]
-    nzs <- square props.nz (vec 0.0 0.0 (negate 1.0)) [
-        0.005, 0.745,
-        0.005, 0.505,
-        0.245, 0.505,
-        0.245, 0.745]
-    empty <- createEmpty
-    foldM (\a b -> merge a b *> pure b) empty [pys, nys, pxs, nxs, pzs, nzs]
+import Graphics.Babylon.VertexData (applyToMesh, getIndices, createVertexData)
+import Prelude (show, (/), (<>), ($), (#), (<$>))
+import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 
 
+generateChunk :: forall eff. Int -> Int -> Scene -> RenderList -> Eff ( console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit
+generateChunk cx cz scene renderList = do
+    catchException errorShow do
+        ww <- mkWorker "worker.js"
+        postMessageToWorker ww $ write $ GenerateTerrain cx cz
+        onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
+            Left err -> errorShow err
+            Right (VertexDataPropsData verts) -> do
+                log "Waiting for the worker..."
+                terrainVertexData <- createVertexData (verts)
+                indices <- getIndices terrainVertexData
+                log ("Complete! faces: " <> show (length indices / 3))
 
-main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON | eff) Unit
+                log "Generating terrain mesh.."
+                terrainMesh <- createMesh "terrain" scene
+                applyToMesh terrainMesh false terrainVertexData
+                log "Complete!"
+
+                log "Setting Material..."
+                setRenderingGroupId 1 terrainMesh
+                pushToRenderList terrainMesh renderList
+                setReceiveShadows true terrainMesh
+                boxTex <- createTexture "grass-block.png" scene
+                boxMat <- createStandardMaterial "skybox" scene
+                setDiffuseTexture boxTex boxMat
+                setMaterial (standardMaterialToMaterial boxMat) terrainMesh
+                log "Complete!"
+
+main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
     Nothing -> error "canvas not found"
     Just canvas -> do
@@ -157,46 +110,6 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             pushToRenderList sphere renderList
             setRenderingGroupId 1 sphere
 
-        do
-            log "Generating terrarin map..."
-            let noise = createNoise 0
-            blocks <- for (0 .. 127) \iz -> do
-                for (0 .. 127) \ix -> do
-                    let x = toNumber ix
-                    let z = toNumber iz
-                    let r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
-                    let h = floor (r * 8.0)
-                    for (0 .. h) \iy -> do
-                        let y = toNumber iy
-                        pure (Tuple (Index3D ix iy iz) unit)
-
-            let boxMap :: Map Index3D Unit
-                boxMap = fromFoldable (join (join blocks))
-
-            log ("Complete! Blocks: " <> show (size boxMap))
-
-            log "Generating terrarin verex data..."
-            let verts = createTerrainST boxMap
-            terrainVertexData <- createVertexData (verts)
-            indices <- getIndices terrainVertexData
-            log ("Complete! faces: " <> show (length indices / 3))
-
-            log "Generating terrain mesh.."
-            terrainMesh <- createMesh "terrain" scene
-            applyToMesh terrainMesh false terrainVertexData
-            log "Complete!"
-
-            log "Setting Material..."
-            setRenderingGroupId 1 terrainMesh
-            pushToRenderList terrainMesh renderList
-            setReceiveShadows true terrainMesh
-            boxTex <- createTexture "grass-block.png" scene
-            boxMat <- createStandardMaterial "skybox" scene
-            setDiffuseTexture boxTex boxMat
-            setMaterial (standardMaterialToMaterial boxMat) terrainMesh
-            log "Complete!"
-
-
         -- skybox
         do
             skyBoxCubeTex <- createCubeTexture "skybox/skybox" scene
@@ -218,3 +131,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
         engine # runRenderLoop do
             render scene
+
+        for_ (negate 2 .. 2) \cz -> do
+            for_ (negate 2 .. 2) \cx -> do
+                generateChunk cx cz scene renderList

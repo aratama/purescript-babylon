@@ -4,6 +4,8 @@ import Control.Bind (bind)
 import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM2)
 import Control.Monad.ST (pureST)
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
+import Data.Foreign (unsafeFromForeign)
+import Data.Foreign.Class (class IsForeign)
 import Data.Int (toNumber)
 import Data.List (List(Cons, Nil))
 import Data.Map (Map, toList, member)
@@ -11,10 +13,8 @@ import Data.Ord (compare, class Ord)
 import Data.Ring (negate)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (Unit)
-
 import Graphics.Babylon.VertexData (VertexDataProps)
-
-import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&))
+import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($))
 
 data Index3D = Index3D Int Int Int
 
@@ -34,6 +34,15 @@ vec x y z = { x, y, z }
 
 
 type TerrainMap = Map Index3D Unit
+
+newtype VertexDataPropsData = VertexDataPropsData VertexDataProps
+
+instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
+    read value = do
+        pure $ VertexDataPropsData (unsafeFromForeign value)
+
+chunkSize :: Int
+chunkSize = 16
 
 createTerrainST :: TerrainMap -> VertexDataProps
 createTerrainST map = pureST do
