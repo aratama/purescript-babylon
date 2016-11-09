@@ -10,10 +10,12 @@ import Data.List ((..))
 import Data.Map (Map, fromFoldable)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
-import Graphics.Babylon (BABYLON)
-import PerlinNoise (createNoise, simplex2)
 import Prelude (pure, div, (<), (<#>), (*), (+))
 import Test.StrongCheck (SC, quickCheck)
+
+import PerlinNoise (createNoise, simplex2)
+import Graphics.Babylon (BABYLON)
+import Graphics.Babylon.Example.Terrain (BlockType(..))
 
 main :: SC (babylon :: BABYLON) Unit
 main = do
@@ -27,12 +29,13 @@ main = do
                         r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
                         h = floor (r * 2.0)
                         in
-                            (0 .. h) <#> \iy -> let y = toNumber iy in Tuple (Index3D ix iy iz) unit
-            map :: Map Index3D Unit
+                            (0 .. h) <#> \iy -> let y = toNumber iy in Tuple (Index3D ix iy iz) GrassBlock
+            map :: Map Index3D BlockType
             map = fromFoldable (join (join blocks))
 
             dat = createTerrainST map
-        in all (\index -> index < div (length dat.positions) 3) dat.indices
+        in case dat of
+            VertexDataPropsData props -> all (\index -> index < div (length props.grassBlocks.positions) 3) props.grassBlocks.indices
 
     pure unit
 

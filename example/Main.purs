@@ -45,24 +45,36 @@ import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
 shadowMapSize :: Int
 shadowMapSize = 4096
 
-generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Mesh
-generateChunkAff ww boxMat cx cz scene renderList = makeAff \reject resolve -> do
+type BlockMeshes = {
+    grassBlockMesh :: Mesh,
+    waterBlockMesh :: Mesh
+}
+
+generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
+generateChunkAff ww boxMat waterBoxMat cx cz scene renderList = makeAff \reject resolve -> do
     log "Waiting for the worker..."
     postMessageToWorker ww $ write $ GenerateTerrain cx cz
     onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
         Left err -> reject $ EXCEPTION.error $ show err
         Right (VertexDataPropsData verts) -> do
             log "Received terrain data. Generating mesh..."
-            terrainMesh <- createMesh "terrain" scene
-            applyToMesh terrainMesh false =<< createVertexData (verts)
-            setRenderingGroupId 1 terrainMesh
-            pushToRenderList terrainMesh renderList
-            when (abs cx + abs cz < 2) do
-                AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
-                setReceiveShadows true terrainMesh
-            setMaterial (standardMaterialToMaterial boxMat) terrainMesh
+            grassBlockMesh <- generateMesh verts.grassBlocks boxMat
+            waterBlockMesh <- generateMesh verts.waterBlocks waterBoxMat
             log "Completed!"
-            resolve terrainMesh
+            resolve { grassBlockMesh, waterBlockMesh }
+
+  where
+    generateMesh verts mat = do
+        terrainMesh <- createMesh "terrain" scene
+        applyToMesh terrainMesh false =<< createVertexData (verts)
+        setRenderingGroupId 1 terrainMesh
+        pushToRenderList terrainMesh renderList
+        when (abs cx + abs cz < 2) do
+            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+            setReceiveShadows true terrainMesh
+        setMaterial (standardMaterialToMaterial mat) terrainMesh
+        pure terrainMesh
+
 
 main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -145,17 +157,24 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
         EXCEPTION.catchException errorShow $ void do
             ww <- mkWorker "worker.js"
+
             boxTex <- createTexture "grass-block.png" scene
-            boxMat <- createStandardMaterial "skybox" scene
+            boxMat <- createStandardMaterial "grass-block" scene
             setDiffuseTexture boxTex boxMat
+
+            waterBoxTex <- createTexture "water-block.png" scene
+            waterBoxMat <- createStandardMaterial "water-block" scene
+            setDiffuseTexture waterBoxTex waterBoxMat
 
             let range p = abs p.x + abs p.z
 
+            let size = 2
+
             let indices = sortBy (\p q -> compare (range p) (range q)) do
-                    z <- negate 5 .. 5
-                    x <- negate 5 .. 5
+                    z <- negate size .. size
+                    x <- negate size .. size
                     pure { x, z }
 
             runAff errorShow pure do
                 for_ indices \{ x, z } -> do
-                    generateChunkAff ww boxMat x z scene renderList
+                    generateChunkAff ww boxMat waterBoxMat x z scene renderList

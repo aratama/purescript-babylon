@@ -1,24 +1,33 @@
 module Graphics.Babylon.Example.Terrain where
 
+import Control.Alt (void)
 import Control.Bind (bind)
-import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM2)
-import Control.Monad.ST (pureST)
+import Control.Monad.Rec.Class (tailRecM, Step(Loop, Done), tailRecM2)
+import Control.Monad.ST (writeSTRef, readSTRef, modifySTRef, newSTRef, pureST)
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
-import Data.Foreign (unsafeFromForeign)
-import Data.Foreign.Class (class IsForeign)
+import Data.Foreign (toForeign, unsafeFromForeign)
+import Data.Foreign.Class (class AsForeign, class IsForeign)
+import Data.Generic (gShow, class Generic)
 import Data.Int (toNumber)
 import Data.List (List(Cons, Nil))
 import Data.Map (Map, toList, member)
 import Data.Ord (compare, class Ord)
 import Data.Ring (negate)
 import Data.Tuple (Tuple(Tuple))
-import Data.Unit (Unit)
+import Data.Unit (unit, Unit)
 import Graphics.Babylon.VertexData (VertexDataProps)
-import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($))
+import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#))
 
 data Index3D = Index3D Int Int Int
 
 type Vec = { x :: Number, y :: Number, z :: Number }
+
+data BlockType = GrassBlock | WaterBlock
+
+derive instance generic_BlockType :: Generic BlockType
+
+instance show_BlockType :: Show BlockType where
+    show = gShow
 
 instance eq_Index3D :: Eq Index3D where
     eq (Index3D ax ay az) (Index3D bx by bz) = (ax == bx) && (ay == by) && (az == bz)
@@ -33,32 +42,49 @@ vec :: Number -> Number -> Number -> { x :: Number, y :: Number, z :: Number }
 vec x y z = { x, y, z }
 
 
-type TerrainMap = Map Index3D Unit
+type TerrainMap = Map Index3D BlockType
 
-newtype VertexDataPropsData = VertexDataPropsData VertexDataProps
+newtype VertexDataPropsData = VertexDataPropsData {
+    grassBlocks :: VertexDataProps,
+    waterBlocks :: VertexDataProps
+}
 
 instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
     read value = do
         pure $ VertexDataPropsData (unsafeFromForeign value)
 
+instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
+    write (VertexDataPropsData value) = toForeign value
+
+
 chunkSize :: Int
 chunkSize = 16
 
-createTerrainST :: TerrainMap -> VertexDataProps
+createTerrainST :: TerrainMap -> VertexDataPropsData
 createTerrainST map = pureST do
 
-    indices <- emptySTArray
-    positions <- emptySTArray
-    normals <- emptySTArray
-    uvs <- emptySTArray
+    let prepareArray = do
+            offset <- newSTRef 0
+            indices <- emptySTArray
+            positions <- emptySTArray
+            normals <- emptySTArray
+            uvs <- emptySTArray
+            pure { offset, indices, positions, normals, uvs }
+
+    grass <- prepareArray
+    water <- prepareArray
 
     let exists x y z = member (Index3D x y z) map
 
-    tailRecM2 (\blockOffset blocks -> case blocks of
+    toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
         Cons (Tuple (Index3D ix iy iz) block) tail -> do
 
-            let square offset nix niy niz u = if member (Index3D (ix + nix) (iy + niy) (iz + niz)) map then pure offset else do
+            let store = case block of
+                    GrassBlock -> grass
+                    WaterBlock -> water
+
+            let square nix niy niz u = if member (Index3D (ix + nix) (iy + niy) (iz + niz)) map then pure unit else void do
                     let px = toNumber ix
                     let py = toNumber iy
                     let pz = toNumber iz
@@ -76,37 +102,43 @@ createTerrainST map = pureST do
 
                     let v = vec (px + d.x) (py + d.y) (pz + d.z)
 
-                    pushAllSTArray indices [
+                    offset <- readSTRef store.offset
+
+                    pushAllSTArray store.indices [
                         offset + 0, offset + 1, offset + 2,
                         offset + 0, offset + 2, offset + 3
                     ]
 
-                    pushAllSTArray positions [
+                    pushAllSTArray store.positions [
                         v.x - s.x - t.x, v.y - s.y - t.y, v.z - s.z - t.z,
                         v.x + s.x - t.x, v.y + s.y - t.y, v.z + s.z - t.z,
                         v.x + s.x + t.x, v.y + s.y + t.y, v.z + s.z + t.z,
                         v.x - s.x + t.x, v.y - s.y + t.y, v.z - s.z + t.z
                     ]
 
-                    pushAllSTArray normals [
+                    pushAllSTArray store.normals [
                         nx, ny, nz,
                         nx, ny, nz,
                         nx, ny, nz,
                         nx, ny, nz
                     ]
 
-                    pushAllSTArray uvs u
+                    pushAllSTArray store.uvs u
 
-                    pure (offset + 4)
+                    writeSTRef store.offset (offset + 4)
 
-            offset0 <- square blockOffset (negate 1) 0          0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
-            offset1 <- square offset0     1          0          0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
-            offset2 <- square offset1     0          (negate 1) 0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
-            offset3 <- square offset2     0          1          0          [0.005, 0.755, 0.245, 0.755, 0.245, 0.995, 0.005, 0.995]
-            offset4 <- square offset3     0          0          (negate 1) [0.005, 0.745, 0.005, 0.505, 0.245, 0.505, 0.245, 0.745]
-            offset5 <- square offset4     0          0          1          [0.245, 0.505, 0.245, 0.745, 0.005, 0.745, 0.005, 0.505]
-            pure (Loop { a: offset5, b: tail })
-    ) 0 (toList map)
+            square (negate 1) 0          0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
+            square 1          0          0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
+            square 0          (negate 1) 0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
+            square 0          1          0          [0.005, 0.755, 0.245, 0.755, 0.245, 0.995, 0.005, 0.995]
+            square 0          0          (negate 1) [0.005, 0.745, 0.005, 0.505, 0.245, 0.505, 0.245, 0.745]
+            square 0          0          1          [0.245, 0.505, 0.245, 0.745, 0.005, 0.745, 0.005, 0.505]
+            pure (Loop tail)
 
-    { indices: _, positions: _, normals:_, uvs: _ } <$> freeze indices <*> freeze positions <*> freeze normals <*> freeze uvs
 
+    let freezeStore store = { indices: _, positions: _, normals:_, uvs: _ } <$> freeze store.indices <*> freeze store.positions <*> freeze store.normals <*> freeze store.uvs
+
+    grassBlocks <- freezeStore grass
+    waterBlocks <- freezeStore water
+
+    pure $ VertexDataPropsData { grassBlocks, waterBlocks }
