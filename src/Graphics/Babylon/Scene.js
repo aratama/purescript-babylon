@@ -81,3 +81,19 @@ exports.getDebugLayer = function(scene){
         return scene.debugLayer;
     }
 }
+
+exports.pick = function(x){
+    return function(y){
+        return function(predicate){
+            return function(fastCheck){
+                return function(scene){
+                    return function(){
+                        return scene.pick(x, y, function(mesh){
+                            return predicate(mesh)();
+                        }, fastCheck);
+                    }
+                }
+            }
+        }
+    }
+}

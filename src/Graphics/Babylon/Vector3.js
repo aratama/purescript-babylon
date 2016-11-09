@@ -15,3 +15,9 @@ exports.cross = function(v){
         }
     }
 }
+
+exports.runVector3 = function(v){
+    return function(){
+        return { x: v.x, y: v.y, z: v.z }
+    }
+}

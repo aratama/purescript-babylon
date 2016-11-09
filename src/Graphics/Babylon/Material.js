@@ -5,3 +5,19 @@ exports.setFogEnabled = function(fogEnabled){
         }
     }
 }
+
+exports.setZOffset = function(value){
+    return function(mat){
+        return function(){
+            mat.zOffset = value;
+        }
+    }
+}
+
+exports.setWireframe = function(value){
+    return function(mat){
+        return function(){
+            mat.wireframe = value;
+        }
+    }
+}

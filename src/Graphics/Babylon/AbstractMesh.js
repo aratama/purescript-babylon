@@ -5,3 +5,7 @@ exports.setCheckCollisions = function(checkCollisions){
         }
     }
 }
+
+exports.abstractMeshToNode = function(mesh){
+    return mesh;
+}

@@ -9,6 +9,7 @@ import Control.Monad.Aff (Aff, runAff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (errorShow, CONSOLE, log, error)
 import Control.Monad.Eff.Exception (EXCEPTION, catchException, error) as EXCEPTION
+import Control.Monad.Eff.Ref (readRef, REF, writeRef, newRef)
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
 import Data.Array (sortBy, (..))
@@ -20,28 +21,30 @@ import Data.Nullable (toMaybe)
 import Data.Ord (compare, abs)
 import Data.Ring (negate)
 import Data.Unit (Unit)
-import Prelude (show, (+), ($), (#), (<$>), (<), (=<<))
-import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
-
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
-import Graphics.Babylon.AbstractMesh (setCheckCollisions) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (setCheckCollisions, abstractMeshToNode) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
+import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Message (Command(..))
 import Graphics.Babylon.FreeCamera (attachControl, setTarget, setCheckCollisions, createFreeCamera)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
-import Graphics.Babylon.Material (setFogEnabled)
+import Graphics.Babylon.Material (setFogEnabled, setZOffset, setWireframe)
 import Graphics.Babylon.Mesh (Mesh, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
-import Graphics.Babylon.Scene (getDebugLayer, setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
+import Graphics.Babylon.Node (getName)
+import Graphics.Babylon.PickingInfo (getPickedPoint, getPickedMesh, getHit)
+import Graphics.Babylon.Scene (pick, getDebugLayer, setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
 import Graphics.Babylon.StandardMaterial (StandardMaterial, setSpecularPower, setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
-import Graphics.Babylon.Vector3 (createVector3)
+import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
-import Graphics.Babylon.DebugLayer (show) as DebugLayer
+import Math (floor)
+import Prelude (show, (+), ($), (#), (<$>), (<), (=<<), (<>), (/=))
+import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -78,7 +81,7 @@ generateChunkAff ww boxMat waterBoxMat cx cz scene renderList = makeAff \reject 
         pure terrainMesh
 
 
-main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW | eff) Unit
+main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW, ref :: REF | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
     Nothing -> error "canvas not found"
     Just canvas -> void do
@@ -128,12 +131,23 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         setBias 0.000005 shadowGenerator
         renderList <- getShadowMap shadowGenerator >>= getRenderList
 
+        cursor <- do
+            cursorbox <- createBox "cursor" 1.0 scene
+            setRenderingGroupId 1 cursorbox
+
+            mat <- createStandardMaterial "cursormat" scene
+            setWireframe true (standardMaterialToMaterial mat)
+            setZOffset (negate 0.01) (standardMaterialToMaterial mat)
+            setMaterial (standardMaterialToMaterial mat) cursorbox
+            pure cursorbox
+
         do
-            sphere <- createSphere "sphere1" 16 2 scene
+            sphere <- createSphere "sphere" 16 2 scene
             spherePosition <- createVector3 7.0 5.0 7.0
             setPosition spherePosition sphere
             pushToRenderList sphere renderList
             setRenderingGroupId 1 sphere
+            pure sphere
 
         -- skybox
         do
@@ -155,7 +169,27 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             setMaterial (standardMaterialToMaterial skyboxMaterial) skybox
             setInfiniteDistance true skybox
 
+
+        ref <- newRef { x: 0, y: 0 }
+
+        onMouseMove \e -> do
+            writeRef ref {
+                x: e.offsetX,
+                y: e.offsetY
+            }
+
         engine # runRenderLoop do
+
+            pickPoint <- readRef ref
+            pickingInfo <- pick pickPoint.x pickPoint.y (\mesh -> pure true) false scene
+            when (getHit pickingInfo) do
+                let mesh = getPickedMesh pickingInfo
+                when (getName (AbstractMesh.abstractMeshToNode mesh) /= "cursor") do
+                    let point = getPickedPoint pickingInfo
+                    p <- runVector3 point
+                    r <- createVector3 (floor p.x) (floor p.y) (floor p.z)
+                    setPosition r cursor
+
             render scene
 
         EXCEPTION.catchException errorShow $ void do
@@ -184,3 +218,6 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             runAff errorShow pure do
                 for_ indices \{ x, z } -> do
                     generateChunkAff ww boxMat waterBoxMat x z scene renderList
+
+
+foreign import onMouseMove :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit
