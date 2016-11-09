@@ -8,11 +8,10 @@ import DOM (DOM)
 import Data.Array (length, foldM)
 import Data.HeytingAlgebra (not)
 import Data.Int (toNumber, floor)
-import Data.List ((..), toUnfoldable)
-import Data.Map (member, toList, size, fromFoldable)
+import Data.List ((..))
+import Data.Map (Map, size, fromFoldable)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
-import Data.Ord (compare, class Ord)
 import Data.Ring (negate)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
@@ -31,23 +30,11 @@ import Graphics.Babylon.ShadowGenerator (pushToRenderList, getRenderList, getSha
 import Graphics.Babylon.StandardMaterial (setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (sKYBOX_MODE, setCoordinatesMode, createTexture)
 import Graphics.Babylon.Vector3 (createVector3)
-import Graphics.Babylon.VertexData (VertexData, merge, createVertexData, applyToMesh, getIndices)
+import Graphics.Babylon.VertexData (VertexData, applyToMesh, getIndices, createVertexData, merge)
 import PerlinNoise (createNoise, simplex2)
-import Prelude (pure, (#), (*), (<$>), ($), (+), (&&), (==), class Eq, (-), class Show, show, (<>), (*>), (/))
+import Prelude (show, pure, (#), (/), (<>), (*), (+), (<$>), ($), (*>), (-))
 
-data Index3D = Index3D Int Int Int
-
-instance eq_Index3D :: Eq Index3D where
-    eq (Index3D ax ay az) (Index3D bx by bz) = (ax == bx) && (ay == by) && (az == bz)
-
-instance ord_Index3D :: Ord Index3D where
-    compare (Index3D ax ay az) (Index3D bx by bz) = compare (1000000 * ax + 1000 * ay + az) (1000000 * bx + 1000 * by + bz)
-
-instance show_Show :: Show Index3D where
-    show (Index3D x y z) = show x <> "," <> show y <> "," <> show z
-
-vec :: Number -> Number -> Number -> { x :: Number, y :: Number, z :: Number }
-vec x y z = { x, y, z }
+import Graphics.Babylon.Example.Terrain
 
 createTerrain :: forall eff. { x :: Number, y :: Number, z :: Number } -> { nx :: Boolean, px :: Boolean, ny :: Boolean, py :: Boolean, nz :: Boolean, pz :: Boolean } -> Eff (babylon :: BABYLON | eff) VertexData
 createTerrain p props = do
@@ -173,8 +160,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         do
             log "Generating terrarin map..."
             let noise = createNoise 0
-            blocks <- for (0 .. 15) \iz -> do
-                for (0 .. 15) \ix -> do
+            blocks <- for (0 .. 127) \iz -> do
+                for (0 .. 127) \ix -> do
                     let x = toNumber ix
                     let z = toNumber iz
                     let r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
@@ -183,48 +170,30 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         let y = toNumber iy
                         pure (Tuple (Index3D ix iy iz) unit)
 
-            let boxMap = fromFoldable (join (join blocks))
+            let boxMap :: Map Index3D Unit
+                boxMap = fromFoldable (join (join blocks))
 
             log ("Complete! Blocks: " <> show (size boxMap))
 
-            let ws = toUnfoldable (toList boxMap)
-
             log "Generating terrarin verex data..."
-            boxes <- for ws \(Tuple key@(Index3D ix iy iz) _) -> do
-                createTerrain {
-                    x: toNumber ix,
-                    y: toNumber iy,
-                    z: toNumber iz
-                } {
-                    nx: not (member (Index3D (ix - 1) iy iz) boxMap),
-                    px: not (member (Index3D (ix + 1) iy iz) boxMap),
-                    ny: not (member (Index3D ix (iy - 1) iz) boxMap),
-                    py: not (member (Index3D ix (iy + 1) iz) boxMap),
-                    nz: not (member (Index3D ix iy (iz - 1)) boxMap),
-                    pz: not (member (Index3D ix iy (iz + 1)) boxMap)
-                }
-
-            log ("Merging...")
-            empty <- createVertexData { indices: [], positions: [], normals: [], uvs: [] }
-            terrainVertexData <- foldM (\a b -> merge a b *> pure b) empty boxes
-            log ("Get indices...")
+            let verts = createTerrainST boxMap
+            terrainVertexData <- createVertexData (verts)
             indices <- getIndices terrainVertexData
             log ("Complete! faces: " <> show (length indices / 3))
 
             log "Generating terrain mesh.."
             terrainMesh <- createMesh "terrain" scene
             applyToMesh terrainMesh false terrainVertexData
+            log "Complete!"
+
+            log "Setting Material..."
             setRenderingGroupId 1 terrainMesh
             pushToRenderList terrainMesh renderList
             setReceiveShadows true terrainMesh
-
-            -- skyBoxTex <- createCubeTexture "skybox/skybox" scene
             boxTex <- createTexture "grass-block.png" scene
             boxMat <- createStandardMaterial "skybox" scene
             setDiffuseTexture boxTex boxMat
-            -- setDiffuseTexture (cubeTextureToTexture skyBoxTex) skyBoxMat
             setMaterial (standardMaterialToMaterial boxMat) terrainMesh
-
             log "Complete!"
 
 
