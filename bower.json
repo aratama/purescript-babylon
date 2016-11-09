@@ -23,6 +23,7 @@
   "devDependencies": {
     "purescript-st": "^2.0.0",
     "purescript-strongcheck": "^2.0.0",
-    "purescript-webworkers": "^0.1.2"
+    "purescript-webworkers": "^0.1.2",
+    "purescript-aff": "^2.0.1"
   }
 }

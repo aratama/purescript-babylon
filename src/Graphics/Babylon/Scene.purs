@@ -30,3 +30,5 @@ foreign import setFogColor :: forall eff. Color3 -> Scene -> Eff (babylon :: BAB
 foreign import setGravity :: forall eff. Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setCollisionsEnabled :: forall eff. Boolean -> Scene -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setWorkerCollisions :: forall eff. Boolean -> Scene -> Eff (babylon :: BABYLON | eff) Unit

@@ -67,3 +67,11 @@ exports.setCollisionsEnabled = function(collisionsEnabled){
         }
     }
 }
+
+exports.setWorkerCollisions = function(workerCollisions){
+    return function(scene){
+        return function(){
+            scene.workerCollisions = workerCollisions;
+        }
+    }
+}

@@ -1,20 +1,28 @@
 module Main where
 
 import Graphics.Babylon.Example.Terrain
+import Control.Alt (void)
+import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
+import Control.Monad (when)
+import Control.Monad.Aff (Aff, runAff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (errorShow, CONSOLE, log, error)
-import Control.Monad.Eff.Exception (catchException)
+import Control.Monad.Eff.Exception (EXCEPTION, catchException, error) as EXCEPTION
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
-import Data.Array (length, (..))
+import Data.Array (sortBy, (..))
 import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.Foreign.Class (write, read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
+import Data.Ord (compare, abs)
 import Data.Ring (negate)
 import Data.Unit (Unit)
+import Prelude (show, (+), ($), (#), (<$>), (<), (=<<))
+import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
+
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
@@ -22,52 +30,44 @@ import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Message (Command(..))
-import Graphics.Babylon.FreeCamera (setCheckCollisions, setApplyGravity, createFreeCamera, setTarget, attachControl)
+import Graphics.Babylon.FreeCamera (attachControl, setTarget, setCheckCollisions, createFreeCamera)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled)
-import Graphics.Babylon.Mesh (meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
-import Graphics.Babylon.Scene (setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
+import Graphics.Babylon.Mesh (Mesh, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
+import Graphics.Babylon.Scene (setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
-import Graphics.Babylon.StandardMaterial (setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
-import Graphics.Babylon.Texture (sKYBOX_MODE, setCoordinatesMode, createTexture)
+import Graphics.Babylon.StandardMaterial (StandardMaterial, setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
+import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Vector3 (createVector3)
-import Graphics.Babylon.VertexData (applyToMesh, getIndices, createVertexData)
-import Prelude (show, (/), (<>), ($), (#), (<$>))
-import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
+import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
 
-generateChunk :: forall eff. Int -> Int -> Scene -> RenderList -> Eff ( console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit
-generateChunk cx cz scene renderList = catchException errorShow do
-    ww <- mkWorker "worker.js"
+shadowMapSize :: Int
+shadowMapSize = 4096
+
+generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Mesh
+generateChunkAff ww boxMat cx cz scene renderList = makeAff \reject resolve -> do
+    log "Waiting for the worker..."
     postMessageToWorker ww $ write $ GenerateTerrain cx cz
     onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
-        Left err -> errorShow err
+        Left err -> reject $ EXCEPTION.error $ show err
         Right (VertexDataPropsData verts) -> do
-            log "Waiting for the worker..."
-            terrainVertexData <- createVertexData (verts)
-            indices <- getIndices terrainVertexData
-            log ("Complete! faces: " <> show (length indices / 3))
-
-            log "Generating terrain mesh.."
+            log "Received terrain data. Generating mesh..."
             terrainMesh <- createMesh "terrain" scene
-            applyToMesh terrainMesh false terrainVertexData
-            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
-            log "Complete!"
-
-            log "Setting Material..."
+            applyToMesh terrainMesh false =<< createVertexData (verts)
             setRenderingGroupId 1 terrainMesh
             pushToRenderList terrainMesh renderList
-            setReceiveShadows true terrainMesh
-            boxTex <- createTexture "grass-block.png" scene
-            boxMat <- createStandardMaterial "skybox" scene
-            setDiffuseTexture boxTex boxMat
+            when (abs cx + abs cz < 2) do
+                AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+                setReceiveShadows true terrainMesh
             setMaterial (standardMaterialToMaterial boxMat) terrainMesh
-            log "Complete!"
+            log "Completed!"
+            resolve terrainMesh
 
 main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
     Nothing -> error "canvas not found"
-    Just canvas -> do
+    Just canvas -> void do
 
         engine <- createEngine canvas true
 
@@ -82,11 +82,12 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         gravity <- createVector3 0.0 (negate 0.981) 0.0
         setGravity gravity scene
         setCollisionsEnabled true scene
+        setWorkerCollisions true scene
 
         -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
         cameraPosition <- createVector3 (negate 10.0) 10.0 (negate 10.0)
         camera <- createFreeCamera "camera1" cameraPosition scene
-        setApplyGravity true camera
+        -- setApplyGravity true camera
         setCheckCollisions true camera
 
         -- target the camera to scene origin
@@ -107,16 +108,13 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         dirColor <- createColor3 0.8 0.8 0.8
         setDiffuse dirColor (directionalLightToLight light)
 
-
-        shadowGenerator <- createShadowGenerator 2048 light
+        -- shadow
+        shadowGenerator <- createShadowGenerator shadowMapSize light
         setBias 0.000005 shadowGenerator
         renderList <- getShadowMap shadowGenerator >>= getRenderList
 
-        -- create a built-in "sphere" shape; its constructor takes 5 params: name, width, depth, subdivisions, scene
         do
             sphere <- createSphere "sphere1" 16 2 scene
-
-            -- move the sphere upward 1/2 of its height
             spherePosition <- createVector3 7.0 5.0 7.0
             setPosition spherePosition sphere
             pushToRenderList sphere renderList
@@ -145,6 +143,19 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         engine # runRenderLoop do
             render scene
 
-        for_ (negate 2 .. 2) \cz -> do
-            for_ (negate 2 .. 2) \cx -> do
-                generateChunk cx cz scene renderList
+        EXCEPTION.catchException errorShow $ void do
+            ww <- mkWorker "worker.js"
+            boxTex <- createTexture "grass-block.png" scene
+            boxMat <- createStandardMaterial "skybox" scene
+            setDiffuseTexture boxTex boxMat
+
+            let range p = abs p.x + abs p.z
+
+            let indices = sortBy (\p q -> compare (range p) (range q)) do
+                    z <- negate 5 .. 5
+                    x <- negate 5 .. 5
+                    pure { x, z }
+
+            runAff errorShow pure do
+                for_ indices \{ x, z } -> do
+                    generateChunkAff ww boxMat x z scene renderList
