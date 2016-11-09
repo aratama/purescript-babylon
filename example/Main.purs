@@ -35,12 +35,13 @@ import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLig
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled)
 import Graphics.Babylon.Mesh (Mesh, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
-import Graphics.Babylon.Scene (setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
+import Graphics.Babylon.Scene (getDebugLayer, setWorkerCollisions, setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
 import Graphics.Babylon.StandardMaterial (StandardMaterial, setSpecularPower, setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Vector3 (createVector3)
 import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
+import Graphics.Babylon.DebugLayer (show) as DebugLayer
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -96,6 +97,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         setGravity gravity scene
         setCollisionsEnabled true scene
         setWorkerCollisions true scene
+        -- getDebugLayer scene >>= DebugLayer.show true true Nothing
 
         -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
         cameraPosition <- createVector3 (negate 10.0) 10.0 (negate 10.0)

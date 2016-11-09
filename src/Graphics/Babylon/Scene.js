@@ -75,3 +75,9 @@ exports.setWorkerCollisions = function(workerCollisions){
         }
     }
 }
+
+exports.getDebugLayer = function(scene){
+    return function(){
+        return scene.debugLayer;
+    }
+}

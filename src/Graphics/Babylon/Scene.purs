@@ -4,6 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Color3 (Color3)
+import Graphics.Babylon.DebugLayer (DebugLayer)
 import Graphics.Babylon.Engine (Engine)
 import Graphics.Babylon.Vector3 (Vector3)
 
@@ -32,3 +33,5 @@ foreign import setGravity :: forall eff. Vector3 -> Scene -> Eff (babylon :: BAB
 foreign import setCollisionsEnabled :: forall eff. Boolean -> Scene -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setWorkerCollisions :: forall eff. Boolean -> Scene -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import getDebugLayer :: forall eff. Scene -> Eff (babylon :: BABYLON | eff) DebugLayer
