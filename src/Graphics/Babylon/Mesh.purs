@@ -8,8 +8,11 @@ import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Vector3 (Vector3)
 import Graphics.Babylon.Scene (Scene)
 import Graphics.Babylon.Material (Material)
+import Graphics.Babylon.AbstractMesh (AbstractMesh)
 
 foreign import data Mesh :: *
+
+foreign import meshToAbstractMesh :: Mesh -> AbstractMesh
 
 foreign import createMesh :: forall eff . String -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
 
@@ -23,13 +26,9 @@ foreign import setPosition :: forall eff . Vector3 -> Mesh -> Eff (babylon :: BA
 
 foreign import setReceiveShadows  :: forall eff. Boolean -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
 
-
 foreign import mergeMeshes :: forall eff. Array Mesh -> Boolean -> Boolean -> Eff (babylon :: BABYLON | eff) Mesh
 
-
-
 foreign import setMaterial :: forall eff. Material -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
-
 
 foreign import setInfiniteDistance :: forall eff. Boolean -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
 

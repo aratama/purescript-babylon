@@ -25,3 +25,20 @@ exports.attachControl = function(canvas){
         }
     }
 }
+
+exports.setCheckCollisions = function(checkCollisions){
+    return function(camera){
+        return function(){
+            camera.checkCollisions = checkCollisions;
+        }
+    }
+}
+
+exports.setApplyGravity  = function(applyGravity ){
+    return function(camera){
+        return function(){
+            camera.applyGravity  = applyGravity ;
+        }
+    }
+}
+

@@ -14,3 +14,7 @@ foreign import createFreeCamera :: forall eff . String -> Vector3 -> Scene -> Ef
 foreign import setTarget :: forall eff . Vector3 -> FreeCamera -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import attachControl :: forall eff . Canvas -> Boolean -> FreeCamera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setCheckCollisions :: forall eff . Boolean -> FreeCamera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setApplyGravity  :: forall eff . Boolean -> FreeCamera -> Eff (babylon :: BABYLON | eff) Unit

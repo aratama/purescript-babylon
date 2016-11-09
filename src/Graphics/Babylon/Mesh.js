@@ -6,6 +6,10 @@ exports.createMesh = function(id){
     }
 }
 
+exports.meshToAbstractMesh = function(mesh){
+    return mesh;
+}
+
 
 exports.createSphere = function(id){
     return function(segments){

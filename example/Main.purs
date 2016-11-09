@@ -16,16 +16,18 @@ import Data.Nullable (toMaybe)
 import Data.Ring (negate)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
+import Graphics.Babylon.AbstractMesh (setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Message (Command(..))
-import Graphics.Babylon.FreeCamera (createFreeCamera, setTarget, attachControl)
+import Graphics.Babylon.FreeCamera (setCheckCollisions, setApplyGravity, createFreeCamera, setTarget, attachControl)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
-import Graphics.Babylon.Mesh (setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
-import Graphics.Babylon.Scene (Scene, createScene, render)
+import Graphics.Babylon.Material (setFogEnabled)
+import Graphics.Babylon.Mesh (meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
+import Graphics.Babylon.Scene (setCollisionsEnabled, setGravity, setFogColor, setFogEnd, setFogStart, setFogDensity, fOGMODE_EXP, Scene, createScene, render, setFogMode)
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
 import Graphics.Babylon.StandardMaterial (setReflectionTexture, setDiffuseColor, setSpecularColor, setDisableLighting, setBackFaceCulling, setDiffuseTexture, createStandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Texture (sKYBOX_MODE, setCoordinatesMode, createTexture)
@@ -34,34 +36,33 @@ import Graphics.Babylon.VertexData (applyToMesh, getIndices, createVertexData)
 import Prelude (show, (/), (<>), ($), (#), (<$>))
 import WebWorker (onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 
-
 generateChunk :: forall eff. Int -> Int -> Scene -> RenderList -> Eff ( console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit
-generateChunk cx cz scene renderList = do
-    catchException errorShow do
-        ww <- mkWorker "worker.js"
-        postMessageToWorker ww $ write $ GenerateTerrain cx cz
-        onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
-            Left err -> errorShow err
-            Right (VertexDataPropsData verts) -> do
-                log "Waiting for the worker..."
-                terrainVertexData <- createVertexData (verts)
-                indices <- getIndices terrainVertexData
-                log ("Complete! faces: " <> show (length indices / 3))
+generateChunk cx cz scene renderList = catchException errorShow do
+    ww <- mkWorker "worker.js"
+    postMessageToWorker ww $ write $ GenerateTerrain cx cz
+    onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
+        Left err -> errorShow err
+        Right (VertexDataPropsData verts) -> do
+            log "Waiting for the worker..."
+            terrainVertexData <- createVertexData (verts)
+            indices <- getIndices terrainVertexData
+            log ("Complete! faces: " <> show (length indices / 3))
 
-                log "Generating terrain mesh.."
-                terrainMesh <- createMesh "terrain" scene
-                applyToMesh terrainMesh false terrainVertexData
-                log "Complete!"
+            log "Generating terrain mesh.."
+            terrainMesh <- createMesh "terrain" scene
+            applyToMesh terrainMesh false terrainVertexData
+            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+            log "Complete!"
 
-                log "Setting Material..."
-                setRenderingGroupId 1 terrainMesh
-                pushToRenderList terrainMesh renderList
-                setReceiveShadows true terrainMesh
-                boxTex <- createTexture "grass-block.png" scene
-                boxMat <- createStandardMaterial "skybox" scene
-                setDiffuseTexture boxTex boxMat
-                setMaterial (standardMaterialToMaterial boxMat) terrainMesh
-                log "Complete!"
+            log "Setting Material..."
+            setRenderingGroupId 1 terrainMesh
+            pushToRenderList terrainMesh renderList
+            setReceiveShadows true terrainMesh
+            boxTex <- createTexture "grass-block.png" scene
+            boxMat <- createStandardMaterial "skybox" scene
+            setDiffuseTexture boxTex boxMat
+            setMaterial (standardMaterialToMaterial boxMat) terrainMesh
+            log "Complete!"
 
 main :: forall eff. Eff (console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -72,10 +73,21 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
         -- create a basic BJS Scene object
         scene <- createScene engine
+        setFogMode fOGMODE_EXP scene
+        setFogDensity 0.01 scene
+        setFogStart 20.0 scene
+        setFogEnd 200.0 scene
+        fogColor <- createColor3 0.9 0.9 0.9
+        setFogColor fogColor scene
+        gravity <- createVector3 0.0 (negate 0.981) 0.0
+        setGravity gravity scene
+        setCollisionsEnabled true scene
 
         -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
         cameraPosition <- createVector3 (negate 10.0) 10.0 (negate 10.0)
         camera <- createFreeCamera "camera1" cameraPosition scene
+        setApplyGravity true camera
+        setCheckCollisions true camera
 
         -- target the camera to scene origin
         cameraTarget <- createVector3 5.0 3.0 5.0
@@ -116,6 +128,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             setCoordinatesMode sKYBOX_MODE (cubeTextureToTexture skyBoxCubeTex)
 
             skyboxMaterial <- createStandardMaterial "skyBox/skybox" scene
+            setFogEnabled false (standardMaterialToMaterial skyboxMaterial)
             setBackFaceCulling false skyboxMaterial
             setDisableLighting true skyboxMaterial
             skyDiffuse <- createColor3 0.0 0.0 0.0
