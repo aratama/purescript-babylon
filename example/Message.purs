@@ -9,7 +9,7 @@ import Data.Foreign.Class (class AsForeign, readProp, class IsForeign)
 import Data.Generic (class Generic)
 
 -- TODO: pass seed and share block map without sending data
-data Command = GenerateTerrain Int Int Int
+data Command = GenerateTerrain Int Int Int Int
 
 derive instance genericCommand :: Generic Command
 
@@ -19,15 +19,17 @@ instance isForeign_GenerateTerrain :: IsForeign Command where
         case command of
             "GenerateTerrain" -> do
                 x <- readProp "x" value
+                y <- readProp "y" value
                 z <- readProp "z" value
                 seed <- readProp "seed" value
-                pure (GenerateTerrain x z seed)
+                pure (GenerateTerrain x y z seed)
             _ -> except (Left (pure (ForeignError  "Invalid command")))
 
 instance asForeign_Command :: AsForeign Command where
-    write (GenerateTerrain x z seed) = toForeign {
+    write (GenerateTerrain x y z seed) = toForeign {
         command: "GenerateTerrain",
         x,
+        y,
         z,
         seed
     }

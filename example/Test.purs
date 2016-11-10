@@ -17,6 +17,7 @@ import PerlinNoise (createNoise, simplex2)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import Graphics.Babylon.Example.Terrain (BlockType(..))
+import Graphics.Babylon.Example.Index3D (Index3D(..))
 
 main :: SC (babylon :: BABYLON) Unit
 main = do

@@ -2,30 +2,32 @@ module Graphics.Babylon.Example.Terrain where
 
 import Control.Alt (void)
 import Control.Bind (join, bind)
+import Control.Monad (when, whenM)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except (except)
-import Control.Monad.Rec.Class (tailRecM, Step(Loop, Done), tailRecM2)
-import Control.Monad.ST (writeSTRef, readSTRef, modifySTRef, newSTRef, pureST)
+import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM)
+import Control.Monad.ST (writeSTRef, readSTRef, newSTRef, pureST)
 import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Either (Either(Left))
-import Data.Foreign (readArray, ForeignError(ForeignError), readInt, toForeign, unsafeFromForeign)
+import Data.Foreign (ForeignError(ForeignError), toForeign, readArray, readInt)
 import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
 import Data.Generic (gShow, class Generic)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
-import Data.Map (values, mapWithKey, fromFoldable, toUnfoldable, Map, toList, member)
-import Data.Ord (compare, class Ord)
+import Data.Map (Map, member, toList, fromFoldable, mapWithKey, values)
+import Data.Monoid (mempty)
+import Data.Ord (min, compare, class Ord)
+import Data.Ordering (Ordering(EQ))
 import Data.Ring (negate)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
-import Data.Unit (unit, Unit)
-import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#), (>>=))
-
-import PerlinNoise (createNoise, simplex2)
+import Data.Unit (unit)
+import Graphics.Babylon.Example.Index3D (Index3D(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
+import PerlinNoise (createNoise, simplex2)
+import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#), (>>=), (<))
 
-data Index3D = Index3D Int Int Int
 
 type Vec = { x :: Number, y :: Number, z :: Number }
 
@@ -47,14 +49,7 @@ instance isForeign :: IsForeign BlockType where
         1 -> pure WaterBlock
         _ -> except (Left (pure (ForeignError "Invalid prop")))
 
-instance eq_Index3D :: Eq Index3D where
-    eq (Index3D ax ay az) (Index3D bx by bz) = (ax == bx) && (ay == by) && (az == bz)
 
-instance ord_Index3D :: Ord Index3D where
-    compare (Index3D ax ay az) (Index3D bx by bz) = compare (1000000 * ax + 1000 * ay + az) (1000000 * bx + 1000 * by + bz)
-
-instance show_Show :: Show Index3D where
-    show (Index3D x y z) = show x <> "," <> show y <> "," <> show z
 
 vec :: Number -> Number -> Number -> { x :: Number, y :: Number, z :: Number }
 vec x y z = { x, y, z }
@@ -93,9 +88,11 @@ instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
 chunkSize :: Int
 chunkSize = 16
 
-createBlockMap :: forall eff. Int -> Int -> Int -> Eff eff (Map Index3D BlockType)
-createBlockMap cx cz seed = do
+createBlockMap :: forall eff. Int -> Int -> Int -> Int -> Eff eff TerrainMap
+createBlockMap cx cy cz seed = do
+
     let noise = createNoise seed
+
     blocks <- for (0 .. 15) \lz -> do
         for (0 .. 15) \lx -> do
             let gx = chunkSize * cx + lx
@@ -104,15 +101,15 @@ createBlockMap cx cz seed = do
             let z = toNumber gz
             let r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
             let h = floor (r * 8.0)
-            for (0 .. h) \gy -> do
-                pure $ Tuple (Index3D gx gy gz) case gy of
-                    0 -> WaterBlock
-                    _ -> GrassBlock
+            let top = min h (chunkSize * (cy + 1) - 1)
+            let bottom = chunkSize * cy
+            if top < bottom then pure mempty else do
+                for (bottom .. top) \gy -> do
+                    pure $ Tuple (Index3D gx gy gz) case gy of
+                        0 -> WaterBlock
+                        _ -> GrassBlock
 
-    let boxMap :: Map Index3D BlockType
-        boxMap = fromFoldable (join (join blocks))
-
-    pure boxMap
+    pure (fromFoldable (join (join blocks)))
 
 
 

@@ -24,11 +24,11 @@ main :: forall eff. Eff (isww :: IsWW, console :: CONSOLE | eff) Unit
 main = onmessage \(MessageEvent {data: fn}) -> do
     case runExcept $ read fn of
         Left err -> postMessage $ toForeign (show err)
-        Right (GenerateTerrain cx cz seed) -> do
+        Right (GenerateTerrain cx cy cz seed) -> do
             let log' text = log ("[WORKER (" <> show cx <> ", " <> show cz <> ")] " <> text)
 
             log' "Generating terrarin map..."
-            boxMap <- createBlockMap cx cz 0
+            boxMap <- createBlockMap cx cy cz 0
             log' ("Complete! Blocks: " <> show (size boxMap))
 
             log' "Generating terrarin verex data..."

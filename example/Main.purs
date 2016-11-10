@@ -55,11 +55,11 @@ type BlockMeshes = {
     waterBlockMesh :: Mesh
 }
 
-generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
-generateChunkAff ww boxMat waterBoxMat cx cz scene renderList = makeAff \reject resolve -> do
+generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
+generateChunkAff ww boxMat waterBoxMat cx cy cz scene renderList = makeAff \reject resolve -> do
     log "Waiting for the worker..."
     let seed = 0
-    postMessageToWorker ww $ write $ GenerateTerrain cx cz seed
+    postMessageToWorker ww $ write $ GenerateTerrain cx cy cz seed
     onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
         Left err -> reject $ EXCEPTION.error $ show err
         Right (VertexDataPropsData verts) -> do
@@ -217,12 +217,13 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             let indices = sortBy (\p q -> compare (range p) (range q)) do
                     z <- negate size .. size
+                    y <- negate 1 .. 1
                     x <- negate size .. size
-                    pure { x, z }
+                    pure { x, y, z }
 
             runAff errorShow pure do
-                for_ indices \{ x, z } -> do
-                    generateChunkAff ww boxMat waterBoxMat x z scene renderList
+                for_ indices \{ x, y, z } -> do
+                    generateChunkAff ww boxMat waterBoxMat x y z scene renderList
 
 
 foreign import onMouseMove :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit
