@@ -58,7 +58,8 @@ type BlockMeshes = {
 generateChunkAff :: forall eff. WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Scene -> RenderList -> Aff (err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
 generateChunkAff ww boxMat waterBoxMat cx cz scene renderList = makeAff \reject resolve -> do
     log "Waiting for the worker..."
-    postMessageToWorker ww $ write $ GenerateTerrain cx cz
+    let seed = 0
+    postMessageToWorker ww $ write $ GenerateTerrain cx cz seed
     onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
         Left err -> reject $ EXCEPTION.error $ show err
         Right (VertexDataPropsData verts) -> do
@@ -190,7 +191,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                     p <- runVector3 point
                     let ix = Int.floor p.x
                     let iy = Int.floor p.y
-                    let iz = Int.floor p.z 
+                    let iz = Int.floor p.z
                     r <- createVector3 (floor p.x) (floor p.y) (floor p.z)
                     setPosition r cursor
 

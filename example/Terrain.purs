@@ -1,7 +1,8 @@
 module Graphics.Babylon.Example.Terrain where
 
 import Control.Alt (void)
-import Control.Bind (bind)
+import Control.Bind (join, bind)
+import Control.Monad.Eff (Eff)
 import Control.Monad.Except (except)
 import Control.Monad.Rec.Class (tailRecM, Step(Loop, Done), tailRecM2)
 import Control.Monad.ST (writeSTRef, readSTRef, modifySTRef, newSTRef, pureST)
@@ -11,16 +12,18 @@ import Data.Either (Either(Left))
 import Data.Foreign (readArray, ForeignError(ForeignError), readInt, toForeign, unsafeFromForeign)
 import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
 import Data.Generic (gShow, class Generic)
-import Data.Int (toNumber)
-import Data.List (List(Cons, Nil))
+import Data.Int (toNumber, floor)
+import Data.List (List(Cons, Nil), (..))
 import Data.Map (values, mapWithKey, fromFoldable, toUnfoldable, Map, toList, member)
 import Data.Ord (compare, class Ord)
 import Data.Ring (negate)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
-import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#), (>>=))
+
+import PerlinNoise (createNoise, simplex2)
+import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 
 data Index3D = Index3D Int Int Int
 
@@ -89,6 +92,29 @@ instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
 
 chunkSize :: Int
 chunkSize = 16
+
+createBlockMap :: forall eff. Int -> Int -> Int -> Eff eff (Map Index3D BlockType)
+createBlockMap cx cz seed = do
+    let noise = createNoise seed
+    blocks <- for (0 .. 15) \lz -> do
+        for (0 .. 15) \lx -> do
+            let gx = chunkSize * cx + lx
+            let gz = chunkSize * cz + lz
+            let x = toNumber gx
+            let z = toNumber gz
+            let r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
+            let h = floor (r * 8.0)
+            for (0 .. h) \gy -> do
+                pure $ Tuple (Index3D gx gy gz) case gy of
+                    0 -> WaterBlock
+                    _ -> GrassBlock
+
+    let boxMap :: Map Index3D BlockType
+        boxMap = fromFoldable (join (join blocks))
+
+    pure boxMap
+
+
 
 createTerrainST :: TerrainMap -> VertexDataPropsData
 createTerrainST map = pureST do
