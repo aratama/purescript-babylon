@@ -2,21 +2,17 @@ module Graphics.Babylon.Example.Generation where
 
 import Control.Alt (void)
 import Control.Bind (join, bind)
-import Control.Monad.Except (except)
 import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM)
 import Control.Monad.ST (newSTRef, pureST, readSTRef, writeSTRef)
-import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
-import Data.Either (Either(Left))
-import Data.Foreign (Foreign, ForeignError(ForeignError), F, readArray, readInt, toForeign)
-import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
-import Data.Generic (class Generic, gEq, gShow)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
-import Data.Map (Map, member, toList, fromFoldable, mapWithKey, values)
+import Data.Map (fromFoldable, member, toList)
 import Data.Monoid (mempty)
 import Data.Ord (min)
 import Data.Ring (negate)
+import Data.Show (show)
+import Data.StrMap (fromFoldable, member) as StrMap
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
@@ -78,7 +74,12 @@ createTerrainGeometry (Chunk terrain) = pureST do
     grass <- prepareArray
     water <- prepareArray
 
-    let exists x y z = member (BlockIndex x y z) map
+
+    -- for performance reason, use StrMap instead of Map
+    let strmap = StrMap.fromFoldable ((\(Tuple k v) -> Tuple (show k) v) <$> (toList map))
+
+    --let exists x y z = member (BlockIndex x y z) map
+    let exists x y z = StrMap.member (show (BlockIndex x y z)) strmap
 
     toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
@@ -88,7 +89,7 @@ createTerrainGeometry (Chunk terrain) = pureST do
                     GrassBlock -> grass
                     WaterBlock -> water
 
-            let square nix niy niz u = if member (BlockIndex (ix + nix) (iy + niy) (iz + niz)) map then pure unit else void do
+            let square nix niy niz u = if exists (ix + nix) (iy + niy) (iz + niz) then pure unit else void do
                     let px = toNumber ix
                     let py = toNumber iy
                     let pz = toNumber iz
