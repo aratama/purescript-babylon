@@ -3,11 +3,13 @@ module Graphics.Babylon.VertexData where
 import Control.Alternative (pure)
 import Control.Bind (bind)
 import Control.Monad.Eff (Eff)
+import Data.Eq (class Eq)
 import Data.Foreign (toForeign)
 import Data.Foreign.Class (class AsForeign, readProp, class IsForeign)
+import Data.Generic (class Generic, gEq)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Mesh (Mesh)
+import Graphics.Babylon.Types (Mesh)
 
 foreign import data VertexData :: *
 
@@ -17,6 +19,11 @@ newtype VertexDataProps = VertexDataProps {
     normals :: Array Number,
     uvs :: Array Number
 }
+
+derive instance generic_VertexDataProps :: Generic VertexDataProps
+
+instance eq_VertexDataProps :: Eq VertexDataProps where
+    eq = gEq
 
 instance isForeign_VertexDataProps :: IsForeign VertexDataProps where
     read fn = do

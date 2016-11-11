@@ -6,11 +6,8 @@ import Data.Unit (Unit)
 
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Scene (Scene)
 import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.AbstractMesh (AbstractMesh)
-
-foreign import data Mesh :: *
+import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
 
 foreign import meshToAbstractMesh :: Mesh -> AbstractMesh
 

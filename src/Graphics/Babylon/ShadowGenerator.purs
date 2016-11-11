@@ -4,7 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.DirectionalLight (DirectionalLight)
-import Graphics.Babylon.Mesh (Mesh)
+import Graphics.Babylon.Types (Mesh)
 
 
 

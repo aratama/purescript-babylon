@@ -1,6 +1,6 @@
 module Graphics.Babylon.PickingInfo where
 
-import Graphics.Babylon.AbstractMesh (AbstractMesh)
+import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector3 (Vector3)
 
 

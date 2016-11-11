@@ -2,7 +2,7 @@ module Graphics.Babylon.CubeTexture where
 
 import Control.Monad.Eff (Eff)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Scene (Scene)
+import Graphics.Babylon.Types (Scene)
 import Graphics.Babylon.Texture (Texture)
 
 foreign import data CubeTexture :: *

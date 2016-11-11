@@ -6,13 +6,13 @@ import Control.Monad (when, whenM)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Except (except)
 import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM)
-import Control.Monad.ST (writeSTRef, readSTRef, newSTRef, pureST)
+import Control.Monad.ST (newSTRef, pureST, readSTRef, runST, writeSTRef)
 import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Either (Either(Left))
 import Data.Foreign (ForeignError(ForeignError), toForeign, readArray, readInt)
 import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
-import Data.Generic (gShow, class Generic)
+import Data.Generic (class Generic, gEq, gShow)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
 import Data.Map (Map, member, toList, fromFoldable, mapWithKey, values)
@@ -35,6 +35,9 @@ data BlockType = GrassBlock | WaterBlock
 
 derive instance generic_BlockType :: Generic BlockType
 
+instance eq_BlockType :: Eq BlockType where
+    eq = gEq
+
 instance show_BlockType :: Show BlockType where
     show = gShow
 
@@ -49,6 +52,8 @@ instance isForeign :: IsForeign BlockType where
         1 -> pure WaterBlock
         _ -> except (Left (pure (ForeignError "Invalid prop")))
 
+instance eq_VertexDataPropsData :: Eq VertexDataPropsData where
+    eq (VertexDataPropsData a) (VertexDataPropsData b) = a.blocks == b.blocks && a.grassBlocks == b.grassBlocks && a.waterBlocks == b.waterBlocks
 
 
 vec :: Number -> Number -> Number -> { x :: Number, y :: Number, z :: Number }
@@ -88,8 +93,8 @@ instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
 chunkSize :: Int
 chunkSize = 16
 
-createBlockMap :: forall eff. Int -> Int -> Int -> Int -> Eff eff TerrainMap
-createBlockMap cx cy cz seed = do
+createBlockMap :: Int -> Int -> Int -> Int -> TerrainMap
+createBlockMap cx cy cz seed = pureST do
 
     let noise = createNoise seed
 
@@ -153,7 +158,7 @@ createTerrainST map = pureST do
                     let s = vec (a.x * 0.5) (a.y * 0.5) (a.z * 0.5)
                     let t = vec (b.x * 0.5) (b.y * 0.5) (b.z * 0.5)
 
-                    let v = vec (px + d.x) (py + d.y) (pz + d.z)
+                    let v = vec (px + 0.5 + d.x) (py + 0.5 + d.y) (pz + 0.5 + d.z)
 
                     offset <- readSTRef store.offset
 

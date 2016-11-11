@@ -3,14 +3,12 @@ module Graphics.Babylon.Scene where
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.AbstractMesh (AbstractMesh)
 import Graphics.Babylon.Color3 (Color3)
 import Graphics.Babylon.DebugLayer (DebugLayer)
 import Graphics.Babylon.Engine (Engine)
 import Graphics.Babylon.Vector3 (Vector3)
 import Graphics.Babylon.PickingInfo (PickingInfo)
-
-foreign import data Scene :: *
+import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
 
 foreign import createScene :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Scene
 

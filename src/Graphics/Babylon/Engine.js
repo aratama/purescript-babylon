@@ -14,3 +14,13 @@ exports.runRenderLoop = function(callback){
         }
     }
 }
+
+exports.switchFullscreen = function(requestPointerLock){
+    return function(options){
+        return function(mesh){
+            return function(){
+                mesh.switchFullscreen(requestPointerLock, options);
+            }
+        }
+    }
+}

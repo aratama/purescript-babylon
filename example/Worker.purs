@@ -25,13 +25,13 @@ main = onmessage \(MessageEvent {data: fn}) -> do
     case runExcept $ read fn of
         Left err -> postMessage $ toForeign (show err)
         Right (GenerateTerrain cx cy cz seed) -> do
-            let log' text = log ("[WORKER (" <> show cx <> ", " <> show cz <> ")] " <> text)
+            --let log' text = log ("[WORKER (" <> show cx <> ", " <> show cz <> ")] " <> text)
 
-            log' "Generating terrarin map..."
-            boxMap <- createBlockMap cx cy cz 0
-            log' ("Complete! Blocks: " <> show (size boxMap))
+            --log' "Generating terrarin map..."
+            let boxMap = createBlockMap cx cy cz 0
+            --log' ("Complete! Blocks: " <> show (size boxMap))
 
-            log' "Generating terrarin verex data..."
+            --log' "Generating terrarin verex data..."
             let verts = createTerrainST boxMap
-            log' "Complete!"
+            --log' "Complete!"
             postMessage $ write verts

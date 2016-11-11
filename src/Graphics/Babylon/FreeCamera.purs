@@ -5,7 +5,7 @@ import Data.Unit (Unit)
 
 import Graphics.Babylon (BABYLON, Canvas)
 import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Scene (Scene)
+import Graphics.Babylon.Types (Scene)
 
 foreign import data FreeCamera :: *
 
