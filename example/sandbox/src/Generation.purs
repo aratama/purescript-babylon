@@ -1,12 +1,10 @@
-module Graphics.Babylon.Example.Terrain where
+module Graphics.Babylon.Example.Generation where
 
 import Control.Alt (void)
 import Control.Bind (join, bind)
-import Control.Monad (when, whenM)
-import Control.Monad.Eff (Eff)
 import Control.Monad.Except (except)
 import Control.Monad.Rec.Class (Step(Loop, Done), tailRecM)
-import Control.Monad.ST (newSTRef, pureST, readSTRef, runST, writeSTRef)
+import Control.Monad.ST (newSTRef, pureST, readSTRef, writeSTRef)
 import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Either (Either(Left))
@@ -17,90 +15,27 @@ import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
 import Data.Map (Map, member, toList, fromFoldable, mapWithKey, values)
 import Data.Monoid (mempty)
-import Data.Ord (min, compare, class Ord)
-import Data.Ordering (Ordering(EQ))
+import Data.Ord (min)
 import Data.Ring (negate)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
-import Graphics.Babylon.Example.Index3D (Index3D(..))
+
+
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
-import Prelude (class Show, class Eq, pure, show, (<*>), (<$>), (+), (-), (*), (<>), (==), (&&), ($), (#), (>>=), (<))
+import Prelude (class Eq, class Show, pure, (#), ($), (&&), (*), (+), (-), (<), (<$>), (<*>), (==), (>>=))
 
-
-type Vec = { x :: Number, y :: Number, z :: Number }
-
-data BlockType = GrassBlock | WaterBlock
-
-derive instance generic_BlockType :: Generic BlockType
-
-instance eq_BlockType :: Eq BlockType where
-    eq = gEq
-
-instance show_BlockType :: Show BlockType where
-    show = gShow
-
-instance asForeign_BlockType :: AsForeign BlockType where
-    write value = toForeign case value of
-        GrassBlock -> 0
-        WaterBlock -> 1
-
-instance isForeign :: IsForeign BlockType where
-    read fn = readInt fn >>= case _ of
-        0 -> pure GrassBlock
-        1 -> pure WaterBlock
-        _ -> except (Left (pure (ForeignError "Invalid prop")))
-
-instance eq_VertexDataPropsData :: Eq VertexDataPropsData where
-    eq (VertexDataPropsData a) (VertexDataPropsData b) = a.blocks == b.blocks && a.grassBlocks == b.grassBlocks && a.waterBlocks == b.waterBlocks
-
-
-vec :: Number -> Number -> Number -> { x :: Number, y :: Number, z :: Number }
-vec x y z = { x, y, z }
-
-
-type TerrainMap = Map Index3D BlockType
-
-newtype VertexDataPropsData = VertexDataPropsData {
-    blocks :: Map Index3D BlockType,
-    grassBlocks :: VertexDataProps,
-    waterBlocks :: VertexDataProps
-}
-
-boxelMapToForeign :: Map Index3D BlockType -> Foreign
-boxelMapToForeign map = toForeign $ Array.fromFoldable (values (mapWithKey (\(Index3D x y z) v -> { x, y, z, blockType: write v }) map))
-
-foreignToBoxelMap :: Foreign -> F (Map Index3D BlockType)
-foreignToBoxelMap value = do
-    blocksFn <- readArray value
-    blocks <- for blocksFn \block -> do
-        x <- readProp "x" block
-        y <- readProp "y" block
-        z <- readProp "z" block
-        blockType <- readProp "blockType" block
-        pure (Tuple (Index3D x y z) blockType)
-    pure (fromFoldable blocks)
-
-instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
-    read value = do
-        blocks <- readProp "blocks" value >>= foreignToBoxelMap
-        grassBlocks <- readProp "grassBlocks" value
-        waterBlocks <- readProp "waterBlocks" value
-        pure $ VertexDataPropsData { blocks, grassBlocks, waterBlocks }
-
-instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
-    write (VertexDataPropsData value) = toForeign {
-        blocks: boxelMapToForeign value.blocks,
-        grassBlocks: value.grassBlocks,
-        waterBlocks: value.waterBlocks
-    }
-
+import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
+import Graphics.Babylon.Example.Vec (vec)
+import Graphics.Babylon.Example.Chunk (Chunk(..))
+import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
+import Graphics.Babylon.Example.BlockType (BlockType(..))
 
 chunkSize :: Int
 chunkSize = 16
 
-createBlockMap :: Int -> Int -> Int -> Int -> TerrainMap
+createBlockMap :: Int -> Int -> Int -> Int -> Chunk
 createBlockMap cx cy cz seed = pureST do
 
     let noise = createNoise seed
@@ -117,16 +52,21 @@ createBlockMap cx cy cz seed = pureST do
             let bottom = chunkSize * cy
             if top < bottom then pure mempty else do
                 for (bottom .. top) \gy -> do
-                    pure $ Tuple (Index3D gx gy gz) case gy of
+                    pure $ Tuple (BlockIndex gx gy gz) case gy of
                         0 -> WaterBlock
                         _ -> GrassBlock
 
-    pure (fromFoldable (join (join blocks)))
+    pure $ Chunk {
+        index: BlockIndex cx cy cz,
+        map: fromFoldable (join (join blocks))
+    }
 
 
 
-createTerrainST :: TerrainMap -> VertexDataPropsData
-createTerrainST map = pureST do
+createTerrainGeometry :: Chunk -> VertexDataPropsData
+createTerrainGeometry (Chunk terrain) = pureST do
+
+    let map = terrain.map
 
     let prepareArray = do
             offset <- newSTRef 0
@@ -139,17 +79,17 @@ createTerrainST map = pureST do
     grass <- prepareArray
     water <- prepareArray
 
-    let exists x y z = member (Index3D x y z) map
+    let exists x y z = member (BlockIndex x y z) map
 
     toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
-        Cons (Tuple (Index3D ix iy iz) block) tail -> do
+        Cons (Tuple (BlockIndex ix iy iz) block) tail -> do
 
             let store = case block of
                     GrassBlock -> grass
                     WaterBlock -> water
 
-            let square nix niy niz u = if member (Index3D (ix + nix) (iy + niy) (iz + niz)) map then pure unit else void do
+            let square nix niy niz u = if member (BlockIndex (ix + nix) (iy + niy) (iz + niz)) map then pure unit else void do
                     let px = toNumber ix
                     let py = toNumber iy
                     let pz = toNumber iz
@@ -206,4 +146,4 @@ createTerrainST map = pureST do
     grassBlocks <- freezeStore grass
     waterBlocks <- freezeStore water
 
-    pure $ VertexDataPropsData { blocks: map, grassBlocks, waterBlocks }
+    pure $ VertexDataPropsData {  terrain: Chunk terrain, grassBlocks, waterBlocks }

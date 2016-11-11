@@ -9,6 +9,7 @@
     "bundle-sandbox-worker": "psc-bundle --module Graphics.Babylon.Example.Worker --main Graphics.Babylon.Example.Worker --output example/sandbox/public/worker.js output/**/*.js",
     "build-sandbox": "npm run compile-sandbox && npm run bundle-sandbox-main && npm run bundle-sandbox-worker",
     "build": "npm run build-sandbox",
+    "server": "start http-server example/sandbox/public",
     "clean": ""
   },
   "author": "",

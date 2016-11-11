@@ -1,6 +1,6 @@
 module Main where
 
-import Graphics.Babylon.Example.Terrain
+
 import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
@@ -11,7 +11,7 @@ import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (errorShow, CONSOLE, log, error)
 import Control.Monad.Eff.Exception (EXCEPTION, catchException, error) as EXCEPTION
 import Control.Monad.Eff.Now (NOW, now)
-import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
+import Control.Monad.Eff.Ref (REF, Ref, modifyRef, newRef, readRef, writeRef)
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
 import Data.Argonaut.Core (toNumber)
@@ -28,10 +28,9 @@ import Data.Nullable (toMaybe)
 import Data.Ord (abs, compare, max, min)
 import Data.Ring (negate)
 import Data.Unit (Unit, unit)
-import Graphics.Babylon.Example.Index3D (Index3D(..), runIndex3D)
-import Graphics.Babylon.Types (AbstractMesh)
 import Math (remainder, round)
 
+import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (setCheckCollisions, abstractMeshToNode, setIsPickable) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
@@ -39,7 +38,6 @@ import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
-import Graphics.Babylon.Example.Message (Command(..))
 import Graphics.Babylon.FreeCamera (attachControl, setTarget, setCheckCollisions, createFreeCamera)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
@@ -58,46 +56,56 @@ import Math (floor)
 import Prelude (show, (+), ($), (==),  (/=), (#), (<$>), (<), (=<<), (-), (<>),  (/), (*))
 import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
 
+import Graphics.Babylon.Example.Message (Command(..))
+import Graphics.Babylon.Example.Generation (createTerrainGeometry, createBlockMap, chunkSize)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex(..), runIndex3D)
+import Graphics.Babylon.Example.Chunk (Chunk(..))
+import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
+
 shadowMapSize :: Int
 shadowMapSize = 4096
 
 type BlockMeshes = {
-    blocks :: Map Index3D BlockType,
+    blocks :: Chunk,
     grassBlockMesh :: Mesh,
     waterBlockMesh :: Mesh
 }
 
-
+data Mode = Put | Remove
 
 newtype State = State {
-    chunks :: Map Index3D BlockMeshes,
+    mode :: Mode,
+    chunks :: Map BlockIndex BlockMeshes,
     mousePosition :: { x :: Int, y :: Int }
 }
 
-globalPositionToChunkIndex :: Number -> Number -> Number -> Index3D
-globalPositionToChunkIndex x y z = Index3D (f x) (f y) (f z)
+globalPositionToChunkIndex :: Number -> Number -> Number -> BlockIndex
+globalPositionToChunkIndex x y z = BlockIndex (f x) (f y) (f z)
   where
     f v = Int.floor (v + 1000000.0 * Int.toNumber chunkSize) / chunkSize - 1000000
 
-globalPositionToLocalIndex :: Number -> Number -> Number -> Index3D
-globalPositionToLocalIndex x y z = Index3D (f x) (f y) (f z)
+globalIndexToChunkIndex :: BlockIndex -> BlockIndex
+globalIndexToChunkIndex (BlockIndex x y z) = BlockIndex (f x) (f y) (f z)
+  where
+    f v = (v + 1000000 * chunkSize) / chunkSize - 1000000
+
+globalPositionToLocalIndex :: Number -> Number -> Number -> BlockIndex
+globalPositionToLocalIndex x y z = BlockIndex (f x) (f y) (f z)
   where
     delta = Int.toNumber chunkSize * 1000000.0
     f v = mod (Int.floor (v + delta)) chunkSize
 
-globalPositionToGlobalIndex :: Number -> Number -> Number -> Index3D
-globalPositionToGlobalIndex x y z = Index3D (f x) (f y) (f z)
+globalPositionToGlobalIndex :: Number -> Number -> Number -> BlockIndex
+globalPositionToGlobalIndex x y z = BlockIndex (f x) (f y) (f z)
   where
     f v = Int.floor (v + 1000000.0) - 1000000
 
-
-
-generateChunkAff :: forall eff.  WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Int -> Scene -> RenderList -> Aff (now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
-generateChunkAff ww boxMat waterBoxMat cx cy cz scene renderList = makeAff \reject resolve -> do
+generateChunkAff :: forall eff. Ref State -> WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Int -> Scene -> RenderList -> Aff (now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) BlockMeshes
+generateChunkAff ref ww boxMat waterBoxMat cx cy cz scene renderList = makeAff \reject resolve -> do
     start <- now
     log ("Generating chunk..." <> show cx <> ", " <> show cy <> ", " <> show cz)
     let seed = 0
-    postMessageToWorker ww $ write $ GenerateTerrain cx cy cz seed
+    postMessageToWorker ww $ write $ GenerateTerrain (BlockIndex cx cy cz) seed
     onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
         Left err -> reject $ EXCEPTION.error $ show err
         Right (VertexDataPropsData verts) -> do
@@ -105,7 +113,7 @@ generateChunkAff ww boxMat waterBoxMat cx cy cz scene renderList = makeAff \reje
             waterBlockMesh <- generateMesh verts.waterBlocks waterBoxMat
             end <- now
             log ("Completed! time: " <> show (unInstant end - unInstant start) <> " msec.")
-            resolve { blocks: verts.blocks, grassBlockMesh, waterBlockMesh }
+            resolve { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
 
   where
     generateMesh verts mat = do
@@ -212,6 +220,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
 
         ref <- newRef $ State {
+            mode: Put,
             chunks: empty,
             mousePosition: { x: 0, y: 0 }
         }
@@ -224,73 +233,111 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                 }
             }
 
-        engine # runRenderLoop do
+        onButtonClick "add" do
+            modifyRef ref (\(State state) -> State state { mode = Put })
+
+        onButtonClick "remove" do
+            modifyRef ref (\(State state) -> State state { mode = Remove })
 
 
+        let
+            pickBlock :: forall eff. State -> Int -> Int -> Eff (dom :: DOM, ref :: REF, babylon :: BABYLON | eff) (Maybe BlockIndex)
+            pickBlock (State state) screenX screenY = do
+                let predicate mesh = do
+                        let name = getName (AbstractMesh.abstractMeshToNode mesh)
+                        pure (name /= "cursor")
+
+                pickingInfo <- pick screenX screenY predicate false scene
+
+                let pickup = do
+                        let point = getPickedPoint pickingInfo
+                        p <- runVector3 point
+                        let dx = abs (p.x - round p.x)
+                        let dy = abs (p.y - round p.y)
+                        let dz = abs (p.z - round p.z)
+                        let minDelta = min dx (min dy dz)
+                        let lookupBlock x y z = do
+                                let chunkIndex = globalPositionToChunkIndex x y z
+                                let index = globalPositionToGlobalIndex x y z
+                                { blocks: Chunk chunk@{ map } } <- lookup chunkIndex state.chunks
+                                lookup index map
+
+                        let putCursor (BlockIndex x y z) = do
+                                r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
+                                setPosition r cursor
+
+                        case state.mode of
+                            Put -> if minDelta == dx then do
+                                    case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
+                                        Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex (p.x - 0.5) p.y p.z
+                                        Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex (p.x + 0.5) p.y p.z
+                                        _, _ -> pure Nothing
+                                    else if minDelta == dy then do
+                                            case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
+                                                Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex p.x (p.y - 0.5) p.z
+                                                Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex p.x (p.y + 0.5) p.z
+                                                _, _ -> pure Nothing
+                                        else do
+                                            case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
+                                                Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex p.x p.y (p.z - 0.5)
+                                                Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex p.x p.y (p.z + 0.5)
+                                                _, _ -> pure Nothing
+
+                            Remove -> if minDelta == dx then do
+                                    case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
+                                        Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex (p.x + 0.5) p.y p.z
+                                        Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex (p.x - 0.5) p.y p.z
+                                        _, _ -> pure Nothing
+                                    else if minDelta == dy then do
+                                            case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
+                                                Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex p.x (p.y + 0.5) p.z
+                                                Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex p.x (p.y - 0.5) p.z
+                                                _, _ -> pure Nothing
+                                        else do
+                                            case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
+                                                Just block, Nothing -> pure $ Just $ globalPositionToGlobalIndex p.x p.y (p.z + 0.5)
+                                                Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex p.x p.y (p.z - 0.5)
+                                                _, _ -> pure Nothing
+
+                if getHit pickingInfo then pickup else pure Nothing
+
+
+{-}
+        onMouseClick \e -> do
 
             State state <- readRef ref
 
-            let predicate mesh = do
-                    let name = getName (AbstractMesh.abstractMeshToNode mesh)
-                    pure (name /= "cursor")
+            picked <- pickBlock state state.mousePosition.x state.mousePosition.y
+            case picked of
+                Nothing -> pure unit
+                Just index@(BlockIndex x y z) -> do
+                    let chunkIndex = globalIndexToChunkIndex index
+                    case lookup chunkIndex state.chunks of
+                        Nothing -> pure unit
+                        Just chunk@{ index, blocks: Chunk map } -> do
+                            let chunk' = chunk {
+                                    blocks = Chunk { index, map: insert index GrassBlock map }
+                                }
 
-            pickingInfo <- pick state.mousePosition.x state.mousePosition.y predicate false scene
-            when (getHit pickingInfo) do
-                let point = getPickedPoint pickingInfo
-                p <- runVector3 point
-                let dx = abs (p.x - round p.x)
-                let dy = abs (p.y - round p.y)
-                let dz = abs (p.z - round p.z)
-                let minDelta = min dx (min dy dz)
-                let lookupBlock x y z = do
-                        let chunkIndex = globalPositionToChunkIndex x y z
-                        let index = globalPositionToGlobalIndex x y z
-                        chunk <- lookup chunkIndex state.chunks
-                        lookup index chunk.blocks
+                            writeRef ref $ State state {
+                                chunks = insert chunkIndex chunk' state.chunks
+                            }
 
-                let putCursor (Index3D x y z) = do
-                        r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
-                        setPosition r cursor
+-}
 
-                let putting = true
 
-                if putting
-                    then
 
-                        if minDelta == dx then do
-                            case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
-                                Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
-                                Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
-                                _, _ -> pure unit
-                            else if minDelta == dy then do
-                                    case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
-                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
-                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
-                                        _, _ -> pure unit
-                                else do
-                                    case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
-                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
-                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
-                                        _, _ -> pure unit
 
-                    else
+        engine # runRenderLoop do
 
-                        if minDelta == dx then do
-                            case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
-                                Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
-                                Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
-                                _, _ -> pure unit
-                            else if minDelta == dy then do
-                                    case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
-                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
-                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
-                                        _, _ -> pure unit
-                                else do
-                                    case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
-                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
-                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
-                                        _, _ -> pure unit
+            State state <- readRef ref
 
+            picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
+            case picked of
+                Nothing -> pure unit
+                Just (BlockIndex x y z) -> do
+                    r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
+                    setPosition r cursor
 
             render scene
 
@@ -320,10 +367,14 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             runAff errorShow pure do
                 for_ indices \{ x, y, z } -> do
-                    mesh <- generateChunkAff ww boxMat waterBoxMat x y z scene renderList
+                    mesh <- generateChunkAff ref ww boxMat waterBoxMat x y z scene renderList
                     liftEff $ modifyRef ref \(State state) -> State state {
-                        chunks = insert (Index3D x y z) mesh state.chunks
+                        chunks = insert (BlockIndex x y z) mesh state.chunks
                     }
 
 
+foreign import onButtonClick :: forall eff. String -> Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
+
 foreign import onMouseMove :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit
+
+foreign import onMouseClick :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit

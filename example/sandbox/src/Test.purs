@@ -12,7 +12,6 @@ import Data.List ((..))
 import Data.Map (Map, fromFoldable)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
-import Graphics.Babylon.Example.Terrain (createTerrainST, VertexDataPropsData(..), createBlockMap)
 import Main (globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex)
 import Prelude (pure, div, (<), (<#>), (*), (+), (==), negate, ($))
 import Test.StrongCheck (SC, assert, assertEq, quickCheck)
@@ -20,25 +19,29 @@ import Test.StrongCheck (SC, assert, assertEq, quickCheck)
 import PerlinNoise (createNoise, simplex2)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
-import Graphics.Babylon.Example.Terrain (BlockType(..))
-import Graphics.Babylon.Example.Index3D (Index3D(..))
+import Graphics.Babylon.Example.Generation (createTerrainGeometry, createBlockMap, chunkSize)
+import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
+import Graphics.Babylon.Example.Chunk (Chunk(..))
+import Graphics.Babylon.Example.BlockType (BlockType(..))
+import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
+
 
 main :: SC (babylon :: BABYLON) Unit
 main = do
 
-    assert $ assertEq (globalPositionToChunkIndex 0.5 0.5 0.5) (Index3D 0 0 0)
-    assert $ assertEq (globalPositionToChunkIndex (-0.5) (-0.5) (-0.5)) (Index3D (-1) (-1) (-1))
-    assert $ assertEq (globalPositionToChunkIndex (35.0) (-0.5) (12.5)) (Index3D (2) (-1) (0))
-    assert $ assertEq (globalPositionToChunkIndex (-35.0) (0.5) (-12.5)) (Index3D (-3) (0) (-1))
+    assert $ assertEq (globalPositionToChunkIndex 0.5 0.5 0.5) (BlockIndex 0 0 0)
+    assert $ assertEq (globalPositionToChunkIndex (-0.5) (-0.5) (-0.5)) (BlockIndex (-1) (-1) (-1))
+    assert $ assertEq (globalPositionToChunkIndex (35.0) (-0.5) (12.5)) (BlockIndex (2) (-1) (0))
+    assert $ assertEq (globalPositionToChunkIndex (-35.0) (0.5) (-12.5)) (BlockIndex (-3) (0) (-1))
 
-    assert $ assertEq (globalPositionToLocalIndex (-9.3) (6.5) (-4.9)) (Index3D (6) (6) (11))
-    assert $ assertEq (globalPositionToLocalIndex (15.9) (16.0) (16.1)) (Index3D (15) (0) (0))
-    assert $ assertEq (globalPositionToLocalIndex (-15.9) (-16.0) (-16.1)) (Index3D (0) (0) (15))
-    assert $ assertEq (globalPositionToLocalIndex (-31.9) (-32.0) (-32.1)) (Index3D (0) (0) (15))
+    assert $ assertEq (globalPositionToLocalIndex (-9.3) (6.5) (-4.9)) (BlockIndex (6) (6) (11))
+    assert $ assertEq (globalPositionToLocalIndex (15.9) (16.0) (16.1)) (BlockIndex (15) (0) (0))
+    assert $ assertEq (globalPositionToLocalIndex (-15.9) (-16.0) (-16.1)) (BlockIndex (0) (0) (15))
+    assert $ assertEq (globalPositionToLocalIndex (-31.9) (-32.0) (-32.1)) (BlockIndex (0) (0) (15))
 
-    assert $ assertEq (globalPositionToGlobalIndex (0.0) (1.0) (-1.0)) (Index3D (0) 1 (-1))
-    assert $ assertEq (globalPositionToGlobalIndex (-0.9) (-1.0) (-1.1)) (Index3D (-1) (-1) (-2))
-    assert $ assertEq (globalPositionToGlobalIndex (-15.9) (-16.0) (-16.1)) (Index3D (-16) (-16) (-17))
+    assert $ assertEq (globalPositionToGlobalIndex (0.0) (1.0) (-1.0)) (BlockIndex (0) 1 (-1))
+    assert $ assertEq (globalPositionToGlobalIndex (-0.9) (-1.0) (-1.1)) (BlockIndex (-1) (-1) (-2))
+    assert $ assertEq (globalPositionToGlobalIndex (-15.9) (-16.0) (-16.1)) (BlockIndex (-16) (-16) (-17))
 
     quickCheck \seed ->
         let noise = createNoise seed
@@ -49,11 +52,11 @@ main = do
                         r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
                         h = floor (r * 2.0)
                         in
-                            (0 .. h) <#> \iy -> let y = toNumber iy in Tuple (Index3D ix iy iz) GrassBlock
-            map :: Map Index3D BlockType
+                            (0 .. h) <#> \iy -> let y = toNumber iy in Tuple (BlockIndex ix iy iz) GrassBlock
+            map :: Map BlockIndex BlockType
             map = fromFoldable (join (join blocks))
 
-            dat = createTerrainST map
+            dat = createTerrainGeometry (Chunk { index: BlockIndex 0 0 0,  map })
         in case dat of
             VertexDataPropsData props@{ grassBlocks: VertexDataProps grassBlocks } -> all (\index -> index < div (length grassBlocks.positions) 3) grassBlocks.indices
 
@@ -63,7 +66,7 @@ main = do
 test :: SC (babylon :: BABYLON) Unit
 test = do
     quickCheck \cx cy cz seed -> let map = createBlockMap cx cy cz seed
-                                     geometry = createTerrainST map
+                                     geometry = createTerrainGeometry map
                                      fn = write geometry
                                      in case runExcept (read fn) of
                                         Left err -> false
