@@ -77,3 +77,12 @@ exports.dispose = function(mesh){
         }
     }
 }
+
+
+exports.setIsPickable = function(isPickable){
+    return function(mesh){
+        return function(){
+            mesh.isPickable = isPickable;
+        }
+    }
+}

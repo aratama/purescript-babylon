@@ -29,10 +29,11 @@ import Data.Ord (abs, compare, max, min)
 import Data.Ring (negate)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon.Example.Index3D (Index3D(..), runIndex3D)
+import Graphics.Babylon.Types (AbstractMesh)
 import Math (remainder, round)
 
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
-import Graphics.Babylon.AbstractMesh (setCheckCollisions, abstractMeshToNode) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (setCheckCollisions, abstractMeshToNode, setIsPickable) as AbstractMesh
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DebugLayer (show) as DebugLayer
@@ -173,6 +174,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         cursor <- do
             cursorbox <- createBox "cursor" 1.0 scene
             setRenderingGroupId 1 cursorbox
+            AbstractMesh.setIsPickable false (meshToAbstractMesh cursorbox)
 
             mat <- createStandardMaterial "cursormat" scene
             setWireframe true (standardMaterialToMaterial mat)
@@ -227,82 +229,67 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
 
             State state <- readRef ref
-            pickingInfo <- pick state.mousePosition.x state.mousePosition.y (\mesh -> pure true) false scene
+
+            let predicate mesh = do
+                    let name = getName (AbstractMesh.abstractMeshToNode mesh)
+                    pure (name /= "cursor")
+
+            pickingInfo <- pick state.mousePosition.x state.mousePosition.y predicate false scene
             when (getHit pickingInfo) do
-                let mesh = getPickedMesh pickingInfo
-                let name = getName (AbstractMesh.abstractMeshToNode mesh)
-                when (name /= "cursor") do
-                    --log name
-                    let point = getPickedPoint pickingInfo
-                    p <- runVector3 point
-                    let dx = abs (p.x - round p.x)
-                    let dy = abs (p.y - round p.y)
-                    let dz = abs (p.z - round p.z)
+                let point = getPickedPoint pickingInfo
+                p <- runVector3 point
+                let dx = abs (p.x - round p.x)
+                let dy = abs (p.y - round p.y)
+                let dz = abs (p.z - round p.z)
+                let minDelta = min dx (min dy dz)
+                let lookupBlock x y z = do
+                        let chunkIndex = globalPositionToChunkIndex x y z
+                        let index = globalPositionToGlobalIndex x y z
+                        chunk <- lookup chunkIndex state.chunks
+                        lookup index chunk.blocks
 
-                    log $ "x " <> show p.x
-                    log $ "y " <> show p.y
-                    log $ "z " <> show p.z
-                    log $ "dx " <> show dx
-                    log $ "dy " <> show dy
-                    log $ "dz " <> show dz
+                let putCursor (Index3D x y z) = do
+                        r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
+                        setPosition r cursor
 
+                let putting = true
 
-                    let minDelta = min dx (min dy dz)
+                if putting
+                    then
 
-                    let lookupBlock x y z = do
-                            let chunkIndex = globalPositionToChunkIndex x y z
-                            let index = globalPositionToGlobalIndex x y z
-                            chunk <- lookup chunkIndex state.chunks
-                            lookup index chunk.blocks
+                        if minDelta == dx then do
+                            case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
+                                Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
+                                Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
+                                _, _ -> pure unit
+                            else if minDelta == dy then do
+                                    case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
+                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
+                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
+                                        _, _ -> pure unit
+                                else do
+                                    case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
+                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
+                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
+                                        _, _ -> pure unit
 
-                    let putCursor (Index3D x y z) = do
-                            r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
-                            setPosition r cursor
+                    else
 
-                    let putting = true
-
-                    if putting
-                        then
-
-                            if minDelta == dx then do
-                                log "x"
-                                case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
-                                    Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
-                                    Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
-                                    _, _ -> pure unit
-                                else if minDelta == dy then do
-                                        log "y"
-                                        case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
-                                            Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
-                                            Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
-                                            _, _ -> pure unit
-                                    else do
-                                        log "z"
-                                        case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
-                                            Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
-                                            Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
-                                            _, _ -> pure unit
-
-                        else
-
-                            if minDelta == dx then do
-                                log "x"
-                                case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
-                                    Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
-                                    Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
-                                    _, _ -> pure unit
-                                else if minDelta == dy then do
-                                        log "y"
-                                        case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
-                                            Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
-                                            Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
-                                            _, _ -> pure unit
-                                    else do
-                                        log "z"
-                                        case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
-                                            Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
-                                            Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
-                                            _, _ -> pure unit
+                        if minDelta == dx then do
+                            case lookupBlock (p.x + 0.5) p.y p.z, lookupBlock (p.x - 0.5) p.y p.z of
+                                Just block, Nothing -> putCursor (globalPositionToGlobalIndex (p.x + 0.5) p.y p.z)
+                                Nothing, Just block -> putCursor (globalPositionToGlobalIndex (p.x - 0.5) p.y p.z)
+                                _, _ -> pure unit
+                            else if minDelta == dy then do
+                                    case lookupBlock p.x (p.y + 0.5) p.z, lookupBlock p.x (p.y - 0.5) p.z of
+                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x (p.y + 0.5) p.z)
+                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x (p.y - 0.5) p.z)
+                                        _, _ -> pure unit
+                                else do
+                                    case lookupBlock p.x p.y (p.z + 0.5), lookupBlock p.x p.y (p.z - 0.5) of
+                                        Just block, Nothing -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z + 0.5))
+                                        Nothing, Just block -> putCursor (globalPositionToGlobalIndex p.x p.y (p.z - 0.5))
+                                        _, _ -> pure unit
 
 
             render scene

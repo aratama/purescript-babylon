@@ -1,8 +1,8 @@
 node_modules
 bower_components
 output
-public/index.js
-public/worker.js
+example/sandbox/public/index.js
+example/sandbox/public/worker.js
 .psc-ide-port
 
 # Windows image file caches

@@ -57,13 +57,14 @@ main = do
         in case dat of
             VertexDataPropsData props@{ grassBlocks: VertexDataProps grassBlocks } -> all (\index -> index < div (length grassBlocks.positions) 3) grassBlocks.indices
 
-{-}
+
+    pure unit
+
+test :: SC (babylon :: BABYLON) Unit
+test = do
     quickCheck \cx cy cz seed -> let map = createBlockMap cx cy cz seed
                                      geometry = createTerrainST map
                                      fn = write geometry
                                      in case runExcept (read fn) of
                                         Left err -> false
                                         Right geometry' -> geometry' == geometry
--}
-    pure unit
-

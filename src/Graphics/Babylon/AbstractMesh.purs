@@ -24,3 +24,6 @@ foreign import intersectsPoint :: forall eff. Vector3 -> AbstractMesh -> Eff (ba
 foreign import dispose :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import lookAt :: forall eff. Vector3 -> Number -> Number -> Number -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setIsPickable :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+

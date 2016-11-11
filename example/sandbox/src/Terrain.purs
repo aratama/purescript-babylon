@@ -10,7 +10,7 @@ import Control.Monad.ST (newSTRef, pureST, readSTRef, runST, writeSTRef)
 import Data.Array (fromFoldable) as Array
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Either (Either(Left))
-import Data.Foreign (ForeignError(ForeignError), toForeign, readArray, readInt)
+import Data.Foreign (Foreign, ForeignError(ForeignError), F, readArray, readInt, toForeign)
 import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Data.Int (toNumber, floor)
@@ -68,23 +68,30 @@ newtype VertexDataPropsData = VertexDataPropsData {
     waterBlocks :: VertexDataProps
 }
 
+boxelMapToForeign :: Map Index3D BlockType -> Foreign
+boxelMapToForeign map = toForeign $ Array.fromFoldable (values (mapWithKey (\(Index3D x y z) v -> { x, y, z, blockType: write v }) map))
+
+foreignToBoxelMap :: Foreign -> F (Map Index3D BlockType)
+foreignToBoxelMap value = do
+    blocksFn <- readArray value
+    blocks <- for blocksFn \block -> do
+        x <- readProp "x" block
+        y <- readProp "y" block
+        z <- readProp "z" block
+        blockType <- readProp "blockType" block
+        pure (Tuple (Index3D x y z) blockType)
+    pure (fromFoldable blocks)
+
 instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
     read value = do
-        blocks <- do
-            blocksFn <- readProp "blocks" value >>= readArray
-            for blocksFn \block -> do
-                x <- readProp "x" block
-                y <- readProp "y" block
-                z <- readProp "z" block
-                blockType <- readProp "blockType" block
-                pure (Tuple (Index3D x y z) blockType)
+        blocks <- readProp "blocks" value >>= foreignToBoxelMap
         grassBlocks <- readProp "grassBlocks" value
         waterBlocks <- readProp "waterBlocks" value
-        pure $ VertexDataPropsData { blocks: fromFoldable blocks, grassBlocks, waterBlocks }
+        pure $ VertexDataPropsData { blocks, grassBlocks, waterBlocks }
 
 instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
     write (VertexDataPropsData value) = toForeign {
-        blocks: Array.fromFoldable (values (mapWithKey (\(Index3D x y z) v -> { x, y, z, blockType: write v }) value.blocks)),
+        blocks: boxelMapToForeign value.blocks,
         grassBlocks: value.grassBlocks,
         waterBlocks: value.waterBlocks
     }
