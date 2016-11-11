@@ -1,18 +1,24 @@
 module Graphics.Babylon.Example.Terrain (
- ChunkWithMesh, Terrain, emptyTerrain,
+ ChunkWithMesh(..), Terrain, emptyTerrain,
  globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex, globalIndexToChunkIndex,
- lookupBlock, insertChunk
+ lookupBlock, insertChunk, lookupChunk, disposeChunk
 ) where
 
 import Control.Bind (bind)
+import Control.Monad.Eff (Eff)
 import Data.EuclideanRing (mod)
 import Data.Int (floor, toNumber)
 import Data.Map (Map, empty, insert, lookup)
 import Data.Maybe (Maybe)
+import Data.Unit (Unit)
+import Graphics.Babylon (BABYLON)
+import Graphics.Babylon.AbstractMesh (dispose)
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.Example.Generation (chunkSize)
+import Graphics.Babylon.Example.Message (TerrainVertexData(..))
 import Graphics.Babylon.Example.Vec (Vec)
-import Prelude ((*), (/), (+), (-))
+import Graphics.Babylon.Mesh (meshToAbstractMesh)
+import Prelude ((*), (/), (+), (-), ($))
 
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
 import Graphics.Babylon.Example.BlockType (BlockType)
@@ -54,6 +60,9 @@ globalIndexToChunkIndex (BlockIndex x y z) = ChunkIndex (f x) (f y) (f z)
 
 
 
+lookupChunk :: ChunkIndex -> Terrain -> Maybe ChunkWithMesh
+lookupChunk index (Terrain terrain) = lookup index terrain.map
+
 lookupBlock :: Vec -> Terrain -> Maybe BlockType
 lookupBlock p (Terrain terrain) = do
         let chunkIndex = globalPositionToChunkIndex p.x p.y p.z
@@ -66,3 +75,8 @@ insertChunk :: ChunkWithMesh -> Terrain -> Terrain
 insertChunk cmesh@{ blocks: Chunk chunk@{ index } } (Terrain chunks) = Terrain chunks {
     map = insert index cmesh chunks.map
 }
+
+disposeChunk :: forall eff. ChunkWithMesh -> Eff (babylon :: BABYLON | eff) Unit
+disposeChunk chunk = do
+    dispose true $ meshToAbstractMesh chunk.grassBlockMesh
+    dispose true $ meshToAbstractMesh chunk.waterBlockMesh

@@ -70,8 +70,8 @@ exports.lookAt = function(targetPoint){
     }
 }
 
-exports.dispose = function(mesh){
-    return function(doNotRecurse){
+exports.dispose = function(doNotRecurse){
+    return function(mesh){
         return function(){
             mesh.dispose(doNotRecurse);
         }

@@ -1,6 +1,5 @@
 module Main where
 
-
 import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
@@ -9,9 +8,10 @@ import Control.Monad.Aff (Aff, runAff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (errorShow, CONSOLE, log, error)
+import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (EXCEPTION, catchException, error) as EXCEPTION
 import Control.Monad.Eff.Now (NOW, now)
-import Control.Monad.Eff.Ref (REF, Ref, modifyRef, newRef, readRef)
+import Control.Monad.Eff.Ref (REF, Ref, modifyRef, newRef, readRef, writeRef)
 import Control.Monad.Except (runExcept)
 import DOM (DOM)
 import Data.Array (sortBy, (..))
@@ -20,7 +20,7 @@ import Data.Either (Either(..))
 import Data.Foldable (for_)
 import Data.Foreign.Class (write, read)
 import Data.Int (toNumber) as Int
-import Data.Map (empty, insert)
+import Data.Map (delete, insert)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
 import Data.Ord (abs, compare, min)
@@ -34,14 +34,16 @@ import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(BlockIndex))
+import Graphics.Babylon.Example.BlockType (BlockType(..))
+import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.Example.Message (Command(..))
-import Graphics.Babylon.Example.Terrain (ChunkWithMesh, Terrain(..), emptyTerrain, globalPositionToGlobalIndex, insertChunk, lookupBlock)
+import Graphics.Babylon.Example.Terrain (ChunkWithMesh(..), Terrain, disposeChunk, emptyTerrain, globalIndexToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.FreeCamera (attachControl, setTarget, setCheckCollisions, createFreeCamera)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
-import Graphics.Babylon.Material (setFogEnabled, setZOffset, setWireframe)
+import Graphics.Babylon.Material (Material, setFogEnabled, setWireframe, setZOffset)
 import Graphics.Babylon.Mesh (meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId, createBox, setReceiveShadows, createMesh, setPosition, createSphere)
 import Graphics.Babylon.Node (getName)
 import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
@@ -49,9 +51,9 @@ import Graphics.Babylon.Scene (render, pick, setWorkerCollisions, setCollisionsE
 import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList, getRenderList, getShadowMap, createShadowGenerator, setBias)
 import Graphics.Babylon.StandardMaterial (StandardMaterial, setDiffuseTexture, createStandardMaterial, setSpecularColor, standardMaterialToMaterial, setReflectionTexture, setDiffuseColor, setDisableLighting, setBackFaceCulling)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
-import Graphics.Babylon.Types (Scene)
+import Graphics.Babylon.Types (Mesh, Scene)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
-import Graphics.Babylon.VertexData (createVertexData, applyToMesh)
+import Graphics.Babylon.VertexData (VertexData, VertexDataProps(..), applyToMesh, createVertexData)
 import Math (round)
 import Prelude (show, (#), ($), (+), (-), (/=), (<), (<$>), (<>), (=<<), (==))
 import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), OwnsWW, postMessageToWorker, mkWorker)
@@ -59,42 +61,67 @@ import WebWorker (WebWorker, onmessageFromWorker, MessageEvent(MessageEvent), Ow
 shadowMapSize :: Int
 shadowMapSize = 4096
 
-data Mode = Put | Remove
+data Mode = Move | Put | Remove
 
 newtype State = State {
     mode :: Mode,
-    chunks :: Terrain,
+    terrain :: Terrain,
     mousePosition :: { x :: Int, y :: Int }
 }
 
-generateChunkAff :: forall eff. Ref State -> WebWorker -> StandardMaterial -> StandardMaterial -> Int -> Int -> Int -> Scene -> RenderList -> Aff (now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
-generateChunkAff ref ww boxMat waterBoxMat cx cy cz scene renderList = makeAff \reject resolve -> do
+type Materials = {
+    boxMat :: StandardMaterial,
+    waterBoxMat :: StandardMaterial
+}
+
+generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> StandardMaterial -> Scene -> RenderList -> Eff (babylon :: BABYLON | eff) Mesh
+generateMesh (ChunkIndex cx cy cz) verts mat scene renderList = do
+    terrainMesh <- createMesh "terrain" scene
+    applyToMesh terrainMesh false =<< createVertexData (verts)
+    setRenderingGroupId 1 terrainMesh
+    pushToRenderList terrainMesh renderList
+    when (abs cx + abs cz < 1) do
+        setReceiveShadows true terrainMesh
+    when (abs cx + abs cz < 3) do
+        AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+    setMaterial (standardMaterialToMaterial mat) terrainMesh
+    pure terrainMesh
+
+
+
+receiveChunk :: forall eff. Materials -> Scene -> RenderList -> Ref State
+             -> (Error -> Eff (ref :: REF, babylon :: BABYLON | eff) Unit)
+             -> ({ blocks :: Chunk, grassBlockMesh :: Mesh, waterBlockMesh :: Mesh} -> Eff (babylon :: BABYLON, ref :: REF | eff) Unit)
+             -> MessageEvent
+             -> Eff (ref :: REF, babylon :: BABYLON | eff) Unit
+receiveChunk materials scene renderList ref reject resolve (MessageEvent {data: fn}) = case runExcept $ read fn of
+    Left err -> reject $ EXCEPTION.error $ show err
+    Right (VertexDataPropsData verts@{ terrain: Chunk chunk }) -> do
+
+        State state <- readRef ref
+        case lookupChunk chunk.index state.terrain of
+            Nothing -> pure unit
+            Just chunkData -> disposeChunk chunkData
+
+        let index = chunk.index
+        grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene renderList
+        waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene renderList
+        resolve { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+
+generateChunkAff :: forall eff. Ref State -> WebWorker -> Materials -> ChunkIndex -> Scene -> RenderList -> Aff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
+generateChunkAff ref ww materials index@(ChunkIndex cx cy cz) scene renderList = makeAff \reject resolve -> do
     start <- now
     log ("Generating chunk..." <> show cx <> ", " <> show cy <> ", " <> show cz)
     let seed = 0
     postMessageToWorker ww $ write $ GenerateTerrain (ChunkIndex cx cy cz) seed
-    onmessageFromWorker ww \(MessageEvent {data: fn}) -> case runExcept $ read fn of
-        Left err -> reject $ EXCEPTION.error $ show err
-        Right (VertexDataPropsData verts) -> do
-            grassBlockMesh <- generateMesh verts.grassBlocks boxMat
-            waterBlockMesh <- generateMesh verts.waterBlocks waterBoxMat
-            end <- now
-            log ("Completed! time: " <> show (unInstant end - unInstant start) <> " msec.")
-            resolve { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+    onmessageFromWorker ww $ receiveChunk materials scene renderList ref reject resolve
 
-  where
-    generateMesh verts mat = do
-        terrainMesh <- createMesh "terrain" scene
-        applyToMesh terrainMesh false =<< createVertexData (verts)
-        setRenderingGroupId 1 terrainMesh
-        pushToRenderList terrainMesh renderList
-        when (abs cx + abs cz < 1) do
-            setReceiveShadows true terrainMesh
-        when (abs cx + abs cz < 3) do
-            AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
-        setMaterial (standardMaterialToMaterial mat) terrainMesh
-        pure terrainMesh
 
+regenerateChunkAff :: forall eff. Ref State -> WebWorker -> Materials -> ChunkWithMesh -> Scene -> RenderList -> Aff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
+regenerateChunkAff ref ww materials chunkWithMesh scene renderList = makeAff \reject resolve -> do
+    let seed = 0
+    postMessageToWorker ww $ write $ RegenerateTerrain chunkWithMesh.blocks
+    onmessageFromWorker ww $ receiveChunk materials scene renderList ref reject resolve
 
 main :: forall eff. Eff (now :: NOW, console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW, ref :: REF | eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -187,8 +214,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
 
         ref <- newRef $ State {
-            mode: Put,
-            chunks: emptyTerrain,
+            mode: Move,
+            terrain: emptyTerrain,
             mousePosition: { x: 0, y: 0 }
         }
 
@@ -199,6 +226,9 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                     y: e.offsetY
                 }
             }
+
+        onButtonClick "move" do
+            modifyRef ref (\(State state) -> State state { mode = Move })
 
         onButtonClick "add" do
             modifyRef ref (\(State state) -> State state { mode = Put })
@@ -223,7 +253,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         let dy = abs (p.y - round p.y)
                         let dz = abs (p.z - round p.z)
                         let minDelta = min dx (min dy dz)
-                        let lookupBlock' x y z = lookupBlock { x, y, z } state.chunks
+                        let lookupBlock' x y z = lookupBlock { x, y, z } state.terrain
 
                         let putCursor (BlockIndex x y z) = do
                                 r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
@@ -262,31 +292,14 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                                                 Nothing, Just block -> pure $ Just $ globalPositionToGlobalIndex p.x p.y (p.z - 0.5)
                                                 _, _ -> pure Nothing
 
+                            Move -> pure Nothing
+
                 if getHit pickingInfo then pickup else pure Nothing
 
 
-{-}
-        onMouseClick \e -> do
 
-            State state <- readRef ref
 
-            picked <- pickBlock state state.mousePosition.x state.mousePosition.y
-            case picked of
-                Nothing -> pure unit
-                Just index@(BlockIndex x y z) -> do
-                    let chunkIndex = globalIndexToChunkIndex index
-                    case lookup chunkIndex state.chunks of
-                        Nothing -> pure unit
-                        Just chunk@{ index, blocks: Chunk map } -> do
-                            let chunk' = chunk {
-                                    blocks = Chunk { index, map: insert index GrassBlock map }
-                                }
 
-                            writeRef ref $ State state {
-                                chunks = insert chunkIndex chunk' state.chunks
-                            }
-
--}
 
 
 
@@ -307,6 +320,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         EXCEPTION.catchException errorShow $ void do
             ww <- mkWorker "worker.js"
 
+
+
             boxTex <- createTexture "grass-block.png" scene
             boxMat <- createStandardMaterial "grass-block" scene
             grassSpecular <- createColor3 0.0 0.0 0.0
@@ -318,7 +333,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             waterBoxMat <- createStandardMaterial "water-block" scene
             setDiffuseTexture waterBoxTex waterBoxMat
 
-            let range p = abs p.x + abs p.z
+            let range (ChunkIndex x y z) = abs x + abs z
 
             let size = 2
 
@@ -326,15 +341,46 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                     z <- negate size .. size
                     y <- negate 0 .. 0
                     x <- negate size .. size
-                    pure { x, y, z }
+                    pure (ChunkIndex x y z)
 
+
+            let materials = { boxMat, waterBoxMat }
             runAff errorShow pure do
-                for_ indices \{ x, y, z } -> do
-                    mesh <- generateChunkAff ref ww boxMat waterBoxMat x y z scene renderList
-
+                for_ indices \index -> do
+                    mesh <- generateChunkAff ref ww materials index scene renderList
                     liftEff $ modifyRef ref \(State state) -> State state {
-                        chunks = insertChunk mesh state.chunks
+                        terrain = insertChunk mesh state.terrain
                     }
+
+            onMouseClick \e -> do
+
+                State state <- readRef ref
+
+                picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
+                case picked of
+                    Nothing -> pure unit
+                    Just blockIndex -> do
+                        let chunkIndex = globalIndexToChunkIndex blockIndex
+                        case lookupChunk chunkIndex state.terrain of
+                            Nothing -> pure unit
+                            Just chunkData@{ blocks: Chunk { index, map } } -> do
+                                let chunk' = chunkData {
+                                        blocks = Chunk { index, map: case state.mode of
+                                            Put -> insert blockIndex GrassBlock map
+                                            Remove -> delete blockIndex map
+                                            Move -> map
+                                        }
+                                    }
+
+                                runAff errorShow pure do
+                                    mesh <- regenerateChunkAff ref ww materials chunk' scene renderList
+                                    liftEff $ writeRef ref $ State state {
+                                        terrain = insertChunk mesh state.terrain
+                                    }
+                                    pure unit
+
+                                pure unit
+
 
 
 foreign import onButtonClick :: forall eff. String -> Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
