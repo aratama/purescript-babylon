@@ -9,11 +9,12 @@ import Data.Foreign.Class (class AsForeign, class IsForeign, readProp, write)
 import Data.Generic (class Generic)
 import Data.Map (toUnfoldable)
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
-import Graphics.Babylon.VertexData (VertexDataProps(..))
 import Graphics.Babylon.Example.Chunk (Chunk(..), boxelMapToForeign, foreignToBoxelMap)
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
+import Graphics.Babylon.VertexData (VertexDataProps(..))
 
 -- TODO: pass seed and share block map without sending data
-data Command = GenerateTerrain BlockIndex Int
+data Command = GenerateTerrain ChunkIndex Int
              | RegenerateTerrain Chunk
 
 newtype TerrainVertexData = TerrainVertexData {
@@ -31,7 +32,7 @@ instance isForeign_GenerateTerrain :: IsForeign Command where
                 y <- readProp "y" value
                 z <- readProp "z" value
                 seed <- readProp "seed" value
-                pure (GenerateTerrain (BlockIndex x y z) seed)
+                pure (GenerateTerrain (ChunkIndex x y z) seed)
 
             "RegenerateTerrain" -> do
                 map <- readProp "blocks" value
@@ -41,7 +42,7 @@ instance isForeign_GenerateTerrain :: IsForeign Command where
 
 instance asForeign_Command :: AsForeign Command where
     write = case _ of
-        (GenerateTerrain (BlockIndex x y z) seed) -> toForeign {
+        (GenerateTerrain (ChunkIndex x y z) seed) -> toForeign {
             command: "GenerateTerrain",
             x,
             y,

@@ -20,11 +20,10 @@ import Data.Ring (negate)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
-
-
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
-import Prelude (class Eq, class Show, pure, (#), ($), (&&), (*), (+), (-), (<), (<$>), (<*>), (==), (>>=))
+import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>))
 
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
 import Graphics.Babylon.Example.Vec (vec)
@@ -35,8 +34,8 @@ import Graphics.Babylon.Example.BlockType (BlockType(..))
 chunkSize :: Int
 chunkSize = 16
 
-createBlockMap :: Int -> Int -> Int -> Int -> Chunk
-createBlockMap cx cy cz seed = pureST do
+createBlockMap :: ChunkIndex -> Int -> Chunk
+createBlockMap (ChunkIndex cx cy cz) seed = pureST do
 
     let noise = createNoise seed
 
@@ -57,7 +56,7 @@ createBlockMap cx cy cz seed = pureST do
                         _ -> GrassBlock
 
     pure $ Chunk {
-        index: BlockIndex cx cy cz,
+        index: ChunkIndex cx cy cz,
         map: fromFoldable (join (join blocks))
     }
 

@@ -7,12 +7,13 @@ import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
 import Data.Map (Map, fromFoldable, mapWithKey, values)
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Prelude (class Eq, pure, ($), (&&), (==), (>>=))
 
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
 import Graphics.Babylon.Example.BlockType (BlockType)
 
-newtype Chunk = Chunk { index :: BlockIndex, map :: Map BlockIndex BlockType }
+newtype Chunk = Chunk { index :: ChunkIndex, map :: Map BlockIndex BlockType }
 
 instance eq_TerrainMap :: Eq Chunk where
     eq (Chunk a) (Chunk b) = a.index == b.index && a.map == b.map
