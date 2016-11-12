@@ -2,7 +2,6 @@ module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, g
 
 import Control.Alternative (pure)
 import Control.Bind (bind)
-import Control.Monad (when)
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
@@ -14,22 +13,18 @@ import Control.Monad.Except (runExcept)
 import Data.Either (Either(..))
 import Data.Foreign.Class (write, read)
 import Data.Maybe (Maybe(Just, Nothing))
-import Data.Ord (abs)
 import Data.Unit (Unit, unit)
-import Prelude (show, ($), (+), (<), (=<<))
+import Prelude (show, ($), (=<<))
 import WebWorker (MessageEvent(MessageEvent), OwnsWW, WebWorker, onmessageFromWorker, postMessageToWorker)
 
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.AbstractMesh (setCheckCollisions) as AbstractMesh
-import Graphics.Babylon.Mesh (createMesh, meshToAbstractMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
-import Graphics.Babylon.ShadowGenerator (RenderList, pushToRenderList)
+import Graphics.Babylon.Mesh (createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
 import Graphics.Babylon.StandardMaterial (StandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Types (Mesh, Scene)
 import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexData)
-
 import Graphics.Babylon.Example.Types (Materials, State(State))
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex)
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, runChunkIndex)
 import Graphics.Babylon.Example.Generation (createBlockMap, createTerrainGeometry)
 import Graphics.Babylon.Example.Message (Command(..))
 import Graphics.Babylon.Example.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
@@ -48,7 +43,6 @@ generateMesh index verts mat scene = do
     applyToMesh terrainMesh false =<< createVertexData (verts)
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
-
     setMaterial (standardMaterialToMaterial mat) terrainMesh
     pure terrainMesh
 

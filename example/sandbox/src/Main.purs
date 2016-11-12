@@ -12,7 +12,7 @@ import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (catchException) as EXCEPTION
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import DOM (DOM)
-import Data.Array (catMaybes, filterM, head, length, sortBy, (..))
+import Data.Array (catMaybes, head, sortBy, (..))
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
 import Data.Maybe (Maybe(..))
@@ -21,7 +21,6 @@ import Data.Ord (abs, compare, min)
 import Data.Ring (negate)
 import Data.Show (show)
 import Data.ShowMap (delete, insert)
-import Data.Traversable (for)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable, setCheckCollisions) as AbstractMesh
@@ -32,16 +31,16 @@ import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Block (Block(..))
-import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
-import Graphics.Babylon.Example.BlockType (grassBlock, waterBlock)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, runBlockIndex)
+import Graphics.Babylon.Example.BlockType (grassBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, addChunkIndex, chunkIndex, chunkIndexRange, runChunkIndex)
-import Graphics.Babylon.Example.Generation (chunkSize, createBlockMap, createTerrainGeometry)
-import Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh)
+import Graphics.Babylon.Example.ChunkIndex (addChunkIndex, chunkIndex, chunkIndexRange, runChunkIndex)
+import Graphics.Babylon.Example.Generation (createBlockMap, createTerrainGeometry)
+import Graphics.Babylon.Example.Request (generateMesh, regenerateChunkAff)
 import Graphics.Babylon.Example.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, setCheckCollisions, setTarget)
+import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setCheckCollisions, setTarget)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
@@ -51,6 +50,7 @@ import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart, setGravity, setWorkerCollisions)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
+import Graphics.Babylon.TargetCamera (setSpeed)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Math (round)
@@ -88,8 +88,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             setFogColor fogColor sce
             gravity <- createVector3 0.0 (negate 0.981) 0.0
             setGravity gravity sce
-            setCollisionsEnabled true sce
-            setWorkerCollisions true sce
+            --setCollisionsEnabled true sce
+            --setWorkerCollisions true sce
             pure sce
 
         when enableDebugLayer do
@@ -110,6 +110,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             -- attach the camera to the canvas
             attachControl canvas false cam
 
+            setSpeed 0.3 (freeCameraToTargetCamera cam)
+
             pure cam
 
         do
@@ -127,6 +129,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             -- shadow
             shadowGenerator <- createShadowGenerator shadowMapSize light
+            --setBias 0.000005 shadowGenerator
             setBias 0.000005 shadowGenerator
             getShadowMap shadowGenerator
 
@@ -272,28 +275,34 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             State state <- readRef ref
 
-            -- picking
-            picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
-            case picked of
-                Nothing -> pure unit
-                Just bi -> do
-                    let rbi = runBlockIndex bi
-                    r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
-                    setPosition r cursor
-
-            -- update shadow rendering list
             cameraPosition <- getPosition (freeCameraToCamera camera) >>= runVector3
             let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
-            let chunks = do
-                    let ci = runChunkIndex cameraPositionChunkIndex
-                    dx <- negate 2 .. 2
-                    dy <- negate 2 .. 2
-                    dz <- negate 2 .. 2
-                    case lookupChunk (chunkIndex (ci.x + dx) (ci.y + dy) (ci.z + dz)) state.terrain of
-                        Nothing -> []
-                        Just chunk -> [meshToAbstractMesh chunk.grassBlockMesh,  meshToAbstractMesh chunk.waterBlockMesh]
 
-            setRenderList (chunks <> [meshToAbstractMesh sphere]) shadowMap
+            -- picking
+            do
+                case state.mode of
+                    Move -> pure unit
+                    _ -> do
+                        picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
+                        case picked of
+                            Nothing -> pure unit
+                            Just bi -> do
+                                let rbi = runBlockIndex bi
+                                r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
+                                setPosition r cursor
+
+            -- update shadow rendering list
+            do
+                let chunks = do
+                        let ci = runChunkIndex cameraPositionChunkIndex
+                        dx <- negate 1 .. 1
+                        dy <- negate 0 .. 0
+                        dz <- negate 1 .. 1
+                        case lookupChunk (chunkIndex (ci.x + dx) (ci.y + dy) (ci.z + dz)) state.terrain of
+                            Nothing -> []
+                            Just chunk -> [meshToAbstractMesh chunk.grassBlockMesh,  meshToAbstractMesh chunk.waterBlockMesh]
+
+                setRenderList (chunks <> [meshToAbstractMesh sphere]) shadowMap
 
 
 
@@ -319,7 +328,6 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         let boxMap = createBlockMap index 0
                         case createTerrainGeometry boxMap of
                             VertexDataPropsData verts -> void do
-                                State state <- readRef ref
                                 case lookupChunk index state.terrain of
                                     Nothing -> pure unit
                                     Just chunkData -> disposeChunk chunkData
@@ -334,12 +342,14 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
 
             -- set collesion
+            {-}
             do
-                for_ (getChunkMap state.terrain) \(dat@{ blocks: Chunk chunk }) -> do
+                State st <- readRef ref
+                for_ (getChunkMap st.terrain) \(dat@{ blocks: Chunk chunk }) -> do
                     let r = chunkIndexRange chunk.index cameraPositionChunkIndex
                     AbstractMesh.setCheckCollisions (r <= 1) (meshToAbstractMesh dat.grassBlockMesh)
                     AbstractMesh.setCheckCollisions (r <= 1) (meshToAbstractMesh dat.waterBlockMesh)
-
+-}
 
             render scene
 
