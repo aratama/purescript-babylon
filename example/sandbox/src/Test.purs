@@ -2,23 +2,19 @@ module Graphics.Babylon.Test where
 
 import Control.Bind (bind)
 import Control.Monad (join)
-import Control.Monad.Except (runExcept)
 import Data.Array (length)
-import Data.Either (Either(..))
 import Data.Foldable (all)
-import Data.Foreign.Class (read, write)
 import Data.Int (toNumber, floor)
 import Data.List ((..))
-import Data.Show (show)
-import Data.ShowMap (ShowMap(..), fromFoldable)
+import Data.ShowMap (ShowMap, fromFoldable)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Example.Block (Block(..))
 import Graphics.Babylon.Example.BlockIndex (blockIndex, BlockIndex)
-import Graphics.Babylon.Example.BlockType (BlockType(..), grassBlock)
+import Graphics.Babylon.Example.BlockType (grassBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex)
 import Graphics.Babylon.Example.Generation (createTerrainGeometry)
 import Graphics.Babylon.Example.Terrain (globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex)
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
@@ -26,8 +22,6 @@ import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
 import Prelude (div, negate, pure, ($), (*), (+), (<), (<#>))
 import Test.StrongCheck (SC, assert, assertEq, quickCheck)
-
-chunkIndex x y z = ChunkIndex { x, y, z }
 
 main :: SC (babylon :: BABYLON) Unit
 main = do

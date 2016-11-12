@@ -12,18 +12,19 @@ import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (catchException) as EXCEPTION
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import DOM (DOM)
-import Data.Array (sortBy, (..), length)
+import Data.Array (catMaybes, filterM, head, length, sortBy, (..))
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
-import Data.Maybe (Maybe(Just, Nothing))
+import Data.Maybe (Maybe(..))
 import Data.Nullable (toMaybe)
 import Data.Ord (abs, compare, min)
 import Data.Ring (negate)
 import Data.Show (show)
 import Data.ShowMap (delete, insert)
+import Data.Traversable (for)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
-import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable, setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Camera (getPosition)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
@@ -31,13 +32,15 @@ import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Block (Block(..))
-import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runIndex3D)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
 import Graphics.Babylon.Example.BlockType (grassBlock, waterBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..), runChunkIndex)
-import Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff)
-import Graphics.Babylon.Example.Terrain (chunkCount, emptyTerrain, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, addChunkIndex, chunkIndex, chunkIndexRange, runChunkIndex)
+import Graphics.Babylon.Example.Generation (chunkSize, createBlockMap, createTerrainGeometry)
+import Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh)
+import Graphics.Babylon.Example.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
+import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, setCheckCollisions, setTarget)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
@@ -51,8 +54,9 @@ import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCul
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Math (round)
-import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>))
+import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>), (<=))
 import WebWorker (mkWorker)
+
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -60,7 +64,11 @@ shadowMapSize = 4096
 enableDebugLayer :: Boolean
 enableDebugLayer = true
 
+loadDistance :: Int
+loadDistance = 2
 
+unloadDistance :: Int
+unloadDistance = 8
 
 main :: forall eff. Eff (Effects eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -202,7 +210,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         let lookupBlock' x y z = lookupBlock { x, y, z } state.terrain
 
                         let putCursor bi = do
-                                let rbi = runIndex3D bi
+                                let rbi = runBlockIndex bi
                                 r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
                                 setPosition r cursor
 
@@ -243,7 +251,22 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
                 if getHit pickingInfo then pickup else pure Nothing
 
+        -- prepare materials
+        materials <- do
+            boxTex <- createTexture "grass-block.png" scene
+            boxMat <- createStandardMaterial "grass-block" scene
+            grassSpecular <- createColor3 0.0 0.0 0.0
+            setSpecularColor grassSpecular boxMat
+            -- setSpecularPower 0.0 boxMat
+            setDiffuseTexture boxTex boxMat
 
+            waterBoxTex <- createTexture "water-block.png" scene
+            waterBoxMat <- createStandardMaterial "water-block" scene
+            setDiffuseTexture waterBoxTex waterBoxMat
+
+            pure { boxMat, waterBoxMat }
+
+        let range index = let ci = runChunkIndex index in abs ci.x + abs ci.z
 
         engine # runRenderLoop do
 
@@ -254,22 +277,68 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             case picked of
                 Nothing -> pure unit
                 Just bi -> do
-                    let rbi = runIndex3D bi
+                    let rbi = runBlockIndex bi
                     r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
                     setPosition r cursor
 
             -- update shadow rendering list
             cameraPosition <- getPosition (freeCameraToCamera camera) >>= runVector3
-            let chunkIndex = runChunkIndex (globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z)
+            let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
             let chunks = do
+                    let ci = runChunkIndex cameraPositionChunkIndex
                     dx <- negate 2 .. 2
                     dy <- negate 2 .. 2
                     dz <- negate 2 .. 2
-                    case lookupChunk (ChunkIndex { x: chunkIndex.x + dx, y: chunkIndex.y + dy, z: chunkIndex.z + dz }) state.terrain of
+                    case lookupChunk (chunkIndex (ci.x + dx) (ci.y + dy) (ci.z + dz)) state.terrain of
                         Nothing -> []
                         Just chunk -> [meshToAbstractMesh chunk.grassBlockMesh,  meshToAbstractMesh chunk.waterBlockMesh]
 
             setRenderList (chunks <> [meshToAbstractMesh sphere]) shadowMap
+
+
+
+
+
+
+
+            -- load chunk
+            do
+                let indices = sortBy (\p q -> compare (range p) (range q)) do
+                        z <- negate loadDistance .. loadDistance
+                        y <- negate 1 .. 1
+                        x <- negate loadDistance .. loadDistance
+                        pure (chunkIndex x y z)
+
+                let indices' =  (\i -> let gi = addChunkIndex cameraPositionChunkIndex i in case lookupChunk gi state.terrain of
+                                        Nothing -> pure gi
+                                        Just _ -> Nothing) <$> indices
+
+                case head (catMaybes indices') of
+                    Nothing -> pure unit
+                    Just index -> do
+                        let boxMap = createBlockMap index 0
+                        case createTerrainGeometry boxMap of
+                            VertexDataPropsData verts -> void do
+                                State state <- readRef ref
+                                case lookupChunk index state.terrain of
+                                    Nothing -> pure unit
+                                    Just chunkData -> disposeChunk chunkData
+                                grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
+                                waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
+                                let result = { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+                                modifyRef ref \(State state) -> State state {
+                                    terrain = insertChunk result state.terrain
+                                }
+                                log $ "load chunk: " <> show index
+                                log $ "total chunks:" <> show (chunkCount state.terrain + 1)
+
+
+            -- set collesion
+            do
+                for_ (getChunkMap state.terrain) \(dat@{ blocks: Chunk chunk }) -> do
+                    let r = chunkIndexRange chunk.index cameraPositionChunkIndex
+                    AbstractMesh.setCheckCollisions (r <= 1) (meshToAbstractMesh dat.grassBlockMesh)
+                    AbstractMesh.setCheckCollisions (r <= 1) (meshToAbstractMesh dat.waterBlockMesh)
 
 
             render scene
@@ -279,29 +348,21 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         EXCEPTION.catchException errorShow $ void do
             ww <- mkWorker "worker.js"
 
-            materials <- do
-                boxTex <- createTexture "grass-block.png" scene
-                boxMat <- createStandardMaterial "grass-block" scene
-                grassSpecular <- createColor3 0.0 0.0 0.0
-                setSpecularColor grassSpecular boxMat
-                -- setSpecularPower 0.0 boxMat
-                setDiffuseTexture boxTex boxMat
 
-                waterBoxTex <- createTexture "water-block.png" scene
-                waterBoxMat <- createStandardMaterial "water-block" scene
-                setDiffuseTexture waterBoxTex waterBoxMat
 
-                pure { boxMat, waterBoxMat }
 
-            let range (ChunkIndex { x, y, z }) = abs x + abs z
 
             let size = 3
+
+
+
+{-}
 
             let indices = sortBy (\p q -> compare (range p) (range q)) do
                     z <- negate size .. size
                     y <- negate 0 .. 0
                     x <- negate size .. size
-                    pure (ChunkIndex { x, y, z })
+                    pure (chunkIndex x y z)
 
             runAff errorShow pure do
                 for_ indices \index -> do
@@ -314,7 +375,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         }
 
                     wait
-
+-}
             onMouseClick \e -> do
 
                 State state <- readRef ref

@@ -1,4 +1,4 @@
-module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff) where
+module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh) where
 
 import Control.Alternative (pure)
 import Control.Bind (bind)
@@ -29,7 +29,7 @@ import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexDa
 
 import Graphics.Babylon.Example.Types (Materials, State(State))
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex)
 import Graphics.Babylon.Example.Generation (createBlockMap, createTerrainGeometry)
 import Graphics.Babylon.Example.Message (Command(..))
 import Graphics.Babylon.Example.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
@@ -39,13 +39,16 @@ enableWorker :: Boolean
 enableWorker = false
 
 generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> StandardMaterial -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
-generateMesh (ChunkIndex { x: cx, y: cy, z: cz }) verts mat scene = do
+generateMesh index verts mat scene = do
+    let rci = runChunkIndex index
+    let cx = rci.x
+    let cy = rci.y
+    let cz = rci.z
     terrainMesh <- createMesh "terrain" scene
     applyToMesh terrainMesh false =<< createVertexData (verts)
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
-    when (abs cx + abs cz < 3) do
-        AbstractMesh.setCheckCollisions true (meshToAbstractMesh terrainMesh)
+
     setMaterial (standardMaterialToMaterial mat) terrainMesh
     pure terrainMesh
 

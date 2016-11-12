@@ -1,17 +1,35 @@
-module Graphics.Babylon.Example.ChunkIndex where
+module Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex, addChunkIndex, chunkIndexRange) where
 
+import Control.Alt (alt)
 import Control.Alternative (pure)
 import Control.Bind (bind)
 import Data.Foreign (toForeign)
-import Data.Foreign.Class (class AsForeign, class IsForeign, readProp)
+import Data.Foreign.Class (class AsForeign, class IsForeign, read, readProp, write)
 import Data.Generic (class Generic, gCompare, gEq)
-import Data.Ord (class Ord)
-import Prelude (class Eq, class Show, show, (<>))
+import Data.Ord (class Ord, abs)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
+import Prelude (class Eq, class Show, show, (<>), (<$>), (+), (-))
 
-data ChunkIndex = ChunkIndex { x :: Int, y :: Int, z :: Int }
+newtype ChunkIndex = ChunkIndex BlockIndex
+
+chunkIndex :: Int -> Int -> Int -> ChunkIndex
+chunkIndex x y z = ChunkIndex (blockIndex x y z)
 
 runChunkIndex :: ChunkIndex -> { x :: Int, y :: Int, z :: Int }
-runChunkIndex (ChunkIndex xyz) = xyz
+runChunkIndex (ChunkIndex xyz) = runBlockIndex xyz
+
+chunkIndexRange :: ChunkIndex -> ChunkIndex -> Int
+chunkIndexRange (ChunkIndex a) (ChunkIndex b) = abs (i.x - k.x) + abs (i.y - k.y) + abs (i.z - k.z)
+  where
+    i = runBlockIndex a
+    k = runBlockIndex b
+
+addChunkIndex :: ChunkIndex -> ChunkIndex -> ChunkIndex
+addChunkIndex (ChunkIndex a) (ChunkIndex b) = chunkIndex (i.x + k.x) (i.y + k.y) (i.z + k.z)
+  where
+    i = runBlockIndex a
+    k = runBlockIndex b
+
 
 derive instance generic_ChunkIndex :: Generic ChunkIndex
 
@@ -22,16 +40,12 @@ instance ord_ChunkIndex :: Ord ChunkIndex where
     compare = gCompare
 
 instance show_Show :: Show ChunkIndex where
-    show (ChunkIndex i) = show i.x <> "," <> show i.y <> "," <> show i.z
+    show (ChunkIndex i) = show i
 
 instance isForeign_ChunkIndex :: IsForeign ChunkIndex where
-    read value = do
-        x <- readProp "x" value
-        y <- readProp "y" value
-        z <- readProp "z" value
-        pure (ChunkIndex { x, y, z })
+    read value = ChunkIndex <$> read value
 
 instance asForeign_ChunkIndex :: AsForeign ChunkIndex where
-    write = toForeign
+    write (ChunkIndex i) = write i
 
 

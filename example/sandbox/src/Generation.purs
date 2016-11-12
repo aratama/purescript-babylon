@@ -15,8 +15,8 @@ import Data.ShowMap (fromStrMap, fromFoldable, member, toList)
 import Data.Traversable (for, for_)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
-import Graphics.Babylon.Example.BlockIndex (runIndex3D)
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
+import Graphics.Babylon.Example.BlockIndex (runBlockIndex)
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, runChunkIndex)
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
 import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>), (==), (<=))
@@ -44,7 +44,12 @@ waterBlockHeight :: Int
 waterBlockHeight = 3
 
 createBlockMap :: ChunkIndex -> Int -> Chunk
-createBlockMap index@(ChunkIndex { x: cx, y: cy, z: cz }) seed = pureST do
+createBlockMap index seed = pureST do
+
+    let rci = runChunkIndex index
+    let cx = rci.x
+    let cy = rci.y
+    let cz = rci.z
 
     let noise = createNoise seed
 
@@ -98,7 +103,7 @@ createTerrainGeometry (Chunk terrain) = pureST do
         Nil -> pure (Done 0)
         Cons (Tuple _ (Block block)) tail -> do
 
-            let bi = runIndex3D block.index
+            let bi = runBlockIndex block.index
             let ix = bi.x
             let iy = bi.y
             let iz = bi.z
