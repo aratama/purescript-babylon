@@ -23,3 +23,13 @@ exports.onButtonClick = function(id){
         }
     }
 }
+
+exports._wait = function(reject){
+    return function(resolve){
+        return function(){
+            setTimeout(function(){
+                resolve({})();
+            }, 0);
+        }
+    }
+}

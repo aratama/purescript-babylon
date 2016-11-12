@@ -1,9 +1,9 @@
 
 # purescript-babylon
 
-Gates of Babylon (http://www.babylonjs.com/) for PureScript.
+Gates of Babylonjs (http://www.babylonjs.com/) for PureScript.
 
-![screenshot](https://rawgit.com/aratama/purescript-babylon/master/docs/screenshot.png)
+![screenshot](https://rawgit.com/aratama/purescript-babylon/master/docs/screenshot2.png)
 
 Experimental. Far remove from completion of the API.
 
@@ -11,7 +11,7 @@ Experimental. Far remove from completion of the API.
 
 ```
 $ psc --version
-0.10.1
+0.10.2
 $ npm install
 $ bower update
 $ npm run build

@@ -4,10 +4,11 @@ import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
 import Control.Monad (when)
-import Control.Monad.Aff (runAff)
+import Control.Monad.Aff (Aff, makeAff, runAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE, error, errorShow)
+import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (catchException) as EXCEPTION
 import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
@@ -287,6 +288,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                     liftEff $ modifyRef ref \(State state) -> State state {
                         terrain = insertChunk chunk state.terrain
                     }
+                    wait
 
             onMouseClick \e -> do
 
@@ -321,3 +323,8 @@ foreign import onButtonClick :: forall eff. String -> Eff (dom :: DOM | eff) Uni
 foreign import onMouseMove :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit
 
 foreign import onMouseClick :: forall eff. ({ offsetX :: Int, offsetY :: Int } -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit
+
+wait :: forall eff. Aff (dom :: DOM | eff) Unit
+wait = makeAff \reject resolve -> _wait reject resolve
+
+foreign import _wait :: forall eff. (Error -> Eff (dom :: DOM | eff) Unit) -> (Unit -> Eff (dom :: DOM | eff) Unit) -> Eff (dom :: DOM | eff) Unit

@@ -1,15 +1,12 @@
 module Data.ShowMap (ShowMap, lookup, member, insert, delete, fromFoldable, toList, empty) where
 
-import Control.Alt (alt)
 import Data.Foldable (class Foldable, foldMap, foldl, foldr)
 import Data.List (List)
-import Data.Map (lookup)
 import Data.Maybe (Maybe)
 import Data.Monoid (class Monoid, mempty)
 import Data.Semigroup (class Semigroup, append)
-import Data.Semiring (class Semiring)
 import Data.Show (class Show, show)
-import Data.StrMap (StrMap, lookup, member, insert, delete, fromFoldable, toList, empty) as StrMap
+import Data.StrMap (StrMap, delete, empty, insert, lookup, member, toList) as StrMap
 import Data.Tuple (Tuple(..))
 
 newtype ShowMap k a = ShowMap (StrMap.StrMap a)
@@ -22,8 +19,8 @@ instance monoid_ShowMap :: (Monoid a) => Monoid (ShowMap k a) where
 
 instance foldable_ShowMap :: Foldable (ShowMap k) where
     foldMap f (ShowMap m) = foldMap f m
-    foldl f b (ShowMap m) = foldl f b m
-    foldr f b (ShowMap m) = foldr f b m
+    foldl f a (ShowMap m) = foldl f a m
+    foldr f a (ShowMap m) = foldr f a m
 
 lookup :: forall k a. (Show k) => k -> ShowMap k a -> Maybe a
 lookup k (ShowMap m) = StrMap.lookup (show k) m
