@@ -4,7 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.DirectionalLight (DirectionalLight)
-import Graphics.Babylon.Types (Mesh)
+import Graphics.Babylon.Types (AbstractMesh, Mesh)
 
 
 
@@ -21,5 +21,7 @@ foreign import getShadowMap :: forall eff. ShadowGenerator -> Eff (babylon :: BA
 foreign import getRenderList :: forall eff. ShadowMap -> Eff (babylon :: BABYLON | eff) RenderList
 
 foreign import pushToRenderList :: forall eff. Mesh -> RenderList -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setRenderList :: forall eff. Array AbstractMesh -> ShadowMap -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setBias  :: forall eff. Number -> ShadowGenerator -> Eff (babylon :: BABYLON | eff) Unit

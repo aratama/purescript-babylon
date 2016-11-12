@@ -31,6 +31,14 @@ exports.pushToRenderList = function(mesh){
     }
 }
 
+exports.setRenderList = function(renderList){
+    return function(shadowMap){
+        return function(){
+            shadowMap.renderList = renderList.slice();
+        }
+    }
+}
+
 exports.setBias = function(bias){
     return function(generator){
         return function(){

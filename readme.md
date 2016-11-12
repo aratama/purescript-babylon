@@ -5,7 +5,7 @@ Gates of Babylonjs (http://www.babylonjs.com/) for PureScript.
 
 ![screenshot](https://rawgit.com/aratama/purescript-babylon/master/docs/screenshot2.png)
 
-Experimental. Far remove from completion of the API.
+Experimental. Far from complete APIs.
 
 ## build
 

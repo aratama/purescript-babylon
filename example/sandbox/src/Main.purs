@@ -3,14 +3,14 @@ module Main (main) where
 import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
-import Control.Monad (when)
+import Control.Comonad.Store (store)
+import Control.Monad (join, when)
 import Control.Monad.Aff (Aff, makeAff, runAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (CONSOLE, error, errorShow)
+import Control.Monad.Eff.Console (error, errorShow)
 import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (catchException) as EXCEPTION
-import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import DOM (DOM)
 import Data.Array (sortBy, (..))
@@ -24,6 +24,7 @@ import Data.ShowMap (delete, insert)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable) as AbstractMesh
+import Graphics.Babylon.Camera (getPosition)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DebugLayer (show) as DebugLayer
@@ -33,11 +34,11 @@ import Graphics.Babylon.Example.Block (Block(..))
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(BlockIndex))
 import Graphics.Babylon.Example.BlockType (grassBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
+import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..), runChunkIndex)
 import Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff)
-import Graphics.Babylon.Example.Terrain (emptyTerrain, globalIndexToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.Terrain (emptyTerrain, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
-import Graphics.Babylon.FreeCamera (attachControl, setTarget, setCheckCollisions, createFreeCamera)
+import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, setCheckCollisions, setTarget)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
@@ -45,19 +46,21 @@ import Graphics.Babylon.Mesh (createBox, createSphere, meshToAbstractMesh, setIn
 import Graphics.Babylon.Node (getName)
 import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart, setGravity, setWorkerCollisions)
-import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getRenderList, getShadowMap, pushToRenderList, setBias)
+import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
+import Graphics.Babylon.Test (chunkIndex)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
+import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Math (round)
-import Prelude (show, (#), ($), (+), (-), (/=), (<$>), (==))
-import WebWorker (OwnsWW, mkWorker)
+import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>))
+import WebWorker (mkWorker)
 
 shadowMapSize :: Int
 shadowMapSize = 4096
 
 enableDebugLayer :: Boolean
-enableDebugLayer = false
+enableDebugLayer = true
 
 main :: forall eff. Eff (Effects eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -99,13 +102,15 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             -- attach the camera to the canvas
             attachControl canvas false cam
 
+            pure cam
+
         do
             hemiPosition <- createVector3 0.0 1.0 0.0
             hemiLight <- createHemisphericLight "Hemi0" hemiPosition scene
             diffuse <- createColor3 0.6 0.6 0.6
             setDiffuse diffuse (hemisphericLightToLight hemiLight)
 
-        renderList <- do
+        shadowMap <- do
             -- create a basic light, aiming 0,1,0 - meaning, to the sky
             lightDirection <- createVector3 (negate 0.4) (negate 0.8) (negate 0.4)
             light <- createDirectionalLight "light1" lightDirection scene
@@ -115,7 +120,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             -- shadow
             shadowGenerator <- createShadowGenerator shadowMapSize light
             setBias 0.000005 shadowGenerator
-            getShadowMap shadowGenerator >>= getRenderList
+            getShadowMap shadowGenerator
 
         cursor <- do
             cursorbox <- createBox "cursor" 1.0 scene
@@ -128,13 +133,12 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             setMaterial (standardMaterialToMaterial mat) cursorbox
             pure cursorbox
 
-        do
-            sphere <- createSphere "sphere" 16 2 scene
+        sphere <- do
+            s <- createSphere "sphere" 16 2 scene
             spherePosition <- createVector3 7.0 5.0 7.0
-            setPosition spherePosition sphere
-            pushToRenderList sphere renderList
-            setRenderingGroupId 1 sphere
-            pure sphere
+            setPosition spherePosition s
+            setRenderingGroupId 1 s
+            pure s
 
         -- skybox
         do
@@ -244,12 +248,27 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             State state <- readRef ref
 
+            -- picking
             picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
             case picked of
                 Nothing -> pure unit
                 Just (BlockIndex { x, y, z }) -> do
                     r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
                     setPosition r cursor
+
+            -- update shadow rendering list
+            cameraPosition <- getPosition (freeCameraToCamera camera) >>= runVector3
+            let chunkIndex = runChunkIndex (globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z)
+            let chunks = do
+                    dx <- negate 2 .. 2
+                    dy <- negate 2 .. 2
+                    dz <- negate 2 .. 2
+                    case lookupChunk (ChunkIndex { x: chunkIndex.x + dx, y: chunkIndex.y + dy, z: chunkIndex.z + dz }) state.terrain of
+                        Nothing -> []
+                        Just chunk -> [meshToAbstractMesh chunk.grassBlockMesh,  meshToAbstractMesh chunk.waterBlockMesh]
+
+            setRenderList (chunks <> [meshToAbstractMesh sphere]) shadowMap
+
 
             render scene
 
@@ -284,7 +303,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             runAff errorShow pure do
                 for_ indices \index -> do
-                    chunk <- generateChunkAff ref ww materials index scene renderList
+                    chunk <- generateChunkAff ref ww materials index scene
                     liftEff $ modifyRef ref \(State state) -> State state {
                         terrain = insertChunk chunk state.terrain
                     }
@@ -311,7 +330,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                                     }
 
                                 runAff errorShow pure $ void do
-                                    mesh <- regenerateChunkAff ref ww materials chunk' scene renderList
+                                    mesh <- regenerateChunkAff ref ww materials chunk' scene
                                     liftEff $ writeRef ref $ State state {
                                         terrain = insertChunk mesh state.terrain
                                     }

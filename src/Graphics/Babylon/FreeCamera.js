@@ -8,6 +8,10 @@ exports.createFreeCamera = function(id){
     }
 }
 
+exports.freeCameraToCamera = function(camera){
+    return camera;
+}
+
 exports.setTarget = function(position){
     return function(camera){
         return function(){
