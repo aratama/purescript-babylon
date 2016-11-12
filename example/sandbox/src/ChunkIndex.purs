@@ -8,10 +8,10 @@ import Data.Generic (class Generic, gCompare, gEq)
 import Data.Ord (class Ord)
 import Prelude (class Eq, class Show, show, (<>))
 
-data ChunkIndex = ChunkIndex Int Int Int
+data ChunkIndex = ChunkIndex { x :: Int, y :: Int, z :: Int }
 
 runChunkIndex :: ChunkIndex -> { x :: Int, y :: Int, z :: Int }
-runChunkIndex (ChunkIndex x y z) = { x, y, z }
+runChunkIndex (ChunkIndex xyz) = xyz
 
 derive instance generic_ChunkIndex :: Generic ChunkIndex
 
@@ -22,16 +22,16 @@ instance ord_ChunkIndex :: Ord ChunkIndex where
     compare = gCompare
 
 instance show_Show :: Show ChunkIndex where
-    show (ChunkIndex x y z) = show x <> "," <> show y <> "," <> show z
+    show (ChunkIndex i) = show i.x <> "," <> show i.y <> "," <> show i.z
 
 instance isForeign_ChunkIndex :: IsForeign ChunkIndex where
     read value = do
         x <- readProp "x" value
         y <- readProp "y" value
         z <- readProp "z" value
-        pure (ChunkIndex x y z)
+        pure (ChunkIndex { x, y, z })
 
 instance asForeign_ChunkIndex :: AsForeign ChunkIndex where
-    write (ChunkIndex x y z) = toForeign { x, y, z }
+    write = toForeign
 
 

@@ -9,7 +9,7 @@ import Data.Foreign.Class (class AsForeign, class IsForeign, readProp, write)
 import Data.Generic (class Generic)
 import Data.Map (toUnfoldable)
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
-import Graphics.Babylon.Example.Chunk (Chunk(..), boxelMapToForeign, foreignToBoxelMap)
+import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.VertexData (VertexDataProps(..))
 
@@ -32,7 +32,7 @@ instance isForeign_GenerateTerrain :: IsForeign Command where
                 y <- readProp "y" value
                 z <- readProp "z" value
                 seed <- readProp "seed" value
-                pure (GenerateTerrain (ChunkIndex x y z) seed)
+                pure (GenerateTerrain (ChunkIndex { x, y, z }) seed)
 
             "RegenerateTerrain" -> do
                 map <- readProp "blocks" value
@@ -42,7 +42,7 @@ instance isForeign_GenerateTerrain :: IsForeign Command where
 
 instance asForeign_Command :: AsForeign Command where
     write = case _ of
-        (GenerateTerrain (ChunkIndex x y z) seed) -> toForeign {
+        (GenerateTerrain (ChunkIndex { x, y, z }) seed) -> toForeign {
             command: "GenerateTerrain",
             x,
             y,

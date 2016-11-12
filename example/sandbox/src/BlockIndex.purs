@@ -1,17 +1,17 @@
 module Graphics.Babylon.Example.BlockIndex where
 
 import Control.Alternative (pure)
-import Control.Bind (bind)
-import Data.Foreign (toForeign)
-import Data.Foreign.Class (class AsForeign, class IsForeign, readProp)
+import Data.Foreign (toForeign, unsafeFromForeign)
+import Data.Foreign.Class (class AsForeign, class IsForeign)
 import Data.Generic (class Generic, gCompare, gEq)
 import Data.Ord (class Ord)
 import Prelude (class Eq, class Show, show, (<>))
 
-data BlockIndex = BlockIndex Int Int Int
+
+newtype BlockIndex = BlockIndex { x :: Int, y :: Int, z :: Int }
 
 runIndex3D :: BlockIndex -> { x :: Int, y :: Int, z :: Int }
-runIndex3D (BlockIndex x y z) = { x, y, z }
+runIndex3D (BlockIndex xyz) = xyz
 
 derive instance generic_Index3D :: Generic BlockIndex
 
@@ -22,16 +22,12 @@ instance ord_Index3D :: Ord BlockIndex where
     compare = gCompare
 
 instance show_Show :: Show BlockIndex where
-    show (BlockIndex x y z) = show x <> "," <> show y <> "," <> show z
+    show (BlockIndex i) = show i.x <> "," <> show i.y <> "," <> show i.z
 
 instance isForeign_Index3D :: IsForeign BlockIndex where
-    read value = do
-        x <- readProp "x" value
-        y <- readProp "y" value
-        z <- readProp "z" value
-        pure (BlockIndex x y z)
+    read value = pure (unsafeFromForeign value)
 
 instance asForeign_Index3D :: AsForeign BlockIndex where
-    write (BlockIndex x y z) = toForeign { x, y, z }
+    write = toForeign
 
 

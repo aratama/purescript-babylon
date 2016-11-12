@@ -7,7 +7,14 @@ import Data.Foreign.Class (class AsForeign, class IsForeign)
 import Data.Generic (class Generic, gEq, gShow)
 import Prelude (class Eq, class Show, pure, (>>=))
 
-data BlockType = GrassBlock | WaterBlock
+newtype BlockType = BlockType Int
+
+grassBlock :: BlockType
+grassBlock = BlockType 0
+
+waterBlock :: BlockType
+waterBlock = BlockType 1
+
 
 derive instance generic_BlockType :: Generic BlockType
 
@@ -17,13 +24,3 @@ instance eq_BlockType :: Eq BlockType where
 instance show_BlockType :: Show BlockType where
     show = gShow
 
-instance asForeign_BlockType :: AsForeign BlockType where
-    write value = toForeign case value of
-        GrassBlock -> 0
-        WaterBlock -> 1
-
-instance isForeign :: IsForeign BlockType where
-    read fn = readInt fn >>= case _ of
-        0 -> pure GrassBlock
-        1 -> pure WaterBlock
-        _ -> except (Left (pure (ForeignError "Invalid prop")))

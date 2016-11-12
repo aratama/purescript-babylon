@@ -7,31 +7,32 @@ import Control.Monad.ST (newSTRef, pureST, readSTRef, writeSTRef)
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
-import Data.Map (fromFoldable, member, toList)
+import Data.StrMap (fromFoldable, member, toList)
 import Data.Monoid (mempty)
 import Data.Ord (min)
 import Data.Ring (negate)
 import Data.Show (show)
-import Data.StrMap (fromFoldable, member) as StrMap
 import Data.Traversable (for)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
-import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>))
+import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>), (==))
+
 
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
 import Graphics.Babylon.Example.Vec (vec)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.Example.BlockType (BlockType(..))
+import Graphics.Babylon.Example.BlockType (BlockType(..), grassBlock, waterBlock)
+import Graphics.Babylon.Example.Block (Block(..))
 
 chunkSize :: Int
 chunkSize = 16
 
 createBlockMap :: ChunkIndex -> Int -> Chunk
-createBlockMap (ChunkIndex cx cy cz) seed = pureST do
+createBlockMap (ChunkIndex index@{ x: cx, y: cy, z: cz }) seed = pureST do
 
     let noise = createNoise seed
 
@@ -47,12 +48,14 @@ createBlockMap (ChunkIndex cx cy cz) seed = pureST do
             let bottom = chunkSize * cy
             if top < bottom then pure mempty else do
                 for (bottom .. top) \gy -> do
-                    pure $ Tuple (BlockIndex gx gy gz) case gy of
-                        0 -> WaterBlock
-                        _ -> GrassBlock
+                    let index = BlockIndex { x:gx, y:gy, z:gz }
+                    let blockType = case gy of
+                            0 -> waterBlock
+                            _ -> grassBlock
+                    pure $ Tuple (show index) (Block { index, blockType })
 
     pure $ Chunk {
-        index: ChunkIndex cx cy cz,
+        index: ChunkIndex index,
         map: fromFoldable (join (join blocks))
     }
 
@@ -74,20 +77,16 @@ createTerrainGeometry (Chunk terrain) = pureST do
     grass <- prepareArray
     water <- prepareArray
 
-
-    -- for performance reason, use StrMap instead of Map
-    let strmap = StrMap.fromFoldable ((\(Tuple k v) -> Tuple (show k) v) <$> (toList map))
-
-    --let exists x y z = member (BlockIndex x y z) map
-    let exists x y z = StrMap.member (show (BlockIndex x y z)) strmap
+    let exists :: Int -> Int -> Int -> Boolean
+        exists ex ey ez = member (show (BlockIndex { x:ex, y:ey, z:ez })) map
 
     toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
-        Cons (Tuple (BlockIndex ix iy iz) block) tail -> do
+        Cons (Tuple _ (Block block@{ index: BlockIndex { x:ix, y:iy, z:iz } })) tail -> do
 
-            let store = case block of
-                    GrassBlock -> grass
-                    WaterBlock -> water
+            let store = if block.blockType == grassBlock
+                            then grass
+                            else water
 
             let square nix niy niz u = if exists (ix + nix) (iy + niy) (iz + niz) then pure unit else void do
                     let px = toNumber ix

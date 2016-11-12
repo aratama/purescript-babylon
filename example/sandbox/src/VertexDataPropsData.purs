@@ -1,9 +1,9 @@
-module Graphics.Babylon.Example.VertexDataPropsData where
+module Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(VertexDataPropsData)) where
 
 import Control.Bind (bind)
 import Data.Foreign (toForeign)
 import Data.Foreign.Class (readProp, write, class AsForeign, class IsForeign)
-import Prelude (class Eq, pure, ($), (&&), (==))
+import Prelude (pure, ($))
 
 import Graphics.Babylon.VertexData (VertexDataProps)
 import Graphics.Babylon.Example.Chunk (Chunk)
@@ -24,10 +24,7 @@ instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
 instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
     write (VertexDataPropsData value) = toForeign {
         terrain: write value.terrain,
-        grassBlocks: value.grassBlocks,
-        waterBlocks: value.waterBlocks
+        grassBlocks: write value.grassBlocks,
+        waterBlocks: write value.waterBlocks
     }
-
-instance eq_VertexDataPropsData :: Eq VertexDataPropsData where
-    eq (VertexDataPropsData a) (VertexDataPropsData b) = a.terrain == b.terrain && a.grassBlocks == b.grassBlocks && a.waterBlocks == b.waterBlocks
 
