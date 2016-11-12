@@ -1,12 +1,14 @@
-module Data.ShowMap (ShowMap, lookup, member, insert, delete, fromFoldable, toList, empty) where
+module Data.ShowMap (ShowMap, lookup, member, insert, delete, fromFoldable, toList, empty, size, fromStrMap) where
 
+import Control.Alt (alt)
 import Data.Foldable (class Foldable, foldMap, foldl, foldr)
+import Data.Int (floor)
 import Data.List (List)
 import Data.Maybe (Maybe)
 import Data.Monoid (class Monoid, mempty)
 import Data.Semigroup (class Semigroup, append)
 import Data.Show (class Show, show)
-import Data.StrMap (StrMap, delete, empty, insert, lookup, member, toList) as StrMap
+import Data.StrMap (StrMap, delete, empty, insert, lookup, member, toList, size) as StrMap
 import Data.Tuple (Tuple(..))
 
 newtype ShowMap k a = ShowMap (StrMap.StrMap a)
@@ -40,5 +42,14 @@ empty = ShowMap StrMap.empty
 fromFoldable :: forall f k a. (Show k, Foldable f) => f (Tuple k a) -> ShowMap k a
 fromFoldable f = foldl (\m (Tuple k v) -> insert k v m) empty f
 
+fromList :: forall f k a. (Show k) => List (Tuple k a) -> ShowMap k a
+fromList f = foldl (\m (Tuple k v) -> insert k v m) empty f
+
 toList :: forall k a. ShowMap k a -> List (Tuple String a)
 toList (ShowMap m) = StrMap.toList m
+
+size :: forall k a. ShowMap k a -> Int
+size (ShowMap m) = floor (StrMap.size m)
+
+fromStrMap :: forall k a. StrMap.StrMap a -> ShowMap k a
+fromStrMap m = ShowMap m

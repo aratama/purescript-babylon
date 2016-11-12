@@ -1,7 +1,7 @@
 module Graphics.Babylon.Example.Terrain (
  ChunkWithMesh(..), Terrain, emptyTerrain,
  globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex, globalIndexToChunkIndex,
- lookupBlock, insertChunk, lookupChunk, disposeChunk
+ lookupBlock, insertChunk, lookupChunk, disposeChunk, chunkCount
 ) where
 
 import Control.Bind (bind)
@@ -11,17 +11,18 @@ import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe)
 import Data.Monoid (mempty)
 import Data.Show (show)
-import Data.ShowMap (ShowMap(..), insert, lookup, empty)
+import Data.ShowMap (ShowMap(..), insert, lookup, empty, size)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.AbstractMesh (dispose)
+import Graphics.Babylon.Example.BlockIndex (runIndex3D)
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.Example.Generation (chunkSize)
 import Graphics.Babylon.Example.Vec (Vec)
 import Graphics.Babylon.Mesh (meshToAbstractMesh)
 import Prelude ((*), (/), (+), (-), ($))
 
-import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex)
 import Graphics.Babylon.Example.Block (Block)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Types (Mesh)
@@ -37,6 +38,8 @@ newtype Terrain = Terrain { map :: ShowMap ChunkIndex ChunkWithMesh }
 emptyTerrain :: Terrain
 emptyTerrain = Terrain { map: empty }
 
+chunkCount :: Terrain -> Int
+chunkCount (Terrain t) = size t.map
 
 globalPositionToChunkIndex :: Number -> Number -> Number -> ChunkIndex
 globalPositionToChunkIndex x y z = ChunkIndex { x: f x, y: f y, z: f z }
@@ -44,19 +47,20 @@ globalPositionToChunkIndex x y z = ChunkIndex { x: f x, y: f y, z: f z }
     f v = floor (v + 1000000.0 * toNumber chunkSize) / chunkSize - 1000000
 
 globalPositionToLocalIndex :: Number -> Number -> Number -> BlockIndex
-globalPositionToLocalIndex x y z = BlockIndex { x: f x, y: f y, z: f z }
+globalPositionToLocalIndex x y z = blockIndex (f x) (f y) (f z)
   where
     delta = toNumber chunkSize * 1000000.0
     f v = mod (floor (v + delta)) chunkSize
 
 globalPositionToGlobalIndex :: Number -> Number -> Number -> BlockIndex
-globalPositionToGlobalIndex x y z = BlockIndex { x: f x, y: f y, z: f z }
+globalPositionToGlobalIndex x y z = blockIndex (f x) (f y) (f z)
   where
     f v = floor (v + 1000000.0) - 1000000
 
 globalIndexToChunkIndex :: BlockIndex -> ChunkIndex
-globalIndexToChunkIndex (BlockIndex { x, y, z }) = ChunkIndex { x: f x, y: f y, z: f z }
+globalIndexToChunkIndex b = ChunkIndex { x: f bi.x, y: f bi.y, z: f bi.z }
   where
+    bi = runIndex3D b
     f v = (v + 1000000 * chunkSize) / chunkSize - 1000000
 
 

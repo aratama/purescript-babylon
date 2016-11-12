@@ -3,23 +3,23 @@ module Main (main) where
 import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, (>>=))
-import Control.Comonad.Store (store)
-import Control.Monad (join, when)
+import Control.Monad (when)
 import Control.Monad.Aff (Aff, makeAff, runAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
-import Control.Monad.Eff.Console (error, errorShow)
+import Control.Monad.Eff.Console (error, errorShow, log)
 import Control.Monad.Eff.Exception (Error)
 import Control.Monad.Eff.Exception (catchException) as EXCEPTION
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import DOM (DOM)
-import Data.Array (sortBy, (..))
+import Data.Array (sortBy, (..), length)
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
 import Data.Ord (abs, compare, min)
 import Data.Ring (negate)
+import Data.Show (show)
 import Data.ShowMap (delete, insert)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
@@ -31,12 +31,12 @@ import Graphics.Babylon.DebugLayer (show) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Block (Block(..))
-import Graphics.Babylon.Example.BlockIndex (BlockIndex(BlockIndex))
-import Graphics.Babylon.Example.BlockType (grassBlock)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runIndex3D)
+import Graphics.Babylon.Example.BlockType (grassBlock, waterBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..), runChunkIndex)
 import Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff)
-import Graphics.Babylon.Example.Terrain (emptyTerrain, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.Terrain (chunkCount, emptyTerrain, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
 import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, setCheckCollisions, setTarget)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
@@ -48,9 +48,7 @@ import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart, setGravity, setWorkerCollisions)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
-import Graphics.Babylon.Test (chunkIndex)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
-import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Math (round)
 import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>))
@@ -61,6 +59,8 @@ shadowMapSize = 4096
 
 enableDebugLayer :: Boolean
 enableDebugLayer = true
+
+
 
 main :: forall eff. Eff (Effects eff) Unit
 main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>= case _ of
@@ -89,7 +89,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
         -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
         camera <- do
-            cameraPosition <- createVector3 (negate 10.0) 10.0 (negate 10.0)
+            cameraPosition <- createVector3 (negate 30.0) 30.0 (negate 30.0)
             cam <- createFreeCamera "camera1" cameraPosition scene
             -- setApplyGravity true camera
             setCheckCollisions true cam
@@ -184,7 +184,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
 
         let
-            pickBlock :: forall eff. State -> Int -> Int -> Eff (dom :: DOM, ref :: REF, babylon :: BABYLON | eff) (Maybe BlockIndex)
+            pickBlock :: forall e. State -> Int -> Int -> Eff (dom :: DOM, ref :: REF, babylon :: BABYLON | e) (Maybe BlockIndex)
             pickBlock (State state) screenX screenY = do
                 let predicate mesh = do
                         let name = getName (AbstractMesh.abstractMeshToNode mesh)
@@ -201,8 +201,9 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                         let minDelta = min dx (min dy dz)
                         let lookupBlock' x y z = lookupBlock { x, y, z } state.terrain
 
-                        let putCursor (BlockIndex { x, y, z }) = do
-                                r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
+                        let putCursor bi = do
+                                let rbi = runIndex3D bi
+                                r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
                                 setPosition r cursor
 
                         case state.mode of
@@ -252,8 +253,9 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
             case picked of
                 Nothing -> pure unit
-                Just (BlockIndex { x, y, z }) -> do
-                    r <- createVector3 (Int.toNumber x + 0.5) (Int.toNumber y + 0.5) (Int.toNumber z + 0.5)
+                Just bi -> do
+                    let rbi = runIndex3D bi
+                    r <- createVector3 (Int.toNumber rbi.x + 0.5) (Int.toNumber rbi.y + 0.5) (Int.toNumber rbi.z + 0.5)
                     setPosition r cursor
 
             -- update shadow rendering list
@@ -293,7 +295,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             let range (ChunkIndex { x, y, z }) = abs x + abs z
 
-            let size = 2
+            let size = 3
 
             let indices = sortBy (\p q -> compare (range p) (range q)) do
                     z <- negate size .. size
@@ -304,9 +306,13 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
             runAff errorShow pure do
                 for_ indices \index -> do
                     chunk <- generateChunkAff ref ww materials index scene
-                    liftEff $ modifyRef ref \(State state) -> State state {
-                        terrain = insertChunk chunk state.terrain
-                    }
+                    liftEff do
+                        State state <- readRef ref
+                        log $ show (chunkCount state.terrain) <> " / " <> show (length indices)
+                        modifyRef ref \(State state) -> State state {
+                            terrain = insertChunk chunk state.terrain
+                        }
+
                     wait
 
             onMouseClick \e -> do

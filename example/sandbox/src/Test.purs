@@ -15,7 +15,7 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Example.Block (Block(..))
-import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
+import Graphics.Babylon.Example.BlockIndex (blockIndex, BlockIndex)
 import Graphics.Babylon.Example.BlockType (BlockType(..), grassBlock)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
@@ -28,9 +28,6 @@ import Prelude (div, negate, pure, ($), (*), (+), (<), (<#>))
 import Test.StrongCheck (SC, assert, assertEq, quickCheck)
 
 chunkIndex x y z = ChunkIndex { x, y, z }
-
-blockIndex x y z = BlockIndex { x, y, z }
-
 
 main :: SC (babylon :: BABYLON) Unit
 main = do

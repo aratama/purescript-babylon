@@ -1,10 +1,10 @@
 exports.createVertexData = function(props){
     return function(){
         var v = new BABYLON.VertexData();
-        v.indices = props.indices.slice();
-        v.positions = props.positions.slice();
-        v.normals = props.normals.slice();
-        v.uvs = props.uvs.slice();
+        v.indices = props.indices;
+        v.positions = props.positions;
+        v.normals = props.normals;
+        v.uvs = props.uvs;
         return v;
     }
 }

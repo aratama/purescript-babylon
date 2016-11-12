@@ -7,56 +7,70 @@ import Control.Monad.ST (newSTRef, pureST, readSTRef, writeSTRef)
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
-import Data.ShowMap (fromFoldable, member, toList)
 import Data.Monoid (mempty)
-import Data.Ord (min)
+import Data.Ord (max, min)
 import Data.Ring (negate)
 import Data.Show (show)
-import Data.Traversable (for)
+import Data.ShowMap (fromStrMap, fromFoldable, member, toList)
+import Data.Traversable (for, for_)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
+import Graphics.Babylon.Example.BlockIndex (runIndex3D)
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
-import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>), (==))
+import Prelude (pure, (#), ($), (*), (+), (-), (<), (<$>), (<*>), (==), (<=))
 
-
-import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
+import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex)
 import Graphics.Babylon.Example.Vec (vec)
 import Graphics.Babylon.Example.Chunk (Chunk(..))
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.Example.BlockType (BlockType(..), grassBlock, waterBlock)
+import Graphics.Babylon.Example.BlockType (grassBlock, waterBlock)
 import Graphics.Babylon.Example.Block (Block(..))
+
+import Data.StrMap.ST (new, poke)
+import Data.StrMap.ST.Unsafe (unsafeGet)
+
+maxHeight :: Int
+maxHeight = 25
 
 chunkSize :: Int
 chunkSize = 16
 
+terrainScale :: Number
+terrainScale = 0.02
+
+waterBlockHeight :: Int
+waterBlockHeight = 3
+
 createBlockMap :: ChunkIndex -> Int -> Chunk
-createBlockMap (ChunkIndex index@{ x: cx, y: cy, z: cz }) seed = pureST do
+createBlockMap index@(ChunkIndex { x: cx, y: cy, z: cz }) seed = pureST do
 
     let noise = createNoise seed
 
-    blocks <- for (0 .. 15) \lz -> do
-        for (0 .. 15) \lx -> do
+    stmap <- new
+
+    for_ (0 .. (chunkSize - 1)) \lz -> do
+        for_ (0 .. (chunkSize - 1)) \lx -> do
             let gx = chunkSize * cx + lx
             let gz = chunkSize * cz + lz
             let x = toNumber gx
             let z = toNumber gz
-            let r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
-            let h = floor (r * 8.0)
+            let r = (simplex2 (x * terrainScale) (z * terrainScale) noise + 1.0) * 0.5
+            let h = max waterBlockHeight (floor (r * toNumber maxHeight))
             let top = min h (chunkSize * (cy + 1) - 1)
             let bottom = chunkSize * cy
             if top < bottom then pure mempty else do
-                for (bottom .. top) \gy -> do
-                    let index = BlockIndex { x:gx, y:gy, z:gz }
-                    let blockType = case gy of
-                            0 -> waterBlock
-                            _ -> grassBlock
-                    pure $ Tuple index (Block { index, blockType })
+                for_ (bottom .. top) \gy -> void do
+                    let bi = blockIndex gx gy gz
+                    let blockType = if gy <= waterBlockHeight then waterBlock else grassBlock
+                    poke stmap (show bi) (Block { index: bi, blockType })
+
+    map <- unsafeGet stmap
 
     pure $ Chunk {
-        index: ChunkIndex index,
-        map: fromFoldable (join (join blocks))
+        index,
+        map: fromStrMap map
     }
 
 
@@ -78,11 +92,16 @@ createTerrainGeometry (Chunk terrain) = pureST do
     water <- prepareArray
 
     let exists :: Int -> Int -> Int -> Boolean
-        exists ex ey ez = member (BlockIndex { x:ex, y:ey, z:ez }) map
+        exists ex ey ez = member (blockIndex ex ey ez) map
 
     toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
-        Cons (Tuple _ (Block block@{ index: BlockIndex { x:ix, y:iy, z:iz } })) tail -> do
+        Cons (Tuple _ (Block block)) tail -> do
+
+            let bi = runIndex3D block.index
+            let ix = bi.x
+            let iy = bi.y
+            let iz = bi.z
 
             let store = if block.blockType == grassBlock
                             then grass

@@ -36,6 +36,7 @@ instance isForeign_VertexDataProps :: IsForeign VertexDataProps where
 instance asForeign :: AsForeign VertexDataProps where
     write = toForeign
 
+-- NOTE* Unsafe function because babylon may change the arrays!
 foreign import createVertexData :: forall eff. VertexDataProps -> Eff (babylon :: BABYLON | eff) VertexData
 
 foreign import applyToMesh :: forall eff. Mesh -> Boolean -> VertexData -> Eff (babylon :: BABYLON | eff) Unit
