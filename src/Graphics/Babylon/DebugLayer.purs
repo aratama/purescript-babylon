@@ -14,3 +14,5 @@ foreign import _show :: forall eff. Boolean -> Boolean -> Nullable HTMLElement -
 
 show :: forall eff. Boolean -> Boolean -> Maybe HTMLElement -> DebugLayer -> Eff (babylon :: BABYLON | eff) Unit
 show shoUI camera rootElement debugLayer = _show shoUI camera (toNullable rootElement) debugLayer
+
+foreign import hide :: forall eff. DebugLayer -> Eff (babylon :: BABYLON | eff) Unit

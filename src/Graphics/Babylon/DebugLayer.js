@@ -9,3 +9,9 @@ exports._show = function(showUI){
         }
     }
 }
+
+exports.hide = function(debugLayer){
+    return function(){
+        debugLayer.hide();
+    }
+}

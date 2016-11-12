@@ -17,7 +17,8 @@ data Mode = Move | Put | Remove
 newtype State = State {
     mode :: Mode,
     terrain :: Terrain,
-    mousePosition :: { x :: Int, y :: Int }
+    mousePosition :: { x :: Int, y :: Int },
+    debugLayer :: Boolean
 }
 
 type Materials = {

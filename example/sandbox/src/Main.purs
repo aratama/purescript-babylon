@@ -13,6 +13,7 @@ import Control.Monad.Eff.Exception (catchException) as EXCEPTION
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import DOM (DOM)
 import Data.Array (catMaybes, head, sortBy, (..))
+import Data.BooleanAlgebra (not)
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
 import Data.Maybe (Maybe(..))
@@ -27,7 +28,7 @@ import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable, setChec
 import Graphics.Babylon.Camera (getPosition)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
-import Graphics.Babylon.DebugLayer (show) as DebugLayer
+import Graphics.Babylon.DebugLayer (show, hide) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Block (Block(..))
@@ -175,7 +176,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         ref <- newRef $ State {
             mode: Move,
             terrain: emptyTerrain,
-            mousePosition: { x: 0, y: 0 }
+            mousePosition: { x: 0, y: 0 },
+            debugLayer: true
         }
 
         onMouseMove \e -> do
@@ -189,10 +191,17 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
         let prepareModeButton id value = onButtonClick id do
                 modifyRef ref (\(State state) -> State state { mode = value })
 
+
         prepareModeButton "move" Move
         prepareModeButton "add" Put
         prepareModeButton "remove" Remove
 
+        onButtonClick "debuglayer" do
+            modifyRef ref (\(State state) -> State state { debugLayer = not state.debugLayer })
+            State state <- readRef ref
+            if state.debugLayer
+                then getDebugLayer scene >>= DebugLayer.show true true Nothing
+                else getDebugLayer scene >>= DebugLayer.hide
 
         let
             pickBlock :: forall e. State -> Int -> Int -> Eff (dom :: DOM, ref :: REF, babylon :: BABYLON | e) (Maybe BlockIndex)
@@ -312,7 +321,7 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
 
             -- load chunk
             do
-                let indices = sortBy (\p q -> compare (range p) (range q)) do
+                let indices = do
                         z <- negate loadDistance .. loadDistance
                         y <- negate 1 .. 1
                         x <- negate loadDistance .. loadDistance
