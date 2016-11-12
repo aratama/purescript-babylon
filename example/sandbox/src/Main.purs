@@ -19,7 +19,7 @@ import Data.Maybe (Maybe(Just, Nothing))
 import Data.Nullable (toMaybe)
 import Data.Ord (abs, compare, min)
 import Data.Ring (negate)
-import Data.StrMap (delete, insert)
+import Data.ShowMap (delete, insert)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, querySelectorCanvas, onDOMContentLoaded)
 import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable) as AbstractMesh
@@ -302,8 +302,8 @@ main = onDOMContentLoaded $ (toMaybe <$> querySelectorCanvas "#renderCanvas") >>
                             Just chunkData@{ blocks: Chunk { index, map } } -> void do
                                 let chunk' = chunkData {
                                         blocks = Chunk { index, map: case state.mode of
-                                            Put -> insert (show blockIndex) (Block { index: blockIndex, blockType: grassBlock }) map
-                                            Remove -> delete (show blockIndex) map
+                                            Put -> insert blockIndex (Block { index: blockIndex, blockType: grassBlock }) map
+                                            Remove -> delete blockIndex map
                                             Move -> map
                                         }
                                     }

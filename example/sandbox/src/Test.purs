@@ -9,10 +9,10 @@ import Data.Foldable (all)
 import Data.Foreign.Class (read, write)
 import Data.Int (toNumber, floor)
 import Data.List ((..))
-import Data.StrMap (StrMap, fromFoldable)
+import Data.Show (show)
+import Data.ShowMap (ShowMap(..), fromFoldable)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
-import Data.Show (show)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Example.Block (Block(..))
 import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
@@ -61,8 +61,8 @@ main = do
                             (0 .. h) <#> \iy -> let
                                 y = toNumber iy
                                 index = blockIndex ix iy iz
-                                in Tuple (show index) (Block { index, blockType: grassBlock })
-            map :: StrMap Block
+                                in Tuple index (Block { index, blockType: grassBlock })
+            map :: ShowMap BlockIndex Block
             map = fromFoldable (join (join blocks))
 
             dat = createTerrainGeometry (Chunk { index: chunkIndex 0 0 0,  map })

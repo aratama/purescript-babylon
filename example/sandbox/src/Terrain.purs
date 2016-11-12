@@ -9,8 +9,9 @@ import Control.Monad.Eff (Eff)
 import Data.EuclideanRing (mod)
 import Data.Int (floor, toNumber)
 import Data.Maybe (Maybe)
+import Data.Monoid (mempty)
 import Data.Show (show)
-import Data.StrMap (StrMap, empty, insert, lookup)
+import Data.ShowMap (ShowMap(..), insert, lookup, empty)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.AbstractMesh (dispose)
@@ -31,7 +32,7 @@ type ChunkWithMesh = {
     waterBlockMesh :: Mesh
 }
 
-newtype Terrain = Terrain { map :: StrMap ChunkWithMesh }
+newtype Terrain = Terrain { map :: ShowMap ChunkIndex ChunkWithMesh }
 
 emptyTerrain :: Terrain
 emptyTerrain = Terrain { map: empty }
@@ -61,19 +62,19 @@ globalIndexToChunkIndex (BlockIndex { x, y, z }) = ChunkIndex { x: f x, y: f y, 
 
 
 lookupChunk :: ChunkIndex -> Terrain -> Maybe ChunkWithMesh
-lookupChunk index (Terrain terrain) = lookup (show index) terrain.map
+lookupChunk index (Terrain terrain) = lookup index terrain.map
 
 lookupBlock :: Vec -> Terrain -> Maybe Block
 lookupBlock p (Terrain terrain) = do
         let chunkIndex = globalPositionToChunkIndex p.x p.y p.z
         let index = globalPositionToGlobalIndex p.x p.y p.z
-        { blocks: Chunk { map } } <- lookup (show chunkIndex) terrain.map
-        lookup (show index) map
+        { blocks: Chunk { map } } <- lookup chunkIndex terrain.map
+        lookup index map
 
 
 insertChunk :: ChunkWithMesh -> Terrain -> Terrain
 insertChunk cmesh@{ blocks: Chunk chunk@{ index } } (Terrain chunks) = Terrain chunks {
-    map = insert (show index) cmesh chunks.map
+    map = insert index cmesh chunks.map
 }
 
 disposeChunk :: forall eff. ChunkWithMesh -> Eff (babylon :: BABYLON | eff) Unit

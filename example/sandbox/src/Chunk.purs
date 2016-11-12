@@ -2,12 +2,15 @@ module Graphics.Babylon.Example.Chunk where
 
 import Data.Foreign (toForeign, unsafeFromForeign)
 import Data.Foreign.Class (class AsForeign, class IsForeign)
-import Data.StrMap (StrMap)
+import Data.ShowMap (ShowMap(..))
+import Graphics.Babylon.Example.Block (Block)
+import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
 import Graphics.Babylon.Example.ChunkIndex (ChunkIndex)
 import Prelude (pure)
-import Graphics.Babylon.Example.Block (Block)
 
-newtype Chunk = Chunk { index :: ChunkIndex, map :: StrMap Block }
+
+
+newtype Chunk = Chunk { index :: ChunkIndex, map :: ShowMap BlockIndex Block }
 
 instance isForeign_TerrainMap :: IsForeign Chunk where
     read value = pure (unsafeFromForeign value)

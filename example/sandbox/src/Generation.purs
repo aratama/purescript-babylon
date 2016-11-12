@@ -7,7 +7,7 @@ import Control.Monad.ST (newSTRef, pureST, readSTRef, writeSTRef)
 import Data.Array.ST (freeze, pushAllSTArray, emptySTArray)
 import Data.Int (toNumber, floor)
 import Data.List (List(Cons, Nil), (..))
-import Data.StrMap (fromFoldable, member, toList)
+import Data.ShowMap (fromFoldable, member, toList)
 import Data.Monoid (mempty)
 import Data.Ord (min)
 import Data.Ring (negate)
@@ -52,7 +52,7 @@ createBlockMap (ChunkIndex index@{ x: cx, y: cy, z: cz }) seed = pureST do
                     let blockType = case gy of
                             0 -> waterBlock
                             _ -> grassBlock
-                    pure $ Tuple (show index) (Block { index, blockType })
+                    pure $ Tuple index (Block { index, blockType })
 
     pure $ Chunk {
         index: ChunkIndex index,
@@ -78,7 +78,7 @@ createTerrainGeometry (Chunk terrain) = pureST do
     water <- prepareArray
 
     let exists :: Int -> Int -> Int -> Boolean
-        exists ex ey ez = member (show (BlockIndex { x:ex, y:ey, z:ez })) map
+        exists ex ey ez = member (BlockIndex { x:ex, y:ey, z:ez }) map
 
     toList map # tailRecM \blocks -> case blocks of
         Nil -> pure (Done 0)
