@@ -97,3 +97,14 @@ exports.pick = function(x){
         }
     }
 }
+
+
+exports.enablePhysics = function(gravity){
+    return function(plugin){
+        return function(scene){
+            return function(){
+                scene.enablePhysics(gravity, plugin);
+            }
+        }
+    }
+}

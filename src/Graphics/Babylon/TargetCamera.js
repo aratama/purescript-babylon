@@ -5,3 +5,16 @@ exports.setSpeed = function(speed){
         }
     }
 }
+
+
+exports.getCameraRotation = function(camera){
+    return function(){
+        return camera.cameraRotation;
+    }
+}
+
+exports.getRotation = function(camera){
+    return function(){
+        return camera.rotation;
+    }
+}

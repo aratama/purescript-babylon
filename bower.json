@@ -25,6 +25,7 @@
     "purescript-aff": "^2.0.1",
     "purescript-now": "^2.0.0",
     "purescript-maps": "^2.0.1",
-    "purescript-console": "^2.0.0"
+    "purescript-console": "^2.0.0",
+    "purescript-canvas": "^2.0.0"
   }
 }

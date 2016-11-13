@@ -8,8 +8,11 @@ import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Vector3 (Vector3)
 import Graphics.Babylon.Material (Material)
 import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
+import Graphics.Babylon.PhysicsImpostor (IPhysicsEnabledObject)
 
 foreign import meshToAbstractMesh :: Mesh -> AbstractMesh
+
+foreign import meshToIPhysicsEnabledObject :: Mesh -> IPhysicsEnabledObject
 
 foreign import createMesh :: forall eff . String -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
 

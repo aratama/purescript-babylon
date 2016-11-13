@@ -8,3 +8,6 @@ foreign import data AbstractMesh :: *
 foreign import data Scene :: *
 
 foreign import data Ray :: *
+
+
+foreign import data PhysicsPlugin :: *

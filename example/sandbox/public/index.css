@@ -19,13 +19,27 @@ html, body {
     margin: auto;
 }
 
-#renderCanvas {
+#renderCanvas, #canvas2d {
     width   : 1280px;
     height  : 720px;
     touch-action: none;
     position: absolute;
     top: 0;
     left: 0;
+}
+
+#minimap {
+    width: 400px;
+    height: 300px;
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+#canvas2d, #minimap {
+    pointer-events: none;
+    touch-action: none;
 }
 
 

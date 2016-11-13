@@ -1,14 +1,10 @@
 module Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex, addChunkIndex, chunkIndexRange) where
 
-import Control.Alt (alt)
-import Control.Alternative (pure)
-import Control.Bind (bind)
-import Data.Foreign (toForeign)
-import Data.Foreign.Class (class AsForeign, class IsForeign, read, readProp, write)
+import Data.Foreign.Class (class AsForeign, class IsForeign, read, write)
 import Data.Generic (class Generic, gCompare, gEq)
-import Data.Ord (class Ord, abs)
+import Data.Ord (class Ord, abs, max)
 import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
-import Prelude (class Eq, class Show, show, (<>), (<$>), (+), (-))
+import Prelude (class Eq, class Show, show, (+), (-), (<$>))
 
 newtype ChunkIndex = ChunkIndex BlockIndex
 
@@ -19,8 +15,11 @@ runChunkIndex :: ChunkIndex -> { x :: Int, y :: Int, z :: Int }
 runChunkIndex (ChunkIndex xyz) = runBlockIndex xyz
 
 chunkIndexRange :: ChunkIndex -> ChunkIndex -> Int
-chunkIndexRange (ChunkIndex a) (ChunkIndex b) = abs (i.x - k.x) + abs (i.y - k.y) + abs (i.z - k.z)
+chunkIndexRange (ChunkIndex a) (ChunkIndex b) =  max dx (max dy dz)
   where
+    dx = abs (i.x - k.x)
+    dy = abs (i.y - k.y)
+    dz = abs (i.z - k.z)
     i = runBlockIndex a
     k = runBlockIndex b
 

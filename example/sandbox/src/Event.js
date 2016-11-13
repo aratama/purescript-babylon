@@ -33,3 +33,11 @@ exports._wait = function(reject){
         }
     }
 }
+
+exports.onKeyDown = function(callback){
+    return function(){
+        window.addEventListener("keydown", function(e){
+            callback(e)();
+        });
+    }
+}

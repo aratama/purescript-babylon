@@ -8,7 +8,7 @@ import Graphics.Babylon.DebugLayer (DebugLayer)
 import Graphics.Babylon.Engine (Engine)
 import Graphics.Babylon.Vector3 (Vector3)
 import Graphics.Babylon.PickingInfo (PickingInfo)
-import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
+import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh, PhysicsPlugin)
 
 foreign import createScene :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Scene
 
@@ -37,3 +37,5 @@ foreign import setWorkerCollisions :: forall eff. Boolean -> Scene -> Eff (babyl
 foreign import getDebugLayer :: forall eff. Scene -> Eff (babylon :: BABYLON | eff) DebugLayer
 
 foreign import pick :: forall eff. Int -> Int -> (AbstractMesh -> Eff (babylon :: BABYLON | eff) Boolean) -> Boolean -> Scene -> Eff (babylon :: BABYLON | eff) PickingInfo
+
+foreign import enablePhysics :: forall eff. Vector3 -> PhysicsPlugin -> Scene -> Eff (babylon :: BABYLON | eff) Unit

@@ -38,7 +38,7 @@ chunkSize :: Int
 chunkSize = 16
 
 terrainScale :: Number
-terrainScale = 0.02
+terrainScale = 0.01
 
 waterBlockHeight :: Int
 waterBlockHeight = 3

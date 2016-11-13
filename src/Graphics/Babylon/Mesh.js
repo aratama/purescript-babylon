@@ -10,6 +10,10 @@ exports.meshToAbstractMesh = function(mesh){
     return mesh;
 }
 
+exports.meshToIPhysicsEnabledObject = function(mesh){
+    return mesh;
+}
+
 
 exports.createSphere = function(id){
     return function(segments){

@@ -86,3 +86,41 @@ exports.setIsPickable = function(isPickable){
         }
     }
 }
+
+exports.setEllipsoid = function(ellipsoid){
+    return function(mesh){
+        return function(){
+            mesh.ellipsoid = ellipsoid;
+        }
+    }
+}
+
+exports.setEllipsoidOffset = function(ellipsoidOffset){
+    return function(mesh){
+        return function(){
+            mesh.ellipsoidOffset = ellipsoidOffset;
+        }
+    }
+}
+
+exports.getPosition = function(mesh){
+    return function(){
+        return mesh.position;
+    }
+}
+
+exports.setPosition = function(position){
+    return function(mesh){
+        return function(){
+            mesh.position = position;
+        }
+    }
+}
+
+exports.setPhysicsImpostor = function(impostor){
+    return function(mesh){
+        return function(){
+            mesh.physicsImpostor = impostor;
+        }
+    }
+}

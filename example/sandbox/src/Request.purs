@@ -1,4 +1,4 @@
-module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh) where
+module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh, postProcess) where
 
 import Control.Alternative (pure)
 import Control.Bind (bind)
@@ -14,6 +14,9 @@ import Data.Either (Either(..))
 import Data.Foreign.Class (write, read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
+import Graphics.Babylon.AbstractMesh (setPhysicsImpostor)
+import Graphics.Babylon.Mesh (meshToAbstractMesh, meshToIPhysicsEnabledObject)
+import Graphics.Babylon.PhysicsImpostor (createPhysicsImpostor, defaultPhysicsImpostorParameters, meshImpostor)
 import Prelude (show, ($), (=<<))
 import WebWorker (MessageEvent(MessageEvent), OwnsWW, WebWorker, onmessageFromWorker, postMessageToWorker)
 
@@ -44,6 +47,10 @@ generateMesh index verts mat scene = do
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
     setMaterial (standardMaterialToMaterial mat) terrainMesh
+
+    --impostor <- createPhysicsImpostor (meshToIPhysicsEnabledObject terrainMesh) meshImpostor defaultPhysicsImpostorParameters scene
+    --setPhysicsImpostor impostor (meshToAbstractMesh terrainMesh)
+
     pure terrainMesh
 
 receiveChunk :: forall eff. Materials -> Scene -> Ref State
@@ -57,7 +64,7 @@ receiveChunk materials scene ref reject resolve (MessageEvent {data: fn}) = case
         result <- postProcess ref materials scene v
         resolve result
 
-postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
+postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
 postProcess ref materials scene (VertexDataPropsData verts@{ terrain: Chunk chunk }) = do
     let index = chunk.index
     State state <- readRef ref
