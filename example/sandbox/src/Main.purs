@@ -2,15 +2,16 @@ module Graphics.Babylon.Example.Sandbox.Main (main) where
 
 import Control.Alt (void)
 import Control.Alternative (pure)
-import Control.Bind (bind, (>>=))
+import Control.Bind (bind, when, (>>=))
 import Control.Monad (join)
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (error, log)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
 import Control.MonadPlus (guard)
 import DOM (DOM)
 import Data.Array (fromFoldable, head, (..))
+import Data.Array.ST (emptySTArray, pushSTArray, runSTArray)
 import Data.BooleanAlgebra (not)
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
@@ -65,7 +66,7 @@ shadowMapSize :: Int
 shadowMapSize = 4096
 
 loadDistance :: Int
-loadDistance = 2
+loadDistance = 4
 
 unloadDistance :: Int
 unloadDistance = 8
@@ -95,7 +96,7 @@ runApp canvas canvas2d minimap = do
         setFogDensity 0.01 sce
         setFogStart 250.0 sce
         setFogEnd 1000.0 sce
-        fogColor <- createColor3 0.9 0.9 0.9
+        fogColor <- createColor3 0.8 0.8 1.0
         setFogColor fogColor sce
         setCollisionsEnabled true sce
         pure sce
@@ -331,24 +332,25 @@ runApp canvas canvas2d minimap = do
 
 
         do
-            chunks :: Array (Array AbstractMesh) <- sequence do
-                    let ci = runChunkIndex cameraPositionChunkIndex
-                    dx <- (ci.x - 2) .. (ci.x + 2)
-                    dy <- (ci.y - 2) .. (ci.y + 2)
-                    dz <- (ci.z - 2) .. (ci.z + 2)
-                    case lookupChunk (chunkIndex dx dy dz) state.terrain of
-                        Nothing -> [pure []]
-                        Just chunkData@{ blocks: Chunk chunk } | isEmpty chunk.map -> [pure []]
-                                   | otherwise -> pure do
-                                        let f m = do
-                                                n <- getTotalIndices m
-                                                pure if 0 < n then [meshToAbstractMesh m] else []
-                                        g <- f chunkData.grassBlockMesh
-                                        w <- f chunkData.waterBlockMesh
-                                        pure (g <> w)
+            let ci = runChunkIndex cameraPositionChunkIndex
+            chunks <- runSTArray do
+                list <- emptySTArray
+                forE (ci.x - 2) (ci.x + 2) \dx -> do
+                    forE (ci.y - 2) (ci.y + 2) \dy -> do
+                        forE (ci.z - 2) (ci.z + 2) \dz -> do
+                            case lookupChunk (chunkIndex dx dy dz) state.terrain of
+                                Nothing -> pure unit
+                                Just chunkData@{ blocks: Chunk chunk } | isEmpty chunk.map -> pure unit
+                                                                       | otherwise -> do
+                                                                            let f m = do
+                                                                                    n <- getTotalIndices m
+                                                                                    when (0 < n) $ void do
+                                                                                        pushSTArray list (meshToAbstractMesh m)
+                                                                            f chunkData.grassBlockMesh
+                                                                            f chunkData.waterBlockMesh
+                pure list
 
-            -- log $ "shodow render list: " <> show (length chunks)
-            setRenderList (join chunks) shadowMap
+            setRenderList chunks shadowMap
 
 
 
@@ -356,9 +358,9 @@ runApp canvas canvas2d minimap = do
         do
             let indices = do
                     let ci = runChunkIndex cameraPositionChunkIndex
-                    x <- (ci.x + loadDistance) .. (ci.x - loadDistance)
+                    x <- (ci.x - loadDistance) .. (ci.x + loadDistance)
                     y <- (ci.y - 1) .. (ci.y + 1)
-                    z <- (ci.z + loadDistance) .. (ci.z - loadDistance)
+                    z <- (ci.z - loadDistance) .. (ci.z + loadDistance)
                     guard (isNothing (lookupChunk (chunkIndex x y z) state.terrain))
                     pure (chunkIndex x y z)
 
