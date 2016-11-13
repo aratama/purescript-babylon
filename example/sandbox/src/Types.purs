@@ -9,9 +9,8 @@ import Graphics.Babylon.Example.Sandbox.Vec (Vec)
 import Graphics.Canvas (CANVAS)
 import Graphics.Babylon.Example.Sandbox.Terrain (Terrain)
 import Graphics.Babylon.StandardMaterial (StandardMaterial)
-import WebWorker (OwnsWW)
 
-type Effects eff = (canvas :: CANVAS, now :: NOW, console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ownsww :: OwnsWW, ref :: REF | eff)
+type Effects eff = (canvas :: CANVAS, now :: NOW, console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ref :: REF | eff)
 
 data Mode = Move | Put | Remove
 

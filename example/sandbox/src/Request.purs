@@ -14,7 +14,6 @@ import Data.Foreign.Class (read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
 import Prelude (show, ($), (=<<))
-import WebWorker (MessageEvent(MessageEvent), OwnsWW)
 
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Mesh (createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
@@ -40,18 +39,7 @@ generateMesh index verts mat scene = do
     setMaterial (standardMaterialToMaterial mat) terrainMesh
     pure terrainMesh
 
-receiveChunk :: forall eff. Materials -> Scene -> Ref State
-             -> (Error -> Eff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit)
-             -> ({ blocks :: Chunk, grassBlockMesh :: Mesh, waterBlockMesh :: Mesh} -> Eff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit)
-             -> MessageEvent
-             -> Eff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) Unit
-receiveChunk materials scene ref reject resolve (MessageEvent {data: fn}) = case runExcept $ read fn of
-    Left err -> reject $ EXCEPTION.error $ show err
-    Right v -> do
-        result <- postProcess ref materials scene v
-        resolve result
-
-postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
+postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, babylon :: BABYLON | eff) ChunkWithMesh
 postProcess ref materials scene (VertexDataPropsData verts@{ terrain: Chunk chunk }) = do
     let index = chunk.index
     State state <- readRef ref

@@ -105,3 +105,9 @@ exports.setRenderingGroupId = function(value){
         }
     }
 }
+
+exports.getTotalIndices = function(mesh){
+    return function(){
+        return mesh.getTotalIndices();
+    }
+}
