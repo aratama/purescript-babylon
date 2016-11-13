@@ -19,7 +19,9 @@ newtype State = State {
     mode :: Mode,
     terrain :: Terrain,
     mousePosition :: { x :: Int, y :: Int },
-    debugLayer :: Boolean
+    debugLayer :: Boolean,
+    yaw :: Number,
+    pitch :: Number
 }
 
 type Materials = {

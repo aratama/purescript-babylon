@@ -16,13 +16,6 @@ exports.freeCameraToTargetCamera = function(camera){
     return camera;
 }
 
-exports.setTarget = function(position){
-    return function(camera){
-        return function(){
-            camera.setTarget(position);
-        }
-    }
-}
 
 exports.attachControl = function(canvas){
     return function(noPreventDefault){

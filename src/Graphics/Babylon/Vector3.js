@@ -16,8 +16,24 @@ exports.cross = function(v){
     }
 }
 
+exports.add = function(v){
+    return function(r){
+        return v.add(r);
+    }
+}
+
 exports.runVector3 = function(v){
     return function(){
         return { x: v.x, y: v.y, z: v.z }
+    }
+}
+
+exports.rotationFromAxis = function(x){
+    return function(y){
+        return function(z){
+            return function(){
+                return BABYLON.Vector3.RotationFromAxis(x, y, z);
+            }
+        }
     }
 }

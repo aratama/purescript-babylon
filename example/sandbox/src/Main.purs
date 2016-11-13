@@ -17,7 +17,7 @@ import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
 import Data.Maybe (Maybe(..), isNothing, maybe)
 import Data.Nullable (toMaybe)
-import Data.Ord (abs, min)
+import Data.Ord (abs, max, min)
 import Data.Ring (negate)
 import Data.Show (show)
 import Data.ShowMap (delete, insert)
@@ -26,6 +26,7 @@ import Graphics.Babylon (BABYLON, Canvas, onDOMContentLoaded, querySelectorCanva
 import Graphics.Babylon.AbstractMesh (applyImpulse, moveWithCollisions, setEllipsoid)
 import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable, setCheckCollisions, getPosition, setPosition, setPhysicsImpostor) as AbstractMesh
 import Graphics.Babylon.Camera (getPosition)
+import Graphics.Babylon.Camera (setPosition) as Camera
 import Graphics.Babylon.CannonJSPlugin (createCannonJSPlugin)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
@@ -43,7 +44,7 @@ import Graphics.Babylon.Example.Request (generateMesh, postProcess)
 import Graphics.Babylon.Example.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
 import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setApplyGravity, setCheckCollisions, setTarget)
+import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setApplyGravity, setCheckCollisions)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
@@ -54,13 +55,13 @@ import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (createScene, enablePhysics, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart, setGravity)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
-import Graphics.Babylon.TargetCamera (getCameraRotation, setSpeed, getRotation)
+import Graphics.Babylon.TargetCamera (createTargetCamera, getCameraRotation, getRotation, setSpeed, setTarget, targetCameraToCamera)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector2 (runVector2)
-import Graphics.Babylon.Vector3 (createVector3, runVector3)
+import Graphics.Babylon.Vector3 (createVector3, runVector3, add, rotationFromAxis)
 import Graphics.Canvas (CanvasElement, arc, beginPath, clearRect, closePath, createImageData, fill, fillPath, fillRect, fillText, getCanvasElementById, getContext2D, lineTo, putImageData, rotate, setFillStyle, setStrokeStyle, strokeRect, translate, withContext)
-import Math (round)
+import Math (cos, round, sin, tan)
 import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>), (<=), (*))
 
 shadowMapSize :: Int
@@ -114,9 +115,12 @@ runApp canvas canvas2d minimap = do
     -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
     camera <- do
         cameraPosition <- createVector3 30.0 30.0 30.0
-        cam <- createFreeCamera "camera1" cameraPosition scene
+
+        cam <- createTargetCamera "first-person-camera" cameraPosition scene
+
+        -- cam <- createFreeCamera "camera1" cameraPosition scene
         --setApplyGravity true cam
-        setCheckCollisions true cam
+        -- setCheckCollisions true cam
 
         -- target the camera to scene origin
         cameraTarget <- createVector3 5.0 3.0 5.0
@@ -124,9 +128,8 @@ runApp canvas canvas2d minimap = do
         pure cam
 
         -- attach the camera to the canvas
-        attachControl canvas false cam
-
-        setSpeed 0.3 (freeCameraToTargetCamera cam)
+        -- attachControl canvas false cam
+        -- setSpeed 0.3 (freeCameraToTargetCamera cam)
 
         pure cam
 
@@ -200,7 +203,9 @@ runApp canvas canvas2d minimap = do
         mode: Move,
         terrain: emptyTerrain,
         mousePosition: { x: 0, y: 0 },
-        debugLayer: false
+        debugLayer: false,
+        yaw: 0.0,
+        pitch: 0.0
     }
 
     onMouseMove \e -> do
@@ -222,10 +227,32 @@ runApp canvas canvas2d minimap = do
     onKeyDown \e -> do
 
         when (e.keyCode == 32) do
+            --moveVector <- createVector3 0.0 1.0 0.0
+        --    cameraPosition <- getPosition camera
+        --    moveWithCollisions moveVector
+
             spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere)
-            impulse <- createVector3 0.1 12.0 0.1
-            applyImpulse impulse spherePosition (meshToAbstractMesh sphere)
+            moveVector <- createVector3 0.1 1.0 0.1
+            moveWithCollisions moveVector (meshToAbstractMesh sphere)
             pure unit
+
+        when (e.keyCode == 37) do -- left
+            modifyRef ref \(State state) -> State state { yaw = state.yaw + 0.02 }
+        when (e.keyCode == 39) do -- right
+            modifyRef ref \(State state) -> State state { yaw = state.yaw - 0.02 }
+        when (e.keyCode == 38) do -- up
+            modifyRef ref \(State state) -> State state { pitch = max (-1.5) $ min 1.5 (state.pitch + 0.02) }
+        when (e.keyCode == 40) do -- down
+            modifyRef ref \(State state) -> State state { pitch = max (-1.5) $ min 1.5 (state.pitch - 0.02) }
+
+        when (e.keyCode == 87) do   -- w
+            velocity <- createVector3 0.1 0.0 0.0
+            moveWithCollisions velocity (meshToAbstractMesh sphere)
+        when (e.keyCode == 83) do  -- s
+            velocity <- createVector3 (negate 0.1) 0.0 0.0
+            moveWithCollisions velocity (meshToAbstractMesh sphere)
+
+
 
     onButtonClick "debuglayer" do
         modifyRef ref (\(State state) -> State state { debugLayer = not state.debugLayer })
@@ -340,17 +367,35 @@ runApp canvas canvas2d minimap = do
 
         State state <- readRef ref
 
-        cameraPosition <- getPosition (freeCameraToCamera camera) >>= runVector3
-        let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
 
         -- sphere
-        do
 
+
+        do
             spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere) >>= runVector3
             let spherePositionChunkIndex = globalPositionToChunkIndex spherePosition.x spherePosition.y spherePosition.z
-            when (chunkIndexRange cameraPositionChunkIndex spherePositionChunkIndex <= collesionEnabledRange) do
-                g <- createVector3 0.0 (-0.01) 0.0
-                moveWithCollisions g (meshToAbstractMesh sphere)
+
+            -- when (chunkIndexRange cameraPositionChunkIndex spherePositionChunkIndex <= collesionEnabledRange) do
+            g <- createVector3 0.0 (-0.1) 0.0
+            moveWithCollisions g (meshToAbstractMesh sphere)
+
+        -- update camera position
+
+        spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere)
+        Camera.setPosition spherePosition (targetCameraToCamera camera)
+
+        let t = cos state.pitch
+        let ctx = cos state.yaw * t
+        let cty = sin state.pitch
+        let ctz = sin state.yaw * t
+
+        cameraDirection <- createVector3 ctx cty ctz
+        setTarget (add spherePosition cameraDirection) camera
+
+        cameraPosition <- runVector3 spherePosition
+        let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
+
+
 
 
         -- picking
@@ -377,16 +422,16 @@ runApp canvas canvas2d minimap = do
                         Nothing -> []
                         Just chunk -> [meshToAbstractMesh chunk.grassBlockMesh,  meshToAbstractMesh chunk.waterBlockMesh]
 
-            log $ "shodow render list: " <> show (length chunks)
+            -- log $ "shodow render list: " <> show (length chunks)
             setRenderList chunks shadowMap
 
         -- load chunk
         do
             let indices = do
                     let ci = runChunkIndex cameraPositionChunkIndex
-                    x <- (ci.x - loadDistance) .. (ci.x + loadDistance)
+                    x <- (ci.x + loadDistance) .. (ci.x - loadDistance)
                     y <- (ci.y - 1) .. (ci.y + 1)
-                    z <- (ci.z - loadDistance) .. (ci.z + loadDistance)
+                    z <- (ci.z + loadDistance) .. (ci.z - loadDistance)
                     guard (isNothing (lookupChunk (chunkIndex x y z) state.terrain))
                     pure (chunkIndex x y z)
 
@@ -423,7 +468,7 @@ runApp canvas canvas2d minimap = do
         do
             mapContext <- getContext2D minimap
 
-            pos <- getPosition (freeCameraToCamera camera) >>= runVector3
+            pos <- getPosition (targetCameraToCamera camera) >>= runVector3
             let i = runChunkIndex (globalPositionToChunkIndex pos.x pos.y pos.z)
 
             clearRect mapContext { x: 0.0, y: 0.0, w: 1280.0, h:720.0 }
@@ -431,7 +476,7 @@ runApp canvas canvas2d minimap = do
 
             --fillRect mapContext { x: 0.0, y: 0.0, w: 1000.0, h: 1000.0 }
 
-            cameraRot <- getRotation (freeCameraToTargetCamera camera) >>= runVector3
+            cameraRot <- getRotation camera >>= runVector3
             withContext mapContext do
                 translate { translateX: 200.0, translateY: 150.0 } mapContext
 
