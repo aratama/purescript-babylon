@@ -1,9 +1,9 @@
-module Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex, addChunkIndex, chunkIndexRange) where
+module Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex, addChunkIndex, chunkIndexRange) where
 
 import Data.Foreign.Class (class AsForeign, class IsForeign, read, write)
 import Data.Generic (class Generic, gCompare, gEq)
 import Data.Ord (class Ord, abs, max)
-import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
+import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
 import Prelude (class Eq, class Show, show, (+), (-), (<$>))
 
 newtype ChunkIndex = ChunkIndex BlockIndex
@@ -28,7 +28,6 @@ addChunkIndex (ChunkIndex a) (ChunkIndex b) = chunkIndex (i.x + k.x) (i.y + k.y)
   where
     i = runBlockIndex a
     k = runBlockIndex b
-
 
 derive instance generic_ChunkIndex :: Generic ChunkIndex
 

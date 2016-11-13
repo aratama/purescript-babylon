@@ -1,4 +1,4 @@
-module Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex) where
+module Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex) where
 
 import Control.Alternative (pure)
 import Data.Foreign (toForeign, unsafeFromForeign)
@@ -6,7 +6,6 @@ import Data.Foreign.Class (class AsForeign, class IsForeign)
 import Data.Generic (class Generic, gCompare, gEq)
 import Data.Ord (class Ord)
 import Prelude (class Eq, class Show)
-
 
 newtype BlockIndex = BlockIndex String
 

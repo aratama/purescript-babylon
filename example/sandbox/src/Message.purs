@@ -1,17 +1,14 @@
-module Graphics.Babylon.Example.Message where
+module Graphics.Babylon.Example.Sandbox.Message where
 
 import Control.Alternative (pure)
-import Control.Bind (bind, (>>=))
+import Control.Bind (bind)
 import Control.Monad.Except (except)
 import Data.Either (Either(Left))
 import Data.Foreign (toForeign, ForeignError(ForeignError))
 import Data.Foreign.Class (class AsForeign, class IsForeign, readProp, write)
-import Data.Generic (class Generic)
-import Data.Map (toUnfoldable)
-import Graphics.Babylon.Example.BlockIndex (BlockIndex(..))
-import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex)
-import Graphics.Babylon.VertexData (VertexDataProps(..))
+import Graphics.Babylon.Example.Sandbox.Chunk (Chunk)
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex)
+import Graphics.Babylon.VertexData (VertexDataProps)
 
 -- TODO: pass seed and share block map without sending data
 data Command = GenerateTerrain ChunkIndex Int

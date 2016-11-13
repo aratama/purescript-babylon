@@ -1,4 +1,4 @@
-module Graphics.Babylon.Example.Terrain (
+module Graphics.Babylon.Example.Sandbox.Terrain (
  ChunkWithMesh(..), Terrain, emptyTerrain,
  globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex, globalIndexToChunkIndex,
  lookupBlock, insertChunk, lookupChunk, disposeChunk, chunkCount, getChunkMap
@@ -13,12 +13,12 @@ import Data.ShowMap (ShowMap, empty, insert, lookup, size)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.AbstractMesh (dispose)
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, chunkIndex)
-import Graphics.Babylon.Example.Generation (chunkSize)
-import Graphics.Babylon.Example.Vec (Vec)
-import Graphics.Babylon.Example.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
-import Graphics.Babylon.Example.Block (Block)
-import Graphics.Babylon.Example.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, chunkIndex)
+import Graphics.Babylon.Example.Sandbox.Generation (chunkSize)
+import Graphics.Babylon.Example.Sandbox.Vec (Vec)
+import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
+import Graphics.Babylon.Example.Sandbox.Block (Block)
+import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Types (Mesh)
 
 import Graphics.Babylon.Mesh (meshToAbstractMesh)

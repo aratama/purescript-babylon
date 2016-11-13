@@ -1,68 +1,62 @@
-module Main (main) where
+module Graphics.Babylon.Example.Sandbox.Main (main) where
 
 import Control.Alt (void)
 import Control.Alternative (pure)
-import Control.Bind (bind, when, (>>=))
+import Control.Bind (bind, (>>=))
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (error, log)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
-import Control.Monad.Maybe.Trans (runMaybeT)
 import Control.MonadPlus (guard)
 import DOM (DOM)
-import DOM.Websocket.Event.Types (closeEventToEvent)
-import Data.Array (catMaybes, head, length, (..))
+import Data.Array (head, (..))
 import Data.BooleanAlgebra (not)
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
-import Data.Maybe (Maybe(..), isNothing, maybe)
+import Data.Maybe (Maybe(Just, Nothing), isNothing)
 import Data.Nullable (toMaybe)
-import Data.Ord (abs, max, min)
+import Data.Ord (abs, min)
 import Data.Ring (negate)
 import Data.Show (show)
 import Data.ShowMap (delete, insert)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (applyImpulse, moveWithCollisions, setEllipsoid)
-import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setIsPickable, setCheckCollisions, getPosition, setPosition, setPhysicsImpostor) as AbstractMesh
-import Graphics.Babylon.Camera (getPosition)
-import Graphics.Babylon.Camera (setPosition) as Camera
-import Graphics.Babylon.CannonJSPlugin (createCannonJSPlugin)
+import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions, setIsPickable) as AbstractMesh
+import Graphics.Babylon.Camera (getPosition) as Camera
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DebugLayer (show, hide) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
-import Graphics.Babylon.Example.Block (Block(..))
-import Graphics.Babylon.Example.BlockIndex (BlockIndex, runBlockIndex)
-import Graphics.Babylon.Example.BlockType (grassBlock)
-import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (addChunkIndex, chunkIndex, chunkIndexRange, runChunkIndex)
-import Graphics.Babylon.Example.Event (onButtonClick, onMouseClick, onMouseMove, onKeyDown)
-import Graphics.Babylon.Example.Generation (chunkSize, createBlockMap, createTerrainGeometry)
-import Graphics.Babylon.Example.Request (generateMesh, postProcess)
-import Graphics.Babylon.Example.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
-import Graphics.Babylon.Example.Types (Mode(Move, Remove, Put), State(State), Effects)
-import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setApplyGravity, setCheckCollisions)
+import Graphics.Babylon.Example.Sandbox.Block (Block(..))
+import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, runBlockIndex)
+import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
+import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex, chunkIndexRange, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Event (onButtonClick, onMouseClick, onMouseMove)
+import Graphics.Babylon.Example.Sandbox.Generation (chunkSize, createBlockMap)
+import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
+import Graphics.Babylon.Example.Sandbox.MiniMap (renderMiniMap)
+import Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess)
+import Graphics.Babylon.Example.Sandbox.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.Sandbox.Types (Mode(Move, Remove, Put), State(State), Effects)
+import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
+import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setCheckCollisions)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
-import Graphics.Babylon.Mesh (createBox, createSphere, meshToAbstractMesh, meshToIPhysicsEnabledObject, setInfiniteDistance, setMaterial, setPosition, setRenderingGroupId)
+import Graphics.Babylon.Mesh (createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial, setPosition, setRenderingGroupId)
 import Graphics.Babylon.Node (getName)
-import Graphics.Babylon.PhysicsImpostor (createPhysicsImpostor, defaultPhysicsImpostorParameters, sphereImpostor)
 import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
-import Graphics.Babylon.Scene (createScene, enablePhysics, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart, setGravity)
+import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
-import Graphics.Babylon.TargetCamera (createTargetCamera, getCameraRotation, getRotation, setSpeed, setTarget, targetCameraToCamera)
+import Graphics.Babylon.TargetCamera (getRotation, setSpeed, setTarget)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
-import Graphics.Babylon.Types (AbstractMesh)
-import Graphics.Babylon.Vector2 (runVector2)
-import Graphics.Babylon.Vector3 (createVector3, runVector3, add, rotationFromAxis)
-import Graphics.Canvas (CanvasElement, arc, beginPath, clearRect, closePath, createImageData, fill, fillPath, fillRect, fillText, getCanvasElementById, getContext2D, lineTo, putImageData, rotate, setFillStyle, setStrokeStyle, strokeRect, translate, withContext)
-import Math (cos, round, sin, tan)
-import Prelude ((#), ($), (+), (-), (/=), (<$>), (==), (<>), (<=), (*))
+import Graphics.Babylon.Vector3 (createVector3, runVector3)
+import Graphics.Canvas (CanvasElement, createImageData, getCanvasElementById, getContext2D)
+import Math (round)
+import Prelude ((#), ($), (+), (-), (/=), (<$>), (<>), (==), (<=))
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -100,36 +94,22 @@ runApp canvas canvas2d minimap = do
         setFogEnd 1000.0 sce
         fogColor <- createColor3 0.9 0.9 0.9
         setFogColor fogColor sce
-        gravity <- createVector3 0.0 (negate 9.81) 0.0
-        setGravity gravity sce
         setCollisionsEnabled true sce
-        --setWorkerCollisions true sce
-
-        -- plugin <- createCannonJSPlugin
-        -- enablePhysics gravity plugin sce
-
         pure sce
 
-    -- getDebugLayer scene >>= DebugLayer.show true true Nothing
-
-    -- create a FreeCamera, and set its position to (x:0, y:5, z:-10)
     camera <- do
         cameraPosition <- createVector3 30.0 30.0 30.0
 
-        cam <- createTargetCamera "first-person-camera" cameraPosition scene
-
-        -- cam <- createFreeCamera "camera1" cameraPosition scene
-        --setApplyGravity true cam
-        -- setCheckCollisions true cam
+        cam <- createFreeCamera "free-camera" cameraPosition scene
+        setCheckCollisions true cam
 
         -- target the camera to scene origin
         cameraTarget <- createVector3 5.0 3.0 5.0
-        setTarget cameraTarget cam
-        pure cam
+        setTarget cameraTarget (freeCameraToTargetCamera cam)
 
         -- attach the camera to the canvas
-        -- attachControl canvas false cam
-        -- setSpeed 0.3 (freeCameraToTargetCamera cam)
+        attachControl canvas false cam
+        setSpeed 0.3 (freeCameraToTargetCamera cam)
 
         pure cam
 
@@ -163,21 +143,6 @@ runApp canvas canvas2d minimap = do
         setMaterial (standardMaterialToMaterial mat) cursorbox
         pure cursorbox
 
-    sphere <- do
-        s <- createSphere "sphere" 16 2 scene
-        spherePosition <- createVector3 2.0 17.0 2.0
-        setPosition spherePosition s
-        setRenderingGroupId terrainRenderingGroup s
-        ellipsoid <- createVector3 0.5 0.5 0.5
-        setEllipsoid ellipsoid (meshToAbstractMesh s)
-        AbstractMesh.setCheckCollisions true (meshToAbstractMesh s)
-
-        -- let options = defaultPhysicsImpostorParameters { mass = 1.0 }
-        -- impostor <- createPhysicsImpostor (meshToIPhysicsEnabledObject s) sphereImpostor options scene
-        -- AbstractMesh.setPhysicsImpostor impostor (meshToAbstractMesh s)
-
-        pure s
-
     -- skybox
     do
         skyBoxCubeTex <- createCubeTexture "skybox/skybox" scene
@@ -205,7 +170,8 @@ runApp canvas canvas2d minimap = do
         mousePosition: { x: 0, y: 0 },
         debugLayer: false,
         yaw: 0.0,
-        pitch: 0.0
+        pitch: 0.0,
+        velocity: { x: 0.0, y: 0.0, z: 0.0 }
     }
 
     onMouseMove \e -> do
@@ -223,36 +189,6 @@ runApp canvas canvas2d minimap = do
     prepareModeButton "move" Move
     prepareModeButton "add" Put
     prepareModeButton "remove" Remove
-
-    onKeyDown \e -> do
-
-        when (e.keyCode == 32) do
-            --moveVector <- createVector3 0.0 1.0 0.0
-        --    cameraPosition <- getPosition camera
-        --    moveWithCollisions moveVector
-
-            spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere)
-            moveVector <- createVector3 0.1 1.0 0.1
-            moveWithCollisions moveVector (meshToAbstractMesh sphere)
-            pure unit
-
-        when (e.keyCode == 37) do -- left
-            modifyRef ref \(State state) -> State state { yaw = state.yaw + 0.02 }
-        when (e.keyCode == 39) do -- right
-            modifyRef ref \(State state) -> State state { yaw = state.yaw - 0.02 }
-        when (e.keyCode == 38) do -- up
-            modifyRef ref \(State state) -> State state { pitch = max (-1.5) $ min 1.5 (state.pitch + 0.02) }
-        when (e.keyCode == 40) do -- down
-            modifyRef ref \(State state) -> State state { pitch = max (-1.5) $ min 1.5 (state.pitch - 0.02) }
-
-        when (e.keyCode == 87) do   -- w
-            velocity <- createVector3 0.1 0.0 0.0
-            moveWithCollisions velocity (meshToAbstractMesh sphere)
-        when (e.keyCode == 83) do  -- s
-            velocity <- createVector3 (negate 0.1) 0.0 0.0
-            moveWithCollisions velocity (meshToAbstractMesh sphere)
-
-
 
     onButtonClick "debuglayer" do
         modifyRef ref (\(State state) -> State state { debugLayer = not state.debugLayer })
@@ -367,32 +303,8 @@ runApp canvas canvas2d minimap = do
 
         State state <- readRef ref
 
-
-        -- sphere
-
-
-        do
-            spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere) >>= runVector3
-            let spherePositionChunkIndex = globalPositionToChunkIndex spherePosition.x spherePosition.y spherePosition.z
-
-            -- when (chunkIndexRange cameraPositionChunkIndex spherePositionChunkIndex <= collesionEnabledRange) do
-            g <- createVector3 0.0 (-0.1) 0.0
-            moveWithCollisions g (meshToAbstractMesh sphere)
-
         -- update camera position
-
-        spherePosition <- AbstractMesh.getPosition (meshToAbstractMesh sphere)
-        Camera.setPosition spherePosition (targetCameraToCamera camera)
-
-        let t = cos state.pitch
-        let ctx = cos state.yaw * t
-        let cty = sin state.pitch
-        let ctz = sin state.yaw * t
-
-        cameraDirection <- createVector3 ctx cty ctz
-        setTarget (add spherePosition cameraDirection) camera
-
-        cameraPosition <- runVector3 spherePosition
+        cameraPosition <- Camera.getPosition (freeCameraToCamera camera) >>= runVector3
         let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
 
 
@@ -460,81 +372,16 @@ runApp canvas canvas2d minimap = do
             State st <- readRef ref
             for_ (getChunkMap st.terrain) \(dat@{ blocks: Chunk chunk }) -> do
                 let r = chunkIndexRange chunk.index cameraPositionChunkIndex
-                --let enabled = r <= collesionEnabledRange
-                let enabled = true
+                let enabled = r <= collesionEnabledRange
                 AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.grassBlockMesh)
                 AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.waterBlockMesh)
 
+
         do
-            mapContext <- getContext2D minimap
+            pos <- Camera.getPosition (freeCameraToCamera camera) >>= runVector3
+            cameraRot <- getRotation (freeCameraToTargetCamera camera) >>= runVector3
+            renderMiniMap state.terrain pos cameraRot minimap
 
-            pos <- getPosition (targetCameraToCamera camera) >>= runVector3
-            let i = runChunkIndex (globalPositionToChunkIndex pos.x pos.y pos.z)
-
-            clearRect mapContext { x: 0.0, y: 0.0, w: 1280.0, h:720.0 }
-
-
-            --fillRect mapContext { x: 0.0, y: 0.0, w: 1000.0, h: 1000.0 }
-
-            cameraRot <- getRotation camera >>= runVector3
-            withContext mapContext do
-                translate { translateX: 200.0, translateY: 150.0 } mapContext
-
-                rotate ( - cameraRot.y) mapContext
-
-                translate { translateX: -pos.x, translateY: pos.z } mapContext
-
-                setFillStyle "rgba(0, 200, 0, 0.3)" mapContext
-                for_ (getChunkMap state.terrain) \(dat@{ blocks: Chunk chunk }) -> do
-                    let index = runChunkIndex chunk.index
-                    fillRect mapContext {
-                        x: Int.toNumber (chunkSize * index.x),
-                        y: Int.toNumber (chunkSize * negate index.z),
-                        w: Int.toNumber chunkSize,
-                        h: Int.toNumber chunkSize
-                    }
-
-                -- x axis
-                setStrokeStyle "rgba(255, 0, 0, 0.5)" mapContext
-                strokeRect mapContext { x: 0.0, y: 0.0, w: 2000.0, h: 1.0 }
-
-                setStrokeStyle "rgba(200, 200, 200, 0.5)" mapContext
-                strokeRect mapContext { x: negate 2000.0, y: 0.0, w: 2000.0, h: 1.0 }
-
-                -- z axis
-                setStrokeStyle "rgba(0, 0, 255, 0.5)" mapContext
-                strokeRect mapContext { x: 0.0, y: negate 2000.0, w: 1.0, h: 2000.0 }
-
-                setStrokeStyle "rgba(200, 200, 200, 0.5)" mapContext
-                strokeRect mapContext { x: 0.0, y: 0.0, w: 1.0, h: 2000.0 }
-
-                translate { translateX: pos.x, translateY: -pos.z } mapContext
-
-                -- position
-                rotate (cameraRot.y - 3.14159265 * 0.5) mapContext
-                setFillStyle "rgba(255, 255, 0, 0.5)" mapContext
-                fillPath mapContext do
-                    arc mapContext { x: 0.0, y: 0.0,  r: 20.0, start: -0.5, end: 0.5 }
-                    lineTo mapContext 0.0 0.0
-                    closePath mapContext
-
-
-                setFillStyle "orange" mapContext
-                fillRect mapContext { x: -3.0, y: -3.0, w: 6.0, h: 6.0 }
-
-
-
-
-
-            --putImageData context imageMap 0.0 0.0
-            setFillStyle "white" mapContext
-            fillText mapContext (" x: " <> show pos.x) 10.0 20.0
-            fillText mapContext (" y: " <> show pos.y) 10.0 40.0
-            fillText mapContext (" z: " <> show pos.z) 10.0 60.0
-
-            fillText mapContext ("ix: " <> show i.x) 10.0 80.0
-            fillText mapContext ("iy: " <> show i.y) 10.0 100.0
-            fillText mapContext ("iz: " <> show i.z) 10.0 120.0
 
         render scene
 

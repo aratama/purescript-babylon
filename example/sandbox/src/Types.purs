@@ -1,13 +1,13 @@
-module Graphics.Babylon.Example.Types where
+module Graphics.Babylon.Example.Sandbox.Types where
 
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Graphics.Babylon (BABYLON)
+import Graphics.Babylon.Example.Sandbox.Vec (Vec)
 import Graphics.Canvas (CANVAS)
-
-import Graphics.Babylon.Example.Terrain (Terrain)
+import Graphics.Babylon.Example.Sandbox.Terrain (Terrain)
 import Graphics.Babylon.StandardMaterial (StandardMaterial)
 import WebWorker (OwnsWW)
 
@@ -21,7 +21,8 @@ newtype State = State {
     mousePosition :: { x :: Int, y :: Int },
     debugLayer :: Boolean,
     yaw :: Number,
-    pitch :: Number
+    pitch :: Number,
+    velocity :: Vec
 }
 
 type Materials = {

@@ -5,8 +5,7 @@
   "scripts": {
     "test": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/**/*.purs && psc-bundle --module Graphics.Babylon.Test --main Graphics.Babylon.Test --output public/index.js output/**/*.js && node public/index.js",
     "compile-sandbox": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/sandbox/src/**/*.purs",
-    "bundle-sandbox-main": "psc-bundle --module Main --main Main --output example/sandbox/public/index.js output/**/*.js",
-    "bundle-sandbox-worker": "psc-bundle --module Graphics.Babylon.Example.Worker --main Graphics.Babylon.Example.Worker --output example/sandbox/public/worker.js output/**/*.js",
+    "bundle-sandbox-main": "psc-bundle --module Graphics.Babylon.Example.Sandbox.Main --main Graphics.Babylon.Example.Sandbox.Main --output example/sandbox/public/index.js output/**/*.js",
     "build-sandbox": "npm run compile-sandbox && npm run bundle-sandbox-main",
     "build": "npm run build-sandbox",
     "server": "start http-server example/sandbox/public",

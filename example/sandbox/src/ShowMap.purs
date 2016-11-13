@@ -1,6 +1,5 @@
 module Data.ShowMap (ShowMap, lookup, member, insert, delete, fromFoldable, toList, empty, size, fromStrMap) where
 
-import Control.Alt (alt)
 import Data.Foldable (class Foldable, foldMap, foldl, foldr)
 import Data.Int (floor)
 import Data.List (List)
@@ -42,7 +41,7 @@ empty = ShowMap StrMap.empty
 fromFoldable :: forall f k a. (Show k, Foldable f) => f (Tuple k a) -> ShowMap k a
 fromFoldable f = foldl (\m (Tuple k v) -> insert k v m) empty f
 
-fromList :: forall f k a. (Show k) => List (Tuple k a) -> ShowMap k a
+fromList :: forall k a. (Show k) => List (Tuple k a) -> ShowMap k a
 fromList f = foldl (\m (Tuple k v) -> insert k v m) empty f
 
 toList :: forall k a. ShowMap k a -> List (Tuple String a)

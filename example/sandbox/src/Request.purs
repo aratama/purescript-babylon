@@ -1,8 +1,7 @@
-module Graphics.Babylon.Example.Request (generateChunkAff, regenerateChunkAff, generateMesh, postProcess) where
+module Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess) where
 
 import Control.Alternative (pure)
 import Control.Bind (bind)
-import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (CONSOLE)
 import Control.Monad.Eff.Exception (Error)
@@ -11,30 +10,22 @@ import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Ref (REF, Ref, readRef)
 import Control.Monad.Except (runExcept)
 import Data.Either (Either(..))
-import Data.Foreign.Class (write, read)
+import Data.Foreign.Class (read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
-import Graphics.Babylon.AbstractMesh (setPhysicsImpostor)
-import Graphics.Babylon.Mesh (meshToAbstractMesh, meshToIPhysicsEnabledObject)
-import Graphics.Babylon.PhysicsImpostor (createPhysicsImpostor, defaultPhysicsImpostorParameters, meshImpostor)
 import Prelude (show, ($), (=<<))
-import WebWorker (MessageEvent(MessageEvent), OwnsWW, WebWorker, onmessageFromWorker, postMessageToWorker)
+import WebWorker (MessageEvent(MessageEvent), OwnsWW)
 
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Mesh (createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
 import Graphics.Babylon.StandardMaterial (StandardMaterial, standardMaterialToMaterial)
 import Graphics.Babylon.Types (Mesh, Scene)
 import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexData)
-import Graphics.Babylon.Example.Types (Materials, State(State))
-import Graphics.Babylon.Example.Chunk (Chunk(..))
-import Graphics.Babylon.Example.ChunkIndex (ChunkIndex, runChunkIndex)
-import Graphics.Babylon.Example.Generation (createBlockMap, createTerrainGeometry)
-import Graphics.Babylon.Example.Message (Command(..))
-import Graphics.Babylon.Example.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
-import Graphics.Babylon.Example.VertexDataPropsData (VertexDataPropsData(..))
-
-enableWorker :: Boolean
-enableWorker = false
+import Graphics.Babylon.Example.Sandbox.Types (Materials, State(State))
+import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
+import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 
 generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> StandardMaterial -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
 generateMesh index verts mat scene = do
@@ -47,10 +38,6 @@ generateMesh index verts mat scene = do
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
     setMaterial (standardMaterialToMaterial mat) terrainMesh
-
-    --impostor <- createPhysicsImpostor (meshToIPhysicsEnabledObject terrainMesh) meshImpostor defaultPhysicsImpostorParameters scene
-    --setPhysicsImpostor impostor (meshToAbstractMesh terrainMesh)
-
     pure terrainMesh
 
 receiveChunk :: forall eff. Materials -> Scene -> Ref State
@@ -75,29 +62,4 @@ postProcess ref materials scene (VertexDataPropsData verts@{ terrain: Chunk chun
     grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
     waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
     pure { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
-
-generateChunkAff :: forall eff. Ref State -> WebWorker -> Materials -> ChunkIndex -> Scene -> Aff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
-generateChunkAff ref ww materials index scene = makeAff \reject resolve -> do
-
-    let seed = 0
-
-    if enableWorker
-        then do
-            postMessageToWorker ww $ write $ GenerateTerrain index seed
-            onmessageFromWorker ww $ receiveChunk materials scene ref reject resolve
-        else do
-            let boxMap = createBlockMap index 0
-            result <- postProcess ref materials scene (createTerrainGeometry boxMap)
-            resolve result
-
-regenerateChunkAff :: forall eff. Ref State -> WebWorker -> Materials -> ChunkWithMesh -> Scene -> Aff (ref :: REF, now :: NOW, err :: EXCEPTION.EXCEPTION,  console :: CONSOLE, ownsww :: OwnsWW, babylon :: BABYLON | eff) ChunkWithMesh
-regenerateChunkAff ref ww materials chunkWithMesh scene = makeAff \reject resolve -> do
-    let seed = 0
-    if enableWorker
-        then do
-            postMessageToWorker ww $ write $ RegenerateTerrain chunkWithMesh.blocks
-            onmessageFromWorker ww $ receiveChunk materials scene ref reject resolve
-        else do
-            result <- postProcess ref materials scene (createTerrainGeometry chunkWithMesh.blocks)
-            resolve result
 
