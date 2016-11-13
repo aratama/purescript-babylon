@@ -133,8 +133,6 @@ runApp canvas canvas2d minimap = do
         -- shadow
         shadowGenerator <- createShadowGenerator shadowMapSize light
         setBias 0.000005 shadowGenerator
-        -- setBias 0.000002 shadowGenerator
-        --setBias 0.0 shadowGenerator
         getShadowMap shadowGenerator
 
     cursor <- do
