@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "test": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/**/*.purs && psc-bundle --module Graphics.Babylon.Test --main Graphics.Babylon.Test --output public/index.js output/**/*.js && node public/index.js",
+    "test": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/**/*.purs && psc-bundle --module Graphics.Babylon.Test --main Graphics.Babylon.Test --output example/sandbox/public/index.js output/**/*.js && node example/sandbox/public/index.js",
     "compile-sandbox": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs example/sandbox/src/**/*.purs",
     "bundle-sandbox": "psc-bundle --module Graphics.Babylon.Example.Sandbox.Main --main Graphics.Babylon.Example.Sandbox.Main --output example/sandbox/public/index.js output/**/*.js",
     "build-sandbox": "npm run compile-sandbox && npm run bundle-sandbox",

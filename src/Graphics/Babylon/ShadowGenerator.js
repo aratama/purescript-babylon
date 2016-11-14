@@ -46,3 +46,11 @@ exports.setBias = function(bias){
         }
     }
 }
+
+exports.setUsePoissonSampling = function(usePoissonSampling){
+    return function(generator){
+        return function(){
+            generator.usePoissonSampling = usePoissonSampling;
+        }
+    }
+}

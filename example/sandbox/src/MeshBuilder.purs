@@ -11,17 +11,22 @@ import Data.Ring (negate)
 import Data.ShowMap (member, toList)
 import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
+import Graphics.Babylon.Example.Sandbox.Block (Block(..))
+import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex, runBlockIndex)
+import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..), grassBlock, waterBlock)
+import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.Vec (vec)
+import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import Prelude (pure, (#), ($), (*), (+), (-), (<$>), (<*>), (==))
-import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex, runBlockIndex)
-import Graphics.Babylon.Example.Sandbox.Vec (vec)
-import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
-import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
-import Graphics.Babylon.Example.Sandbox.Block (Block(..))
 
-createTerrainGeometry :: Chunk -> VertexDataPropsData
-createTerrainGeometry (Chunk terrain) = pureST do
+
+foreign import createTerrainGeometryJS :: BlockType -> BlockType -> Chunk -> VertexDataPropsData
+
+createTerrainGeometry = createTerrainGeometryJS grassBlock waterBlock
+
+createTerrainGeometry' :: Chunk -> VertexDataPropsData
+createTerrainGeometry' (Chunk terrain) = pureST do
 
     let map = terrain.map
 

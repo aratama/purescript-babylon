@@ -13,6 +13,7 @@ import Data.Either (Either(..))
 import Data.Foreign.Class (read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
+import Graphics.Babylon.Material (Material)
 import Prelude (show, ($), (=<<))
 
 import Graphics.Babylon (BABYLON)
@@ -26,7 +27,7 @@ import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
 import Graphics.Babylon.Example.Sandbox.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 
-generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> StandardMaterial -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
+generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> Material -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
 generateMesh index verts mat scene = do
     let rci = runChunkIndex index
     let cx = rci.x
@@ -36,7 +37,7 @@ generateMesh index verts mat scene = do
     applyToMesh terrainMesh false =<< createVertexData (verts)
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
-    setMaterial (standardMaterialToMaterial mat) terrainMesh
+    setMaterial mat terrainMesh
     pure terrainMesh
 
 postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, babylon :: BABYLON | eff) ChunkWithMesh

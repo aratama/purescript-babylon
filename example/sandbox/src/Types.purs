@@ -5,10 +5,11 @@ import Control.Monad.Eff.Now (NOW)
 import Control.Monad.Eff.Ref (REF)
 import DOM (DOM)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Example.Sandbox.Vec (Vec)
-import Graphics.Canvas (CANVAS)
 import Graphics.Babylon.Example.Sandbox.Terrain (Terrain)
+import Graphics.Babylon.Example.Sandbox.Vec (Vec)
+import Graphics.Babylon.Material (Material)
 import Graphics.Babylon.StandardMaterial (StandardMaterial)
+import Graphics.Canvas (CANVAS)
 
 type Effects eff = (canvas :: CANVAS, now :: NOW, console :: CONSOLE, dom :: DOM, babylon :: BABYLON, ref :: REF | eff)
 
@@ -25,7 +26,7 @@ newtype State = State {
 }
 
 type Materials = {
-    boxMat :: StandardMaterial,
-    waterBoxMat :: StandardMaterial
+    boxMat :: Material,
+    waterBoxMat :: Material
 }
 

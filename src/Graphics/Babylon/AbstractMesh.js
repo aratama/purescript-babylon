@@ -124,3 +124,11 @@ exports.setPhysicsImpostor = function(impostor){
         }
     }
 }
+
+exports.setIsVisible = function(isVisible){
+    return function(mesh){
+        return function(){
+            mesh.isVisible = isVisible;
+        }
+    }
+}

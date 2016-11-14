@@ -28,12 +28,14 @@ foreign import lookAt :: forall eff. Vector3 -> Number -> Number -> Number -> Ab
 
 foreign import setIsPickable :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setEllipsoid  :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+foreign import setEllipsoid :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setEllipsoidOffset  :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+foreign import setEllipsoidOffset :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import getPosition  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Vector3
+foreign import getPosition :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Vector3
 
-foreign import setPosition  :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+foreign import setPosition :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setPhysicsImpostor  :: forall eff. PhysicsImpostor -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+foreign import setPhysicsImpostor :: forall eff. PhysicsImpostor -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setIsVisible :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit

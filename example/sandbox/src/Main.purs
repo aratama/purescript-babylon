@@ -24,7 +24,7 @@ import Data.ShowMap (delete, insert, isEmpty)
 import Data.Traversable (for, sequence)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions, setIsPickable) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions, setIsPickable, setIsVisible) as AbstractMesh
 import Graphics.Babylon.Camera (getPosition) as Camera
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
@@ -42,7 +42,7 @@ import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.MiniMap (renderMiniMap)
 import Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess)
 import Graphics.Babylon.Example.Sandbox.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
-import Graphics.Babylon.Example.Sandbox.Types (Mode(Move, Remove, Put), State(State), Effects)
+import Graphics.Babylon.Example.Sandbox.Types (Effects, Mode(..), State(State))
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setCheckCollisions)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
@@ -52,12 +52,13 @@ import Graphics.Babylon.Mesh (getTotalIndices, createBox, meshToAbstractMesh, se
 import Graphics.Babylon.Node (getName)
 import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
-import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setRenderList)
+import Graphics.Babylon.ShadowGenerator (setUsePoissonSampling, createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
 import Graphics.Babylon.TargetCamera (getRotation, setSpeed, setTarget)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
+import Graphics.Babylon.WaterMaterial (createWaterMaterial, setBumpTexture, addToRenderList, waterMaterialToMaterial, setWaveHeight, setWindForce)
 import Graphics.Canvas (CanvasElement, createImageData, getCanvasElementById, getContext2D)
 import Math (round)
 import Prelude (otherwise, (#), ($), (+), (-), (/=), (<$>), (<=), (<>), (==), (<))
@@ -80,14 +81,13 @@ terrainRenderingGroup = 1
 collesionEnabledRange :: Int
 collesionEnabledRange = 1
 
+enableWaterMaterial :: Boolean
+enableWaterMaterial = false
+
 runApp :: forall eff. Canvas -> CanvasElement -> CanvasElement -> Eff (Effects eff) Unit
-runApp canvas canvas2d minimap = do
+runApp canvasGL canvas2d minimap = do
 
-    context <- getContext2D canvas2d
-
-    engine <- createEngine canvas true
-
-    imageMap <- createImageData context 256.0 256.0
+    engine <- createEngine canvasGL true
 
     -- create a basic BJS Scene object
     scene <- do
@@ -111,8 +111,8 @@ runApp canvas canvas2d minimap = do
         cameraTarget <- createVector3 5.0 3.0 5.0
         setTarget cameraTarget (freeCameraToTargetCamera cam)
 
-        -- attach the camera to the canvas
-        attachControl canvas false cam
+        -- attach the camera to the canvasGL
+        attachControl canvasGL false cam
         setSpeed 0.3 (freeCameraToTargetCamera cam)
 
         pure cam
@@ -133,12 +133,14 @@ runApp canvas canvas2d minimap = do
         -- shadow
         shadowGenerator <- createShadowGenerator shadowMapSize light
         setBias 0.000005 shadowGenerator
+        setUsePoissonSampling true shadowGenerator
         getShadowMap shadowGenerator
 
     cursor <- do
         cursorbox <- createBox "cursor" 1.0 scene
         setRenderingGroupId 1 cursorbox
         AbstractMesh.setIsPickable false (meshToAbstractMesh cursorbox)
+        AbstractMesh.setIsVisible false (meshToAbstractMesh cursorbox)
 
         mat <- createStandardMaterial "cursormat" scene
         setWireframe true (standardMaterialToMaterial mat)
@@ -147,7 +149,7 @@ runApp canvas canvas2d minimap = do
         pure cursorbox
 
     -- skybox
-    do
+    skybox <- do
         skyBoxCubeTex <- createCubeTexture "skybox/skybox" scene
         setCoordinatesMode sKYBOX_MODE (cubeTextureToTexture skyBoxCubeTex)
 
@@ -161,11 +163,11 @@ runApp canvas canvas2d minimap = do
         setSpecularColor skySpec skyboxMaterial
         setReflectionTexture (cubeTextureToTexture skyBoxCubeTex) skyboxMaterial
 
-        skybox <- createBox "skybox" 1000.0 scene
-        setRenderingGroupId skyBoxRenderingGruop skybox
-        setMaterial (standardMaterialToMaterial skyboxMaterial) skybox
-        setInfiniteDistance true skybox
-
+        skyboxMesh <- createBox "skybox" 1000.0 scene
+        setRenderingGroupId skyBoxRenderingGruop skyboxMesh
+        setMaterial (standardMaterialToMaterial skyboxMaterial) skyboxMesh
+        setInfiniteDistance true skyboxMesh
+        pure skyboxMesh
 
     ref <- newRef $ State {
         mode: Move,
@@ -187,6 +189,10 @@ runApp canvas canvas2d minimap = do
 
     let prepareModeButton id value = onButtonClick id do
             modifyRef ref (\(State state) -> State state { mode = value })
+            AbstractMesh.setIsVisible (case value of
+                Put -> true
+                Remove -> true
+                Move -> false) (meshToAbstractMesh cursor)
 
 
     prepareModeButton "move" Move
@@ -269,11 +275,23 @@ runApp canvas canvas2d minimap = do
         -- setSpecularPower 0.0 boxMat
         setDiffuseTexture boxTex boxMat
 
-        waterBoxTex <- createTexture "water-block.png" scene
-        waterBoxMat <- createStandardMaterial "water-block" scene
-        setDiffuseTexture waterBoxTex waterBoxMat
 
-        pure { boxMat, waterBoxMat }
+        waterMaterial <- if enableWaterMaterial
+            then do
+                mat <- createWaterMaterial "water-block" scene
+                tex <- createTexture "waterbump.png" scene
+                setBumpTexture tex mat
+                addToRenderList (meshToAbstractMesh skybox) mat
+                setWaveHeight 0.0 mat
+                setWindForce 1.0 mat
+                pure (waterMaterialToMaterial mat)
+            else do
+                tex <- createTexture "water-block.png" scene
+                mat <- createStandardMaterial "water-block" scene
+                setDiffuseTexture tex mat
+                pure (standardMaterialToMaterial mat)
+
+        pure { boxMat: standardMaterialToMaterial boxMat, waterBoxMat: waterMaterial }
 
 
     onMouseClick \e -> do
@@ -406,5 +424,5 @@ main = onDOMContentLoaded do
     canvas2dM <- getCanvasElementById "canvas2d"
     minimapM <- getCanvasElementById "minimap"
     case canvasM, canvas2dM, minimapM of
-        Just canvas, Just canvas2d, Just minimap -> runApp canvas canvas2d minimap
-        _, _, _ -> error "canvas not found"
+        Just canvasGL, Just canvas2d, Just minimap -> runApp canvasGL canvas2d minimap
+        _, _, _ -> error "canvasGL not found"

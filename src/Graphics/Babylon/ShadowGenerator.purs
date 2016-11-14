@@ -25,3 +25,5 @@ foreign import pushToRenderList :: forall eff. Mesh -> RenderList -> Eff (babylo
 foreign import setRenderList :: forall eff. Array AbstractMesh -> ShadowMap -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setBias  :: forall eff. Number -> ShadowGenerator -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setUsePoissonSampling :: forall eff. Boolean -> ShadowGenerator -> Eff (babylon :: BABYLON | eff) Unit

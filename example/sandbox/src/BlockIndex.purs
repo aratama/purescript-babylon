@@ -3,8 +3,9 @@ module Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runB
 import Control.Alternative (pure)
 import Data.Foreign (toForeign, unsafeFromForeign)
 import Data.Foreign.Class (class AsForeign, class IsForeign)
-import Data.Generic (class Generic, gCompare, gEq)
+import Data.Generic (class Generic, gCompare, gEq, gShow)
 import Data.Ord (class Ord)
+import Data.Show (show)
 import Prelude (class Eq, class Show)
 
 newtype BlockIndex = BlockIndex String
@@ -12,6 +13,8 @@ newtype BlockIndex = BlockIndex String
 foreign import blockIndex :: Int -> Int -> Int -> BlockIndex
 
 foreign import runBlockIndex :: BlockIndex -> { x :: Int, y :: Int, z :: Int }
+
+foreign import showBlockIndex :: BlockIndex -> String
 
 derive instance generic_Index3D :: Generic BlockIndex
 

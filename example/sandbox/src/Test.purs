@@ -3,6 +3,7 @@ module Graphics.Babylon.Test where
 import Control.Bind (bind)
 import Control.Monad (join)
 import Data.Array (length)
+import Data.Date (year)
 import Data.Foldable (all)
 import Data.Int (toNumber, floor)
 import Data.List ((..))
@@ -11,17 +12,17 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit, Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Example.Sandbox.Block (Block(..))
-import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex, BlockIndex)
+import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex)
+import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.Terrain (globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex)
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import PerlinNoise (createNoise, simplex2)
-import Prelude (div, negate, pure, ($), (*), (+), (<), (<#>))
+import Prelude (div, negate, pure, ($), (*), (+), (<), (<#>), (&&), (==), mod)
 import Test.StrongCheck (SC, assert, assertEq, quickCheck)
-import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 
 main :: SC (babylon :: BABYLON) Unit
 main = do
@@ -40,6 +41,20 @@ main = do
     assert $ assertEq (globalPositionToGlobalIndex (-0.9) (-1.0) (-1.1)) (blockIndex (-1) (-1) (-2))
     assert $ assertEq (globalPositionToGlobalIndex (-15.9) (-16.0) (-16.1)) (blockIndex (-16) (-16) (-17))
 
+
+    assert $ assertEq let xyz = runBlockIndex (blockIndex 1 2 3) in xyz.x == 1 && xyz.y == 2 && xyz.z == 3
+    assert $ assertEq let xyz = runBlockIndex (blockIndex (-1) (-2) (-3)) in xyz.x == (-1) && xyz.y == (-2) && xyz.z == (-3)
+
+    let checkRange n = (-65536) < n && n < 65536
+    quickCheck \x y z -> let
+        nx = mod x 1000
+        ny = mod y 1000
+        nz = mod z 1000
+        xyz = runBlockIndex (blockIndex nx ny nz)
+        in
+        nx == xyz.x && ny == xyz.y && nz == xyz.z
+
+{-
     quickCheck \seed ->
         let noise = createNoise seed
             blocks = (0 .. 15) <#> \iz ->
@@ -62,6 +77,8 @@ main = do
 
 
     pure unit
+
+-}
 
 {-}
 test :: SC (babylon :: BABYLON) Unit
