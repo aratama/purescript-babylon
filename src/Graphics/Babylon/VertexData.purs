@@ -17,7 +17,8 @@ newtype VertexDataProps = VertexDataProps {
     indices :: Array Int,
     positions :: Array Number,
     normals :: Array Number,
-    uvs :: Array Number
+    uvs :: Array Number,
+    colors :: Array Number
 }
 
 derive instance generic_VertexDataProps :: Generic VertexDataProps
@@ -31,7 +32,8 @@ instance isForeign_VertexDataProps :: IsForeign VertexDataProps where
         positions <- readProp "positions" fn
         normals <- readProp "normals" fn
         uvs <- readProp "uvs" fn
-        pure (VertexDataProps { indices, positions, normals, uvs })
+        colors <- readProp "colors" fn
+        pure (VertexDataProps { indices, positions, normals, uvs, colors })
 
 instance asForeign :: AsForeign VertexDataProps where
     write = toForeign

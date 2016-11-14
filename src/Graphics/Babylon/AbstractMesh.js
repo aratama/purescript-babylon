@@ -132,3 +132,11 @@ exports.setIsVisible = function(isVisible){
         }
     }
 }
+
+exports.setUseVertexColors  = function(useVertexColors ){
+    return function(mesh){
+        return function(){
+            mesh.useVertexColors  = useVertexColors ;
+        }
+    }
+}

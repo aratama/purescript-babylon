@@ -39,3 +39,5 @@ foreign import setPosition :: forall eff. Vector3 -> AbstractMesh -> Eff (babylo
 foreign import setPhysicsImpostor :: forall eff. PhysicsImpostor -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setIsVisible :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setUseVertexColors :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit

@@ -8,7 +8,10 @@ import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex)
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex)
 import Prelude (pure)
 
-newtype Chunk = Chunk { index :: ChunkIndex, map :: ShowMap BlockIndex Block }
+newtype Chunk = Chunk {
+    index :: ChunkIndex,
+    map :: ShowMap BlockIndex Block
+}
 
 instance isForeign_TerrainMap :: IsForeign Chunk where
     read value = pure (unsafeFromForeign value)

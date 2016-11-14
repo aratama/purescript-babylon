@@ -19,7 +19,7 @@ exports.createTerrainGeometryJS = function(grassBlockValue){
             var map = terrain.map;
 
             function prepareArray(){
-                return { offset: 0, indices: [], positions: [], normals: [], uvs: [] }
+                return { offset: 0, indices: [], positions: [], normals: [], uvs: [], colors: [] }
             }
 
             var grass = prepareArray()
@@ -31,48 +31,47 @@ exports.createTerrainGeometryJS = function(grassBlockValue){
 
             Object.values(map).forEach(function(block){
                 var bi = runBlockIndex(block.index)
-                var ix = bi.x
-                var iy = bi.y
-                var iz = bi.z
+                var px = bi.x
+                var py = bi.y
+                var pz = bi.z
 
                 var store = block.blockType == grassBlockValue ? grass : water;
 
-                function square(nix, niy, niz, u){
-                    if(exists(ix + nix, iy + niy, iz + niz)){
+                // nx, ny, nz: normal vector
+                function square(nx, ny, nz, u){
+                    if( ! exists(px + nx, py + ny, pz + nz)){
 
-                    }else{
-                        var px = ix
-                        var py = iy
-                        var pz = iz
-
-                        var nx = nix
-                        var ny = niy
-                        var nz = niz
-
+                        // horizontal extent vector of the plane
                         var ax = ny
                         var ay = nz
                         var az = nx
 
+                        // vertical extent vector of the plane
                         var bx = ay * nz - ay * nx
                         var by = az * nx - ax * nz
                         var bz = ax * ny - ay * nx
 
+                        // half-sized normal vector
                         var dx = nx * 0.5
                         var dy = ny * 0.5
                         var dz = nz * 0.5
 
+                        // half-sized horizontal vector
                         var sx = ax * 0.5
                         var sy = ay * 0.5
                         var sz = az * 0.5
 
+                        // half-sized vertical vector
                         var tx = bx * 0.5
                         var ty = by * 0.5
                         var tz = bz * 0.5
 
+                        // center of the plane
                         var vx = px + 0.5 + dx
                         var vy = py + 0.5 + dy
                         var vz = pz + 0.5 + dz
 
+                        // vertex index offset
                         var offset = store.offset
 
                         store.indices.push(offset + 0);
@@ -107,6 +106,48 @@ exports.createTerrainGeometryJS = function(grassBlockValue){
                         store.normals.push(nx);
                         store.normals.push(ny);
                         store.normals.push(nz);
+
+
+                        var add = 0.2
+                        var base = 0.4
+
+                        var brightness =
+                            (exists(px + nx - ax,      py + ny - ay,      pz + nz - az     ) ? 0 : add) +
+                            (exists(px + nx      - bx, py + ny      - by, pz + nz      - bz) ? 0 : add) +
+                            (exists(px + nx - ax - bx, py + ny - ay - by, pz + nz - az - bz) ? 0 : add) + base;
+
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(1.0);
+
+
+                        var brightness =
+                            (exists(px + nx + ax,      py + ny + ay,      pz + nz + az     ) ? 0 : add) +
+                            (exists(px + nx      - bx, py + ny      - by, pz + nz      - bz) ? 0 : add) +
+                            (exists(px + nx + ax - bx, py + ny + ay - by, pz + nz + az - bz) ? 0 : add) + base;
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(1.0);
+
+                        var brightness =
+                            (exists(px + nx + ax,      py + ny + ay,      pz + nz + az     ) ? 0 : add) +
+                            (exists(px + nx      + bx, py + ny      + by, pz + nz      + bz) ? 0 : add) +
+                            (exists(px + nx + ax + bx, py + ny + ay + by, pz + nz + az + bz) ? 0 : add) + base;
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(1.0);
+
+                        var brightness =
+                            (exists(px + nx - ax,      py + ny - ay,      pz + nz - az     ) ? 0 : add) +
+                            (exists(px + nx      + bx, py + ny      + by, pz + nz      + bz) ? 0 : add) +
+                            (exists(px + nx - ax + bx, py + ny - ay + by, pz + nz - az + bz) ? 0 : add) + base;
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(brightness);
+                        store.colors.push(1.0);
 
                         Array.prototype.push.apply(store.uvs, u)
 

@@ -13,7 +13,9 @@ import Data.Either (Either(..))
 import Data.Foreign.Class (read)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
+import Graphics.Babylon.AbstractMesh (setUseVertexColors)
 import Graphics.Babylon.Material (Material)
+import Graphics.Babylon.Mesh (meshToAbstractMesh)
 import Prelude (show, ($), (=<<))
 
 import Graphics.Babylon (BABYLON)
@@ -37,6 +39,7 @@ generateMesh index verts mat scene = do
     applyToMesh terrainMesh false =<< createVertexData (verts)
     setRenderingGroupId 1 terrainMesh
     setReceiveShadows true terrainMesh
+    setUseVertexColors true (meshToAbstractMesh terrainMesh)
     setMaterial mat terrainMesh
     pure terrainMesh
 

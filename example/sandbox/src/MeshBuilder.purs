@@ -36,7 +36,8 @@ createTerrainGeometry' (Chunk terrain) = pureST do
             positions <- emptySTArray
             normals <- emptySTArray
             uvs <- emptySTArray
-            pure { offset, indices, positions, normals, uvs }
+            colors <- emptySTArray
+            pure { offset, indices, positions, normals, uvs, colors }
 
     grass <- prepareArray
     water <- prepareArray
@@ -98,6 +99,13 @@ createTerrainGeometry' (Chunk terrain) = pureST do
 
                     pushAllSTArray store.uvs u
 
+                    pushAllSTArray store.colors [
+                        0.0, 0.0, 0.0, 1.0,
+                        0.0, 0.0, 0.0, 1.0,
+                        0.0, 0.0, 0.0, 1.0,
+                        0.0, 0.0, 0.0, 1.0
+                    ]
+
                     writeSTRef store.offset (offset + 4)
 
             square (negate 1) 0          0          [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745]
@@ -109,7 +117,7 @@ createTerrainGeometry' (Chunk terrain) = pureST do
             pure (Loop tail)
 
 
-    let freezeStore store = VertexDataProps <$> ({ indices: _, positions: _, normals:_, uvs: _ } <$> freeze store.indices <*> freeze store.positions <*> freeze store.normals <*> freeze store.uvs)
+    let freezeStore store = VertexDataProps <$> ({ indices: _, positions: _, normals:_, uvs: _, colors: _ } <$> freeze store.indices <*> freeze store.positions <*> freeze store.normals <*> freeze store.uvs <*> freeze store.colors)
 
     grassBlocks <- freezeStore grass
     waterBlocks <- freezeStore water

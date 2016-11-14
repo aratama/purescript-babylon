@@ -5,6 +5,7 @@ exports.createVertexData = function(props){
         v.positions = props.positions;
         v.normals = props.normals;
         v.uvs = props.uvs;
+        v.colors = props.colors;
         return v;
     }
 }
