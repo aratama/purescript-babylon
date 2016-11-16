@@ -13,18 +13,21 @@ import Data.Tuple (Tuple(Tuple))
 import Data.Unit (unit)
 import Graphics.Babylon.Example.Sandbox.Block (Block(..))
 import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex, runBlockIndex)
-import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..), grassBlock, waterBlock)
+import Graphics.Babylon.Example.Sandbox.BlockType (BlockTypes, blockTypes, BlockType(..), grassBlock, waterBlock)
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
 import Graphics.Babylon.Example.Sandbox.Vec (vec)
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
 import Prelude (pure, (#), ($), (*), (+), (-), (<$>), (<*>), (==))
 
 
-foreign import createTerrainGeometryJS :: BlockType -> BlockType -> Chunk -> VertexDataPropsData
+foreign import createTerrainGeometryJS :: Int -> BlockTypes -> (ChunkIndex -> { x :: Int, y :: Int, z :: Int }) -> Chunk -> VertexDataPropsData
 
-createTerrainGeometry = createTerrainGeometryJS grassBlock waterBlock
+createTerrainGeometry = createTerrainGeometryJS chunkSize blockTypes runChunkIndex
 
+{-
 createTerrainGeometry' :: Chunk -> VertexDataPropsData
 createTerrainGeometry' (Chunk terrain) = pureST do
 
@@ -123,3 +126,4 @@ createTerrainGeometry' (Chunk terrain) = pureST do
     waterBlocks <- freezeStore water
 
     pure $ VertexDataPropsData {  terrain: Chunk terrain, grassBlocks, waterBlocks }
+-}

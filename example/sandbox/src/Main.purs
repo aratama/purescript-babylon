@@ -20,7 +20,6 @@ import Data.Nullable (toMaybe)
 import Data.Ord (abs, min)
 import Data.Ring (negate)
 import Data.Show (show)
-import Data.ShowMap (delete, insert, isEmpty)
 import Data.Traversable (for, sequence)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, Canvas, onDOMContentLoaded, querySelectorCanvas)
@@ -35,14 +34,16 @@ import Graphics.Babylon.Engine (createEngine, runRenderLoop)
 import Graphics.Babylon.Example.Sandbox.Block (Block(..))
 import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
+import Graphics.Babylon.Example.Sandbox.BoxelMap (delete, insert)
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex, chunkIndexRange, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
 import Graphics.Babylon.Example.Sandbox.Event (onButtonClick, onMouseClick, onMouseMove)
-import Graphics.Babylon.Example.Sandbox.Generation (chunkSize, createBlockMap)
+import Graphics.Babylon.Example.Sandbox.Generation (createBlockMap)
 import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.MiniMap (renderMiniMap)
 import Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess)
-import Graphics.Babylon.Example.Sandbox.Terrain (chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, insertChunk, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.Sandbox.Terrain (globalIndexToLocalIndex, chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, globalPositionToLocalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.Types (Effects, Mode(..), State(State))
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setCheckCollisions)
@@ -322,6 +323,7 @@ runApp canvasGL canvas2d = do
         pure { boxMat: standardMaterialToMaterial boxMat, waterBoxMat: waterMaterial }
 
 
+
     onMouseClick \e -> do
 
         State state <- readRef ref
@@ -333,20 +335,24 @@ runApp canvasGL canvas2d = do
                 let chunkIndex = globalIndexToChunkIndex blockIndex
                 case lookupChunk chunkIndex state.terrain of
                     Nothing -> pure unit
-                    Just chunkData@{ blocks: Chunk { index, map } } -> void do
+                    Just chunkData@{ blocks: Chunk chunk@{ index, blocks: chunkBlocks } } -> void do
+
+                        let localIndex = globalIndexToLocalIndex blockIndex
                         let chunk' = chunkData {
-                                blocks = Chunk { index, map: case state.mode of
-                                    Put -> insert blockIndex (Block { index: blockIndex, blockType: grassBlock }) map
-                                    Remove -> delete blockIndex map
-                                    Move -> map
+                                blocks = Chunk chunk {
+                                    blocks = case state.mode of
+                                        Put -> insert localIndex grassBlock chunkBlocks
+                                        Remove -> delete localIndex chunkBlocks
+                                        Move -> chunkBlocks
+                                    }
                                 }
-                            }
 
                         mesh <- postProcess ref materials scene (createTerrainGeometry chunk'.blocks)
 
                         liftEff $ writeRef ref $ State state {
                             terrain = insertChunk mesh state.terrain
                         }
+
 
     engine # runRenderLoop do
 

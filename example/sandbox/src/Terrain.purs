@@ -1,6 +1,6 @@
 module Graphics.Babylon.Example.Sandbox.Terrain (
  ChunkWithMesh(..), Terrain, emptyTerrain,
- globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex, globalIndexToChunkIndex,
+ globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex, globalIndexToChunkIndex, globalIndexToLocalIndex,
  lookupBlock, insertChunk, lookupChunk, disposeChunk, chunkCount, getChunkMap
 ) where
 
@@ -8,21 +8,24 @@ import Control.Bind (bind)
 import Control.Monad.Eff (Eff)
 import Data.EuclideanRing (mod)
 import Data.Int (floor, toNumber)
-import Data.Maybe (Maybe)
+import Data.Maybe (Maybe(..))
 import Data.ShowMap (ShowMap, empty, insert, lookup, size)
+import Data.String.Regex.Flags (global)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.AbstractMesh (dispose)
-import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, chunkIndex)
-import Graphics.Babylon.Example.Sandbox.Generation (chunkSize)
-import Graphics.Babylon.Example.Sandbox.Vec (Vec)
-import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.Block (Block)
+import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
+import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..), airBlock, blockTypes)
+import Graphics.Babylon.Example.Sandbox.BoxelMap (lookup) as Boxel
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
-import Graphics.Babylon.Types (Mesh)
-
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, chunkIndex, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
+import Graphics.Babylon.Example.Sandbox.LocalIndex (LocalIndex, localIndex, runLocalIndex)
+import Graphics.Babylon.Example.Sandbox.Vec (Vec)
 import Graphics.Babylon.Mesh (meshToAbstractMesh)
-import Prelude ((*), (/), (+), (-), ($))
+import Graphics.Babylon.Types (Mesh)
+import Prelude ((*), (/), (+), (-), ($), (==))
 
 
 type ChunkWithMesh = {
@@ -69,13 +72,23 @@ globalIndexToChunkIndex b = chunkIndex (f bi.x) (f bi.y) (f bi.z)
 lookupChunk :: ChunkIndex -> Terrain -> Maybe ChunkWithMesh
 lookupChunk index (Terrain terrain) = lookup index terrain.map
 
-lookupBlock :: Vec -> Terrain -> Maybe Block
+lookupBlock :: Vec -> Terrain -> Maybe BlockType
 lookupBlock p (Terrain terrain) = do
         let chunkIndex = globalPositionToChunkIndex p.x p.y p.z
-        let index = globalPositionToGlobalIndex p.x p.y p.z
-        { blocks: Chunk { map } } <- lookup chunkIndex terrain.map
-        lookup index map
+        let globalIndex = globalPositionToGlobalIndex p.x p.y p.z
+        let localIndex = globalIndexToLocalIndex globalIndex
+        { blocks: Chunk chunk@{ blocks } } <- lookup chunkIndex terrain.map
+        blockType <- Boxel.lookup localIndex blocks
+        if blockType == airBlock then Nothing else Just blockType
 
+globalIndexToLocalIndex :: BlockIndex -> LocalIndex
+globalIndexToLocalIndex index = localIndex cx cy cz
+  where
+    chunkIndex = runChunkIndex (globalIndexToChunkIndex index)
+    globalIndex = runBlockIndex index
+    cx = globalIndex.x - chunkSize * chunkIndex.x
+    cy = globalIndex.y - chunkSize * chunkIndex.y
+    cz = globalIndex.z - chunkSize * chunkIndex.z
 
 insertChunk :: ChunkWithMesh -> Terrain -> Terrain
 insertChunk cmesh@{ blocks: Chunk chunk@{ index } } (Terrain chunks) = Terrain chunks {

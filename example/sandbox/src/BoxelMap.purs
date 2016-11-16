@@ -1,71 +1,42 @@
-module Data.BoxelMap (BoxelMap, lookup, member, insert, delete, fromFoldable, toList, empty, size, fromStrMap, isEmpty) where
+module Graphics.Babylon.Example.Sandbox.BoxelMap (BoxelMap, empty, lookup, insert, delete) where
 
-import Data.Foldable (class Foldable, foldMap, foldl, foldr)
-import Data.Functor (class Functor, (<$>))
-import Data.Int (floor)
-import Data.List (List, fromFoldable) as List
+import Data.Foldable (class Foldable, foldl)
+import Data.Functor (class Functor)
+import Data.List (List) as List
+import Data.Map (lookup)
 import Data.Maybe (Maybe)
-import Data.Monoid (class Monoid, mempty)
-import Data.Nullable (Nullable, toMaybe, toNullable)
-import Data.Semigroup (class Semigroup, append)
-import Data.Show (class Show, show)
-import Data.StrMap (StrMap, delete, empty, insert, lookup, member, toList, size, isEmpty) as StrMap
-import Data.Traversable (class Traversable, sequence, traverse)
+import Data.Nullable (Nullable, toMaybe)
 import Data.Tuple (Tuple(..))
+import Graphics.Babylon.Example.Sandbox.LocalIndex (LocalIndex)
 
-foreign import data BoxelMap :: * -> * -> *
+foreign import data BoxelMap :: * -> *
 
-instance functor_ShowMap :: (Show k) => Functor (BoxelMap k) where
+instance functor_ShowMap :: Functor BoxelMap where
     map = mapBoxelMap
 
-{-
+foreign import mapBoxelMap :: forall a b. (a -> b) -> BoxelMap a -> BoxelMap b
 
-instance semigroup_ShowMap :: (Semigroup a) => Semigroup (BoxelMap k a) where
-    append (BoxelMap a) (BoxelMap b) = BoxelMap (append a b)
+foreign import _lookup :: forall a. LocalIndex -> BoxelMap a -> Nullable a
 
-instance monoid_ShowMap :: (Monoid a) => Monoid (BoxelMap k a) where
-    mempty = BoxelMap mempty
-
-instance foldable_ShowMap :: Foldable (BoxelMap k) where
-    foldMap f (BoxelMap m) = foldMap f m
-    foldl f a (BoxelMap m) = foldl f a m
-    foldr f a (BoxelMap m) = foldr f a m
-
-
-
-instance traversable_ShowMap :: Traversable (BoxelMap k) where
-    traverse f (BoxelMap m) = map BoxelMap (traverse f m)
-    sequence (BoxelMap m) = map BoxelMap (sequence m)
--}
-
-foreign import mapBoxelMap :: forall k a b. (Show k) => (a -> b) -> BoxelMap k a -> BoxelMap k b
-
-foreign import _lookup :: forall k a. (Show k) => k -> BoxelMap k a -> Nullable a
-
-lookup :: forall k a. (Show k) => k -> BoxelMap k a -> Maybe a
+lookup :: forall a. LocalIndex -> BoxelMap a -> Maybe a
 lookup key map = toMaybe (_lookup key map)
 
-foreign import member :: forall k a. (Show k) => k -> BoxelMap k a -> Boolean
+foreign import member :: forall a. LocalIndex -> BoxelMap a -> Boolean
 
-foreign import insert :: forall k a. (Show k) => k -> a -> BoxelMap k a -> BoxelMap k a
+foreign import insert :: forall a. LocalIndex -> a -> BoxelMap a -> BoxelMap a
 
-foreign import delete :: forall k a. (Show k) => k -> BoxelMap k a -> BoxelMap k a
+foreign import delete :: forall a. LocalIndex -> BoxelMap a -> BoxelMap a
 
-foreign import empty :: forall k a. BoxelMap k a
+foreign import empty :: forall a. BoxelMap a
 
-fromFoldable :: forall f k a. (Show k, Foldable f) => f (Tuple k a) -> BoxelMap k a
+fromFoldable :: forall f a. (Foldable f) => f (Tuple LocalIndex a) -> BoxelMap a
 fromFoldable f = foldl (\m (Tuple k v) -> insert k v m) empty f
 
-fromList :: forall k a. (Show k) => List.List (Tuple k a) -> BoxelMap k a
+fromList :: forall a. List.List (Tuple LocalIndex a) -> BoxelMap a
 fromList f = foldl (\m (Tuple k v) -> insert k v m) empty f
 
-toList :: forall k a. (Show k) => BoxelMap k a -> List.List (Tuple String a)
-toList map = (\entry -> Tuple entry.key entry.value) <$> List.fromFoldable (toArray map)
+foreign import toArray :: forall a. BoxelMap a -> Array { key :: LocalIndex, value :: a }
 
-foreign import toArray :: forall k a. (Show k) => BoxelMap k a -> Array { key :: String, value :: a }
+foreign import size :: forall a. BoxelMap a -> Int
 
-foreign import size :: forall k a. BoxelMap k a -> Int
-
-foreign import fromStrMap :: forall k a. StrMap.StrMap a -> BoxelMap k a
-
-foreign import isEmpty :: forall k a. BoxelMap k a -> Boolean
+--

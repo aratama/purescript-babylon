@@ -14,17 +14,17 @@ import Data.StrMap.ST.Unsafe (unsafeGet)
 import Data.Traversable (for_)
 import Graphics.Babylon.Example.Sandbox.Block (Block(..))
 import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex)
-import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..), grassBlock, waterBlock)
+import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..), BlockTypes, blockTypes, grassBlock, waterBlock)
+import Graphics.Babylon.Example.Sandbox.BoxelMap (BoxelMap, empty) as Boxel
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
 import PerlinNoise (Noise, createNoise, simplex2)
 import Prelude (pure, ($), (*), (+), (-), (<), (<=))
 
+
 maxHeight :: Int
 maxHeight = 25
-
-chunkSize :: Int
-chunkSize = 16
 
 terrainScale :: Number
 terrainScale = 0.01
@@ -33,10 +33,11 @@ waterBlockHeight :: Int
 waterBlockHeight = 3
 
 createBlockMap :: ChunkIndex -> Int -> Chunk
-createBlockMap index seed = createBlockMapJS (createNoise seed) simplex2 index terrainScale  waterBlockHeight maxHeight grassBlock waterBlock 
+createBlockMap index seed = createBlockMapJS (createNoise seed) simplex2 index terrainScale  waterBlockHeight maxHeight blockTypes
 
-foreign import createBlockMapJS :: Noise -> (Number -> Number -> Noise -> Number) -> ChunkIndex -> Number -> Int ->Int -> BlockType -> BlockType -> Chunk
+foreign import createBlockMapJS :: Noise -> (Number -> Number -> Noise -> Number) -> ChunkIndex -> Number -> Int ->Int -> BlockTypes -> Chunk
 
+{-
 createBlockMapPS :: ChunkIndex -> Int -> Chunk
 createBlockMapPS index seed = pureST do
 
@@ -69,8 +70,10 @@ createBlockMapPS index seed = pureST do
 
     pure $ Chunk {
         index,
-        map: fromStrMap map
+        map: fromStrMap map,
+        localMap: Boxel.empty
     }
 
 
 
+-}

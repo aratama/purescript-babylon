@@ -1,7 +1,12 @@
+var CHUNK_SIZE = 16;
+var TOTAL_BLOCKS = CHUNK_SIZE * CHUNK_SIZE * CHUNK_SIZE;
+
+exports.empty = new Uint8Array(TOTAL_BLOCKS);
+
 exports.insert = function(key){
     return function(value){
         return function(map){
-            var m = Object.create(map);
+            var m = new Uint8Array(map);
             m[key] = value;
             return m;
         }
@@ -10,43 +15,39 @@ exports.insert = function(key){
 
 exports.delete = function(key){
     return function(map){
-        var m = Object.create(map);
-        delete m[key];
+        var m = new Uint8Array(map);
+        m[key] = 0;
         return m;
     }
 }
 
 exports.member = function(key){
     return function(map){
-        return !! m[key];
+        return map[key] !== 0;
     }
 }
 
-exports.empty = Object.create({});
-
 exports.isEmpty = function(map){
-    return Object.keys(map).length === 0;
+    throw new Error();
 }
 
 exports.size = function(map){
-    return Object.keys(map).length;
+    throw new Error();
 }
 
 exports.fromStrMap = function(map){
-    return map;
+    throw new Error();
 }
 
 exports.toArray = function(map){
-    return map;
+    throw new Error();
 }
 
 exports.mapBoxelMap = function(f){
     return function(map){
-        var keys = Object.keys();
-        var m = Object.create({});
-        for(var i = 0; i < keys.length; i++){
-            var key = keys[i];
-            m[key] = f(map[key]);
+        var m = new Uint8Array();
+        for(var i = 0; i < TOTAL_BLOCKS; i++){
+            m[i] = f[map[i]];
         }
         return m;
     }

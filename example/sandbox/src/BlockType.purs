@@ -5,11 +5,27 @@ import Prelude (class Eq, class Show)
 
 newtype BlockType = BlockType Int
 
+airBlock :: BlockType
+airBlock = BlockType 0
+
 grassBlock :: BlockType
-grassBlock = BlockType 0
+grassBlock = BlockType 1
 
 waterBlock :: BlockType
-waterBlock = BlockType 1
+waterBlock = BlockType 2
+
+type BlockTypes = {
+    airBlock :: BlockType,
+    grassBlock :: BlockType,
+    waterBlock :: BlockType
+}
+
+blockTypes :: BlockTypes
+blockTypes = {
+    airBlock: airBlock,
+    grassBlock: grassBlock,
+    waterBlock: waterBlock
+}
 
 derive instance generic_BlockType :: Generic BlockType
 
