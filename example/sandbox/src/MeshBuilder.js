@@ -1,18 +1,83 @@
-function vec(x, y, z){
-    return { x:x, y:y, z:z }
-}
 
-var nxUV = [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745];
-var pxUV = [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745];
-var nyUV = [0.005, 0.505, 0.245, 0.505, 0.245, 0.745, 0.005, 0.745];
-var pyUV = [0.005, 0.755, 0.245, 0.755, 0.245, 0.995, 0.005, 0.995];
-var nzUV = [0.005, 0.745, 0.005, 0.505, 0.245, 0.505, 0.245, 0.745];
-var pzUV = [0.245, 0.505, 0.245, 0.745, 0.005, 0.745, 0.005, 0.505];
 
 exports.createTerrainGeometryJS = function(chunkSize){
     return function(blockTypes){
         return function(runChunkIndex){
             return function(chunk){
+
+
+                var TEXTURE_SIZE = 4096;
+                var CHIP_SIZE = 64;
+                var CHIP_RATIO_0 = 0;
+                var CHIP_RATIO_1 = CHIP_SIZE / TEXTURE_SIZE;
+                var CHIP_RATIO_2 = CHIP_RATIO_1 * 2;
+                var CHIP_RATIO_3 = CHIP_RATIO_1 * 3;
+                var CHIP_RATIO_4 = CHIP_RATIO_1 * 4;
+
+                function vec(x, y, z){
+                    return { x:x, y:y, z:z }
+                }
+
+                function nxUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1)
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                }
+                function pxUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1)
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                }
+                function nyUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(CHIP_RATIO_3);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(CHIP_RATIO_3);
+                }
+                function pyUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                }
+                function nzUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1)
+                }
+                function pzUV(uvs, dx){
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                    uvs.push(CHIP_RATIO_0 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1)
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_1);
+                    uvs.push(CHIP_RATIO_1 + dx);
+                    uvs.push(1.0 - CHIP_RATIO_2);
+                }
 
                 var runBlockIndex = PS["Graphics.Babylon.Example.Sandbox.BlockIndex"].runBlockIndex;
                 var blockIndex = PS["Graphics.Babylon.Example.Sandbox.BlockIndex"].blockIndex;
@@ -57,7 +122,8 @@ exports.createTerrainGeometryJS = function(chunkSize){
                                 var py = oy + ly
                                 var pz = oz + lz
 
-                                var store = block == blockTypes.grassBlock ? grass : water;
+                                //var store = block == blockTypes.grassBlock ? grass : water;
+                                var store = grass;
 
                                 // nx, ny, nz: normal vector
                                 function square(nx, ny, nz, u){
@@ -171,7 +237,8 @@ exports.createTerrainGeometryJS = function(chunkSize){
                                         store.colors.push(brightness);
                                         store.colors.push(1.0);
 
-                                        Array.prototype.push.apply(store.uvs, u)
+                                        //u(store.uvs, CHIP_RATIO_1 * block);
+                                        u(store.uvs, CHIP_RATIO_1 * block);
 
                                         store.offset += 4
                                     }

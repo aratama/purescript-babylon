@@ -15,17 +15,27 @@ grassBlock = BlockType 1
 waterBlock :: BlockType
 waterBlock = BlockType 2
 
+woodBlock :: BlockType
+woodBlock = BlockType 3
+
+leavesBlock :: BlockType
+leavesBlock = BlockType 4
+
 type BlockTypes = {
     airBlock :: BlockType,
     grassBlock :: BlockType,
-    waterBlock :: BlockType
+    waterBlock :: BlockType,
+    woodBlock :: BlockType,
+    leavesBlock :: BlockType
 }
 
 blockTypes :: BlockTypes
 blockTypes = {
     airBlock: airBlock,
     grassBlock: grassBlock,
-    waterBlock: waterBlock
+    waterBlock: waterBlock,
+    woodBlock: woodBlock,
+    leavesBlock: leavesBlock
 }
 
 derive instance generic_BlockType :: Generic BlockType

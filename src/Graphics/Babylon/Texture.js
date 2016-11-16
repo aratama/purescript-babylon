@@ -1,7 +1,7 @@
 exports.createTexture = function(path){
     return function(scene){
         return function(){
-            return new BABYLON.Texture(path, scene);
+            return new BABYLON.Texture(path, scene, false, true);
         }
     }
 }

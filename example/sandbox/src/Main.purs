@@ -1,6 +1,5 @@
 module Graphics.Babylon.Example.Sandbox.Main (main) where
 
-
 import Control.Alternative (pure)
 import Control.Bind (bind)
 import Control.Monad.Eff (Eff)
@@ -36,7 +35,6 @@ import Graphics.Babylon.Viewport (createViewport)
 import Graphics.Babylon.WaterMaterial (createWaterMaterial, setBumpTexture, addToRenderList, waterMaterialToMaterial, setWaveHeight, setWindForce)
 import Graphics.Canvas (CanvasElement, getCanvasElementById)
 import Prelude ((#), ($), (<$>))
-
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -162,26 +160,14 @@ runApp canvasGL canvas2d = do
         setInfiniteDistance true skyboxMesh
         pure skyboxMesh
 
-    ref <- newRef $ State {
-        mode: Move,
-        terrain: emptyTerrain,
-        mousePosition: { x: 0, y: 0 },
-        debugLayer: false,
-        yaw: 0.0,
-        pitch: 0.0,
-        velocity: { x: 0.0, y: 0.0, z: 0.0 },
-        minimap: false
-    }
-
     -- prepare materials
     materials <- do
-        boxTex <- createTexture "grass-block.png" scene
+        texture <- createTexture "texture.png" scene
         boxMat <- createStandardMaterial "grass-block" scene
         grassSpecular <- createColor3 0.0 0.0 0.0
         setSpecularColor grassSpecular boxMat
         -- setSpecularPower 0.0 boxMat
-        setDiffuseTexture boxTex boxMat
-
+        setDiffuseTexture texture boxMat
 
         waterMaterial <- if enableWaterMaterial
             then do
@@ -193,12 +179,22 @@ runApp canvasGL canvas2d = do
                 setWindForce 1.0 mat
                 pure (waterMaterialToMaterial mat)
             else do
-                tex <- createTexture "water-block.png" scene
                 mat <- createStandardMaterial "water-block" scene
-                setDiffuseTexture tex mat
+                setDiffuseTexture texture mat
                 pure (standardMaterialToMaterial mat)
 
         pure { boxMat: standardMaterialToMaterial boxMat, waterBoxMat: waterMaterial }
+
+    ref <- newRef $ State {
+        mode: Move,
+        terrain: emptyTerrain,
+        mousePosition: { x: 0, y: 0 },
+        debugLayer: false,
+        yaw: 0.0,
+        pitch: 0.0,
+        velocity: { x: 0.0, y: 0.0, z: 0.0 },
+        minimap: false
+    }
 
     initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials
 
