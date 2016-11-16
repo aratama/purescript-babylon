@@ -1,27 +1,12 @@
 module Graphics.Babylon.Test where
 
 import Control.Bind (bind)
-import Control.Monad (join)
-import Data.Array (length)
-import Data.Date (year)
-import Data.Foldable (all)
-import Data.Int (toNumber, floor)
-import Data.List ((..))
-import Data.ShowMap (ShowMap, fromFoldable)
-import Data.Tuple (Tuple(Tuple))
-import Data.Unit (unit, Unit)
+import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Example.Sandbox.Block (Block(..))
-import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, blockIndex, runBlockIndex)
-import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
-import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
+import Graphics.Babylon.Example.Sandbox.BlockIndex (blockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex)
-import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.Terrain (globalPositionToChunkIndex, globalPositionToLocalIndex, globalPositionToGlobalIndex)
-import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
-import Graphics.Babylon.VertexData (VertexDataProps(VertexDataProps))
-import PerlinNoise (createNoise, simplex2)
-import Prelude (div, negate, pure, ($), (*), (+), (<), (<#>), (&&), (==), mod)
+import Prelude (mod, negate, ($), (&&), (<), (==))
 import Test.StrongCheck (SC, assert, assertEq, quickCheck)
 
 main :: SC (babylon :: BABYLON) Unit
@@ -53,40 +38,3 @@ main = do
         xyz = runBlockIndex (blockIndex nx ny nz)
         in
         nx == xyz.x && ny == xyz.y && nz == xyz.z
-
-{-
-    quickCheck \seed ->
-        let noise = createNoise seed
-            blocks = (0 .. 15) <#> \iz ->
-                (0 .. 15) <#> \ix ->
-                    let x = toNumber ix
-                        z = toNumber iz
-                        r = (simplex2 (x * 0.03) (z * 0.03) noise + 1.0) * 0.5
-                        h = floor (r * 2.0)
-                        in
-                            (0 .. h) <#> \iy -> let
-                                y = toNumber iy
-                                index = blockIndex ix iy iz
-                                in Tuple index (Block { index, blockType: grassBlock })
-            map :: ShowMap BlockIndex Block
-            map = fromFoldable (join (join blocks))
-
-            dat = createTerrainGeometry (Chunk { index: chunkIndex 0 0 0,  map })
-        in case dat of
-            VertexDataPropsData props@{ grassBlocks: VertexDataProps grassBlocks } -> all (\index -> index < div (length grassBlocks.positions) 3) grassBlocks.indices
-
-
-    pure unit
-
--}
-
-{-}
-test :: SC (babylon :: BABYLON) Unit
-test = do
-    quickCheck \cx cy cz seed -> let map = createBlockMap (chunkIndex cx cy cz) seed
-                                     geometry = createTerrainGeometry map
-                                     fn = write geometry
-                                     in case runExcept (read fn) of
-                                        Left err -> false
-                                        Right geometry' -> geometry' == geometry
--}

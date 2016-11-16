@@ -20,7 +20,7 @@ exports.createBlockMapJS = function(noise){
                             var cz = rci.z
 
                             // var stmap = Object.create({});
-                            var stmap = new Uint32Array(chunkSize * chunkSize * chunkSize);
+                            var stmap = new Uint8Array(chunkSize * chunkSize * chunkSize);
 
                             for(var lz = 0; lz <= chunkSize - 1; lz++){
                                 for(var lx = 0; lx <= chunkSize - 1; lx++){

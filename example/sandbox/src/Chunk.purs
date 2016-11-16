@@ -2,11 +2,8 @@ module Graphics.Babylon.Example.Sandbox.Chunk where
 
 import Data.Foreign (toForeign, unsafeFromForeign)
 import Data.Foreign.Class (class AsForeign, class IsForeign)
-import Data.ShowMap (ShowMap)
-import Graphics.Babylon.Example.Sandbox.Block (Block)
-import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex)
-import Graphics.Babylon.Example.Sandbox.BlockType (BlockType(..))
-import Graphics.Babylon.Example.Sandbox.BoxelMap (BoxelMap, empty) as Boxel
+import Graphics.Babylon.Example.Sandbox.BlockType (BlockType)
+import Graphics.Babylon.Example.Sandbox.BoxelMap (BoxelMap) as Boxel
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex)
 import Prelude (pure)
 

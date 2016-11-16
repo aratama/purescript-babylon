@@ -1,33 +1,45 @@
-module Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess) where
+module Graphics.Babylon.Example.Sandbox.Request (updateChunkMesh, createChunkMesh) where
 
 import Control.Alternative (pure)
 import Control.Bind (bind)
+import Control.Monad (void)
 import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (CONSOLE)
-import Control.Monad.Eff.Exception (Error)
-import Control.Monad.Eff.Exception (EXCEPTION, error) as EXCEPTION
 import Control.Monad.Eff.Now (NOW)
-import Control.Monad.Eff.Ref (REF, Ref, readRef)
-import Control.Monad.Except (runExcept)
-import Data.Either (Either(..))
-import Data.Foreign.Class (read)
+import Control.Monad.Eff.Ref (REF, Ref, modifyRef, readRef, writeRef)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
-import Graphics.Babylon.AbstractMesh (setUseVertexColors)
-import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.Mesh (meshToAbstractMesh)
-import Prelude (show, ($), (=<<))
-
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Mesh (createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
-import Graphics.Babylon.StandardMaterial (StandardMaterial, standardMaterialToMaterial)
-import Graphics.Babylon.Types (Mesh, Scene)
-import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexData)
+import Graphics.Babylon.AbstractMesh (setUseVertexColors)
+import Graphics.Babylon.Example.Sandbox.Generation (createBlockMap)
+import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.Types (Materials, State(State))
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
-import Graphics.Babylon.Example.Sandbox.Terrain (ChunkWithMesh, disposeChunk, lookupChunk)
+import Graphics.Babylon.Example.Sandbox.Terrain (insertChunk, ChunkWithMesh, disposeChunk, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
+import Graphics.Babylon.Material (Material)
+import Graphics.Babylon.Mesh (meshToAbstractMesh, createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
+import Graphics.Babylon.Types (Mesh, Scene)
+import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexData)
+import Prelude (($), (=<<))
+
+createChunkMesh :: forall eff. Ref State -> Materials -> Scene -> ChunkIndex -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, babylon :: BABYLON | eff) Unit
+createChunkMesh ref materials scene index = do
+    State state <- readRef ref
+    let boxMap = createBlockMap index 0
+    case createTerrainGeometry boxMap of
+        VertexDataPropsData verts -> void do
+            case lookupChunk index state.terrain of
+                Nothing -> pure unit
+                Just chunkData -> disposeChunk chunkData
+            grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
+            waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
+            let result = { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+            modifyRef ref \(State state) -> State state {
+                terrain = insertChunk result state.terrain
+            }
 
 generateMesh :: forall eff. ChunkIndex -> VertexDataProps -> Material -> Scene -> Eff (babylon :: BABYLON | eff) Mesh
 generateMesh index verts mat scene = do
@@ -43,8 +55,13 @@ generateMesh index verts mat scene = do
     setMaterial mat terrainMesh
     pure terrainMesh
 
-postProcess :: forall eff. Ref State -> Materials -> Scene -> VertexDataPropsData -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, babylon :: BABYLON | eff) ChunkWithMesh
-postProcess ref materials scene (VertexDataPropsData verts@{ terrain: Chunk chunk }) = do
+
+
+updateChunkMesh :: forall eff. Ref State -> Materials -> Scene -> ChunkWithMesh -> Eff (ref :: REF, now :: NOW,  console :: CONSOLE, babylon :: BABYLON | eff) Unit
+updateChunkMesh ref materials scene chunkWithMesh = void do
+
+    VertexDataPropsData verts@{ terrain: Chunk chunk } <- pure (createTerrainGeometry chunkWithMesh.blocks)
+
     let index = chunk.index
     State state <- readRef ref
     case lookupChunk chunk.index state.terrain of
@@ -53,5 +70,9 @@ postProcess ref materials scene (VertexDataPropsData verts@{ terrain: Chunk chun
 
     grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
     waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
-    pure { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+    mesh <- pure { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+    liftEff $ writeRef ref $ State state {
+        terrain = insertChunk mesh state.terrain
+    }
+
 

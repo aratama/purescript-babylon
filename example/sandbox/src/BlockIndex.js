@@ -2,26 +2,6 @@ exports.showBlockIndex = function(i){
     return "" + i;
 }
 
-
-/*
-exports.blockIndex = function(x){
-    return function(y){
-        return function(z){
-            return x + "," + y + "," + z;
-        }
-    }
-}
-
-exports.runBlockIndex = function(bits){
-    var ns = bits.split(",");
-    return {
-        x: parseInt(ns[0]),
-        y: parseInt(ns[1]),
-        z: parseInt(ns[2])
-    }
-}
-*/
-
 var _2_13 = 8192;      // 2^13
 var _2_14 = 16384;      // 2^14
 var _2_17 = 131072;     // 2^17

@@ -8,6 +8,7 @@ import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Class (liftEff)
 import Control.Monad.Eff.Console (error, log)
 import Control.Monad.Eff.Ref (REF, modifyRef, newRef, readRef, writeRef)
+import Control.Monad.Maybe.Trans (lift, runMaybeT)
 import Control.MonadPlus (guard)
 import DOM (DOM)
 import Data.Array (fromFoldable, head, (..))
@@ -15,7 +16,7 @@ import Data.Array.ST (emptySTArray, pushSTArray, runSTArray)
 import Data.BooleanAlgebra (not)
 import Data.Foldable (for_)
 import Data.Int (toNumber) as Int
-import Data.Maybe (Maybe(Just, Nothing), isNothing)
+import Data.Maybe (Maybe(Just, Nothing), isNothing, maybe)
 import Data.Nullable (toMaybe)
 import Data.Ord (abs, min)
 import Data.Ring (negate)
@@ -31,18 +32,17 @@ import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DebugLayer (show, hide) as DebugLayer
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
-import Graphics.Babylon.Example.Sandbox.Block (Block(..))
 import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
 import Graphics.Babylon.Example.Sandbox.BoxelMap (delete, insert)
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
-import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex, chunkIndexRange, runChunkIndex)
+import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex, chunkIndexDistance, runChunkIndex)
 import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
 import Graphics.Babylon.Example.Sandbox.Event (onButtonClick, onMouseClick, onMouseMove)
 import Graphics.Babylon.Example.Sandbox.Generation (createBlockMap)
 import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.MiniMap (renderMiniMap)
-import Graphics.Babylon.Example.Sandbox.Request (generateMesh, postProcess)
+import Graphics.Babylon.Example.Sandbox.Request (updateChunkMesh, createChunkMesh)
 import Graphics.Babylon.Example.Sandbox.Terrain (globalIndexToLocalIndex, chunkCount, disposeChunk, emptyTerrain, getChunkMap, globalIndexToChunkIndex, globalPositionToChunkIndex, globalPositionToGlobalIndex, globalPositionToLocalIndex, insertChunk, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.Types (Effects, Mode(..), State(State))
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
@@ -327,7 +327,6 @@ runApp canvasGL canvas2d = do
     onMouseClick \e -> do
 
         State state <- readRef ref
-
         picked <- pickBlock (State state) state.mousePosition.x state.mousePosition.y
         case picked of
             Nothing -> pure unit
@@ -335,24 +334,16 @@ runApp canvasGL canvas2d = do
                 let chunkIndex = globalIndexToChunkIndex blockIndex
                 case lookupChunk chunkIndex state.terrain of
                     Nothing -> pure unit
-                    Just chunkData@{ blocks: Chunk chunk@{ index, blocks: chunkBlocks } } -> void do
-
+                    Just chunkData@{ blocks: Chunk chunk } -> void do
                         let localIndex = globalIndexToLocalIndex blockIndex
-                        let chunk' = chunkData {
-                                blocks = Chunk chunk {
-                                    blocks = case state.mode of
-                                        Put -> insert localIndex grassBlock chunkBlocks
-                                        Remove -> delete localIndex chunkBlocks
-                                        Move -> chunkBlocks
-                                    }
-                                }
-
-                        mesh <- postProcess ref materials scene (createTerrainGeometry chunk'.blocks)
-
-                        liftEff $ writeRef ref $ State state {
-                            terrain = insertChunk mesh state.terrain
+                        updateChunkMesh ref materials scene chunkData {
+                            blocks = Chunk chunk {
+                                blocks = case state.mode of
+                                    Put -> insert localIndex grassBlock chunk.blocks
+                                    Remove -> delete localIndex chunk.blocks
+                                    Move -> chunk.blocks
+                            }
                         }
-
 
     engine # runRenderLoop do
 
@@ -361,9 +352,6 @@ runApp canvasGL canvas2d = do
         -- update camera position
         cameraPosition <- Camera.getPosition (freeCameraToCamera camera) >>= runVector3
         let cameraPositionChunkIndex = globalPositionToChunkIndex cameraPosition.x cameraPosition.y cameraPosition.z
-
-
-
 
         -- picking
         do
@@ -412,20 +400,9 @@ runApp canvasGL canvas2d = do
             case head indices of
                 Nothing -> pure unit
                 Just index -> do
-                    let boxMap = createBlockMap index 0
-                    case createTerrainGeometry boxMap of
-                        VertexDataPropsData verts -> void do
-                            case lookupChunk index state.terrain of
-                                Nothing -> pure unit
-                                Just chunkData -> disposeChunk chunkData
-                            grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
-                            waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
-                            let result = { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
-                            modifyRef ref \(State state) -> State state {
-                                terrain = insertChunk result state.terrain
-                            }
-                            log $ "load chunk: " <> show index
-                            log $ "total chunks:" <> show (chunkCount state.terrain + 1)
+                    createChunkMesh ref materials scene index
+                    log $ "load chunk: " <> show index
+                    log $ "total chunks:" <> show (chunkCount state.terrain + 1)
 
 
         -- set collesion
@@ -433,7 +410,7 @@ runApp canvasGL canvas2d = do
         do
             State st <- readRef ref
             for_ (getChunkMap st.terrain) \(dat@{ blocks: Chunk chunk }) -> do
-                let r = chunkIndexRange chunk.index cameraPositionChunkIndex
+                let r = chunkIndexDistance chunk.index cameraPositionChunkIndex
                 let enabled = r <= collesionEnabledRange
                 AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.grassBlockMesh)
                 AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.waterBlockMesh)

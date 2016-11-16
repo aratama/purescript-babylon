@@ -21,28 +21,6 @@ exports.delete = function(key){
     }
 }
 
-exports.member = function(key){
-    return function(map){
-        return map[key] !== 0;
-    }
-}
-
-exports.isEmpty = function(map){
-    throw new Error();
-}
-
-exports.size = function(map){
-    throw new Error();
-}
-
-exports.fromStrMap = function(map){
-    throw new Error();
-}
-
-exports.toArray = function(map){
-    throw new Error();
-}
-
 exports.mapBoxelMap = function(f){
     return function(map){
         var m = new Uint8Array();

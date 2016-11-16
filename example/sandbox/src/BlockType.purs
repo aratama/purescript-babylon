@@ -1,6 +1,7 @@
 module Graphics.Babylon.Example.Sandbox.BlockType where
 
 import Data.Generic (class Generic, gEq, gShow)
+import Data.Newtype (class Newtype)
 import Prelude (class Eq, class Show)
 
 newtype BlockType = BlockType Int
@@ -28,6 +29,8 @@ blockTypes = {
 }
 
 derive instance generic_BlockType :: Generic BlockType
+
+derive instance newtype_BlockType :: Newtype BlockType _
 
 instance eq_BlockType :: Eq BlockType where
     eq = gEq

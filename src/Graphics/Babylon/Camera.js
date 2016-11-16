@@ -12,9 +12,9 @@ exports.setPosition = function(position){
     }
 }
 
-exports.pERSPECTIVE_CAMERA = BABYLON.Camera.PERSPECTIVE_CAMERA;
+exports.pERSPECTIVE_CAMERA = 0; // BABYLON.Camera.PERSPECTIVE_CAMERA
 
-exports.oRTHOGRAPHIC_CAMERA = BABYLON.Camera.ORTHOGRAPHIC_CAMERA;
+exports.oRTHOGRAPHIC_CAMERA = 1; // BABYLON.Camera.ORTHOGRAPHIC_CAMERA
 
 exports.setMode = function(mode){
     return function(camera){
