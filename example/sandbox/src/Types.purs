@@ -23,6 +23,7 @@ newtype State = State {
     yaw :: Number,
     pitch :: Number,
     velocity :: Vec,
+    totalFrames :: Int,
     minimap :: Boolean
 }
 

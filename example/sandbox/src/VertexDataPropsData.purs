@@ -10,21 +10,18 @@ import Graphics.Babylon.Example.Sandbox.Chunk (Chunk)
 
 newtype VertexDataPropsData = VertexDataPropsData {
     terrain :: Chunk,
-    grassBlocks :: VertexDataProps,
-    waterBlocks :: VertexDataProps
+    standardMaterialBlocks :: VertexDataProps
 }
 
 instance isForeign_VertexDataPropsData :: IsForeign VertexDataPropsData where
     read value = do
         terrain <- readProp "terrain" value
-        grassBlocks <- readProp "grassBlocks" value
-        waterBlocks <- readProp "waterBlocks" value
-        pure $ VertexDataPropsData { terrain, grassBlocks, waterBlocks }
+        standardMaterialBlocks <- readProp "standardMaterialBlocks" value
+        pure $ VertexDataPropsData { terrain, standardMaterialBlocks }
 
 instance asForeign_VertexDataPropsData :: AsForeign VertexDataPropsData where
     write (VertexDataPropsData value) = toForeign {
         terrain: write value.terrain,
-        grassBlocks: write value.grassBlocks,
-        waterBlocks: write value.waterBlocks
+        standardMaterialBlocks: write value.standardMaterialBlocks
     }
 

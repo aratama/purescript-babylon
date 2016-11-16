@@ -45,9 +45,8 @@ createChunkMesh ref materials scene index = do
             case lookupChunk index state.terrain of
                 Nothing -> pure unit
                 Just chunkData -> disposeChunk chunkData
-            grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
-            waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
-            let result = { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+            standardMaterialMesh <- generateMesh index verts.standardMaterialBlocks materials.boxMat scene
+            let result = { blocks: verts.terrain, standardMaterialMesh }
             modifyRef ref \(State state) -> State state {
                 terrain = insertChunk result state.terrain
             }
@@ -79,9 +78,8 @@ updateChunkMesh ref materials scene chunkWithMesh = void do
         Nothing -> pure unit
         Just chunkData -> disposeChunk chunkData
 
-    grassBlockMesh <- generateMesh index verts.grassBlocks materials.boxMat scene
-    waterBlockMesh <- generateMesh index verts.waterBlocks materials.waterBoxMat scene
-    mesh <- pure { blocks: verts.terrain, grassBlockMesh, waterBlockMesh }
+    standardMaterialMesh <- generateMesh index verts.standardMaterialBlocks materials.boxMat scene
+    mesh <- pure { blocks: verts.terrain, standardMaterialMesh }
     liftEff $ writeRef ref $ State state {
         terrain = insertChunk mesh state.terrain
     }

@@ -6,9 +6,11 @@ exports.createBlockMapJS = function(noise){
                     return function(maxHeight){
                         return function(blockTypes){
 
+                            var airBlock = blockTypes.airBlock;
                             var grassBlock = blockTypes.grassBlock;
                             var waterBlock = blockTypes.waterBlock;
                             var woodBlock = blockTypes.woodBlock;
+                            var leavesBlock = blockTypes.leavesBlock;
 
                             var runBlockIndex = PS["Graphics.Babylon.Example.Sandbox.BlockIndex"].runBlockIndex;
                             var runChunkIndex = PS["Graphics.Babylon.Example.Sandbox.ChunkIndex"].runChunkIndex;
@@ -24,10 +26,16 @@ exports.createBlockMapJS = function(noise){
                             var stmap = new Uint8Array(chunkSize * chunkSize * chunkSize);
 
                             function lookup(lx, ly, lz){
-                                return stmap[chunkSize * chunkSize * lx + chunkSize * ly + lz];
+                                if(0 <= lx && lx < chunkSize && 0 <= ly && ly < chunkSize && 0 <= lz && lz < chunkSize){
+                                    return stmap[chunkSize * chunkSize * lx + chunkSize * ly + lz];
+                                }else{
+                                    return airBlock
+                                }
                             }
                             function put(lx, ly, lz, value){
-                                stmap[chunkSize * chunkSize * lx + chunkSize * ly + lz] = value;
+                                if(0 <= lx && lx < chunkSize && 0 <= ly && ly < chunkSize && 0 <= lz && lz < chunkSize){
+                                    stmap[chunkSize * chunkSize * lx + chunkSize * ly + lz] = value;
+                                }
                             }
 
 
@@ -70,8 +78,15 @@ exports.createBlockMapJS = function(noise){
                                             }
                                         }
                                         if(top !== null){
-                                            for(var i = 0; i < 5 && top + 1 + i < chunkSize; i++){
+                                            for(var i = 0; i < 3 && top + 1 + i < chunkSize; i++){
                                                 put(lx, top + 1 + i, lz, woodBlock);
+                                            }
+                                            for(var i = 3; i < 6 && top + 1 + i < chunkSize; i++){
+                                                for(var dx = -1; dx <= 1; dx++){
+                                                    for(var dz = -1; dz <= 1; dz++){
+                                                        put(lx + dx, top + 1 + i, lz + dz, leavesBlock);
+                                                    }
+                                                }
                                             }
                                         }
                                     }

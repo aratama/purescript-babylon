@@ -91,8 +91,7 @@ exports.createTerrainGeometryJS = function(chunkSize){
                     return { offset: 0, indices: [], positions: [], normals: [], uvs: [], colors: [] }
                 }
 
-                var grass = prepareArray()
-                var water = prepareArray()
+                var meshData = prepareArray();
 
                 var chunkIndex = runChunkIndex(chunk.index);
                 var ox = chunkSize * chunkIndex.x;
@@ -122,8 +121,8 @@ exports.createTerrainGeometryJS = function(chunkSize){
                                 var py = oy + ly
                                 var pz = oz + lz
 
-                                //var store = block == blockTypes.grassBlock ? grass : water;
-                                var store = grass;
+                                //var store = block == blockTypes.grassBlock ? meshData : water;
+                                var store = meshData;
 
                                 // nx, ny, nz: normal vector
                                 function square(nx, ny, nz, u){
@@ -255,7 +254,7 @@ exports.createTerrainGeometryJS = function(chunkSize){
                     }
                 }
 
-                return {  terrain: chunk, grassBlocks: grass, waterBlocks: water }
+                return {  terrain: chunk, standardMaterialBlocks: meshData }
             }
         }
     }

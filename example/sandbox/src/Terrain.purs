@@ -28,8 +28,7 @@ import Prelude ((*), (/), (+), (-), ($), (==))
 
 type ChunkWithMesh = {
     blocks :: Chunk,
-    grassBlockMesh :: Mesh,
-    waterBlockMesh :: Mesh
+    standardMaterialMesh :: Mesh
 }
 
 newtype Terrain = Terrain { map :: ShowMap ChunkIndex ChunkWithMesh }
@@ -95,5 +94,4 @@ insertChunk cmesh@{ blocks: Chunk chunk@{ index } } (Terrain chunks) = Terrain c
 
 disposeChunk :: forall eff. ChunkWithMesh -> Eff (babylon :: BABYLON | eff) Unit
 disposeChunk chunk = do
-    dispose true $ meshToAbstractMesh chunk.grassBlockMesh
-    dispose true $ meshToAbstractMesh chunk.waterBlockMesh
+    dispose true $ meshToAbstractMesh chunk.standardMaterialMesh

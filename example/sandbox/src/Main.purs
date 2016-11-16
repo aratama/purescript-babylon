@@ -193,7 +193,8 @@ runApp canvasGL canvas2d = do
         yaw: 0.0,
         pitch: 0.0,
         velocity: { x: 0.0, y: 0.0, z: 0.0 },
-        minimap: false
+        minimap: false,
+        totalFrames: 0
     }
 
     initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials

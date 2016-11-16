@@ -2,10 +2,10 @@ module Graphics.Babylon.Example.Sandbox.Update (update, pickBlock) where
 
 import Control.Alt (void)
 import Control.Alternative (pure)
-import Control.Bind (bind, (>>=))
+import Control.Bind (bind, when, (>>=))
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Console (log)
-import Control.Monad.Eff.Ref (REF, Ref, readRef)
+import Control.Monad.Eff.Ref (REF, Ref, modifyRef, readRef)
 import Control.MonadPlus (guard)
 import DOM (DOM)
 import Data.Array (head, (..))
@@ -35,7 +35,7 @@ import Graphics.Babylon.TargetCamera (getRotation)
 import Graphics.Babylon.Types (Mesh, Scene)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Math (round)
-import Prelude (($), (+), (-), (/=), (<=), (<>), (==))
+import Prelude (mod, ($), (+), (-), (/=), (<=), (<>), (==))
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -120,6 +120,8 @@ pickBlock scene cursor (State state) screenX screenY = do
 update :: forall eff. Ref State -> Scene -> Materials -> ShadowMap -> Mesh -> FreeCamera -> Eff (Effects eff) Unit
 update ref scene materials shadowMap cursor camera = do
 
+        modifyRef ref \(State state) -> State state { totalFrames = state.totalFrames + 1 }
+
         State state <- readRef ref
 
         -- update camera position
@@ -142,18 +144,18 @@ update ref scene materials shadowMap cursor camera = do
         -- update shadow rendering list
 
 
-        do
+        when (mod state.totalFrames 30 == 0) do
+            let shadowRange = 2
             let ci = runChunkIndex cameraPositionChunkIndex
             chunks <- runSTArray do
                 list <- emptySTArray
-                forE (ci.x - 2) (ci.x + 2) \dx -> do
-                    forE (ci.y - 2) (ci.y + 2) \dy -> do
-                        forE (ci.z - 2) (ci.z + 2) \dz -> do
+                forE (ci.x - shadowRange) (ci.x + shadowRange) \dx -> do
+                    forE (ci.y - shadowRange) (ci.y + shadowRange) \dy -> do
+                        forE (ci.z - shadowRange) (ci.z + shadowRange) \dz -> do
                             case lookupChunk (chunkIndex dx dy dz) state.terrain of
                                 Nothing -> pure unit
                                 Just chunkData@{ blocks: Chunk chunk } -> void do
-                                    pushSTArray list (meshToAbstractMesh chunkData.grassBlockMesh)
-                                    pushSTArray list (meshToAbstractMesh chunkData.waterBlockMesh)
+                                    pushSTArray list (meshToAbstractMesh chunkData.standardMaterialMesh)
                 pure list
 
             setRenderList chunks shadowMap
@@ -185,8 +187,7 @@ update ref scene materials shadowMap cursor camera = do
             for_ (getChunkMap st.terrain) \(dat@{ blocks: Chunk chunk }) -> do
                 let r = chunkIndexDistance chunk.index cameraPositionChunkIndex
                 let enabled = r <= collesionEnabledRange
-                AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.grassBlockMesh)
-                AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.waterBlockMesh)
+                AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.standardMaterialMesh)
 
 
         do
