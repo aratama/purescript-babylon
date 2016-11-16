@@ -22,7 +22,8 @@ newtype State = State {
     debugLayer :: Boolean,
     yaw :: Number,
     pitch :: Number,
-    velocity :: Vec
+    velocity :: Vec,
+    minimap :: Boolean
 }
 
 type Materials = {

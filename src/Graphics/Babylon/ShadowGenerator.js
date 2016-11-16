@@ -1,15 +1,10 @@
 exports.createShadowGenerator = function(size){
     return function(light){
         return function(){
-            var s = new BABYLON.ShadowGenerator(size, light);
-            //s.useBlurVarianceShadowMap  =true;
-            //s.blurScale = 0.9;
-            //s.blurBoxOffset = 0.1;
-            return s;
+            return new BABYLON.ShadowGenerator(size, light);
         }
     }
 }
-
 
 exports.getShadowMap = function(shadowGenerator){
     return function(){
@@ -34,7 +29,9 @@ exports.pushToRenderList = function(mesh){
 exports.setRenderList = function(renderList){
     return function(shadowMap){
         return function(){
-            shadowMap.renderList = renderList.slice();
+            shadowMap.renderList = renderList.filter(function(mesh){
+                return 0 < mesh.getTotalVertices();
+            });
         }
     }
 }

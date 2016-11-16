@@ -108,3 +108,19 @@ exports.enablePhysics = function(gravity){
         }
     }
 }
+
+exports.setActiveCamera = function(camera){
+    return function(scene){
+        return function(){
+            scene.activeCamera = camera;
+        }
+    }
+}
+
+exports.setActiveCameras = function(cameras){
+    return function(scene){
+        return function(){
+            scene.activeCameras = cameras;
+        }
+    }
+}

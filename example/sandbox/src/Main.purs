@@ -25,6 +25,7 @@ import Data.Traversable (for, sequence)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON, Canvas, onDOMContentLoaded, querySelectorCanvas)
 import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions, setIsPickable, setIsVisible) as AbstractMesh
+import Graphics.Babylon.Camera (oRTHOGRAPHIC_CAMERA, setMode, oRTHOGRAPHIC_CAMERA, setViewport, setOrthoLeft, setOrthoRight, setOrthoTop, setOrthoBottom)
 import Graphics.Babylon.Camera (getPosition) as Camera
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
@@ -51,13 +52,14 @@ import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
 import Graphics.Babylon.Mesh (getTotalIndices, createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial, setPosition, setRenderingGroupId)
 import Graphics.Babylon.Node (getName)
 import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
-import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
+import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, getDebugLayer, pick, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
 import Graphics.Babylon.ShadowGenerator (setUsePoissonSampling, createShadowGenerator, getShadowMap, setBias, setRenderList)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
-import Graphics.Babylon.TargetCamera (getRotation, setSpeed, setTarget)
+import Graphics.Babylon.TargetCamera (createTargetCamera, getRotation, setSpeed, setTarget, targetCameraToCamera)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
 import Graphics.Babylon.Types (AbstractMesh)
 import Graphics.Babylon.Vector3 (createVector3, runVector3)
+import Graphics.Babylon.Viewport (createViewport)
 import Graphics.Babylon.WaterMaterial (createWaterMaterial, setBumpTexture, addToRenderList, waterMaterialToMaterial, setWaveHeight, setWindForce)
 import Graphics.Canvas (CanvasElement, createImageData, getCanvasElementById, getContext2D)
 import Math (round)
@@ -84,8 +86,8 @@ collesionEnabledRange = 1
 enableWaterMaterial :: Boolean
 enableWaterMaterial = false
 
-runApp :: forall eff. Canvas -> CanvasElement -> CanvasElement -> Eff (Effects eff) Unit
-runApp canvasGL canvas2d minimap = do
+runApp :: forall eff. Canvas -> CanvasElement -> Eff (Effects eff) Unit
+runApp canvasGL canvas2d = do
 
     engine <- createEngine canvasGL true
 
@@ -100,6 +102,21 @@ runApp canvasGL canvas2d minimap = do
         setFogColor fogColor sce
         setCollisionsEnabled true sce
         pure sce
+
+    miniMapCamera <- do
+        let minimapScale = 200.0
+        position <- createVector3 0.0 30.0 0.0
+        cam <- createTargetCamera "minimap-camera" position scene
+        target <- createVector3 0.0 0.0 0.0
+        setTarget target cam
+        setMode oRTHOGRAPHIC_CAMERA (targetCameraToCamera cam)
+        setOrthoLeft (-minimapScale) (targetCameraToCamera cam)
+        setOrthoRight minimapScale (targetCameraToCamera cam)
+        setOrthoTop minimapScale (targetCameraToCamera cam)
+        setOrthoBottom (-minimapScale) (targetCameraToCamera cam)
+        viewport <- createViewport 0.75 0.65 0.24 0.32
+        setViewport viewport (targetCameraToCamera cam)
+        pure cam
 
     camera <- do
         cameraPosition <- createVector3 30.0 30.0 30.0
@@ -116,6 +133,9 @@ runApp canvasGL canvas2d minimap = do
         setSpeed 0.3 (freeCameraToTargetCamera cam)
 
         pure cam
+
+    setActiveCameras [freeCameraToCamera camera] scene
+    setActiveCamera (freeCameraToCamera camera) scene
 
     do
         hemiPosition <- createVector3 0.0 1.0 0.0
@@ -176,7 +196,8 @@ runApp canvasGL canvas2d minimap = do
         debugLayer: false,
         yaw: 0.0,
         pitch: 0.0,
-        velocity: { x: 0.0, y: 0.0, z: 0.0 }
+        velocity: { x: 0.0, y: 0.0, z: 0.0 },
+        minimap: false
     }
 
     onMouseMove \e -> do
@@ -198,6 +219,13 @@ runApp canvasGL canvas2d minimap = do
     prepareModeButton "move" Move
     prepareModeButton "add" Put
     prepareModeButton "remove" Remove
+
+    onButtonClick "minimap" do
+        modifyRef ref (\(State state) -> State state { minimap = not state.minimap })
+        State state <- readRef ref
+        if state.minimap
+            then setActiveCameras [freeCameraToCamera camera, targetCameraToCamera miniMapCamera] scene
+            else setActiveCameras [freeCameraToCamera camera] scene
 
     onButtonClick "debuglayer" do
         modifyRef ref (\(State state) -> State state { debugLayer = not state.debugLayer })
@@ -356,14 +384,9 @@ runApp canvasGL canvas2d minimap = do
                         forE (ci.z - 2) (ci.z + 2) \dz -> do
                             case lookupChunk (chunkIndex dx dy dz) state.terrain of
                                 Nothing -> pure unit
-                                Just chunkData@{ blocks: Chunk chunk } | isEmpty chunk.map -> pure unit
-                                                                       | otherwise -> do
-                                                                            let f m = do
-                                                                                    n <- getTotalIndices m
-                                                                                    when (0 < n) $ void do
-                                                                                        pushSTArray list (meshToAbstractMesh m)
-                                                                            f chunkData.grassBlockMesh
-                                                                            f chunkData.waterBlockMesh
+                                Just chunkData@{ blocks: Chunk chunk } -> void do
+                                    pushSTArray list (meshToAbstractMesh chunkData.grassBlockMesh)
+                                    pushSTArray list (meshToAbstractMesh chunkData.waterBlockMesh)
                 pure list
 
             setRenderList chunks shadowMap
@@ -413,8 +436,8 @@ runApp canvasGL canvas2d minimap = do
         do
             pos <- Camera.getPosition (freeCameraToCamera camera) >>= runVector3
             cameraRot <- getRotation (freeCameraToTargetCamera camera) >>= runVector3
-            renderMiniMap state.terrain pos cameraRot minimap
-
+            -- renderMiniMap state.terrain pos cameraRot minimap
+            pure unit
 
         render scene
 
@@ -422,7 +445,6 @@ main :: forall eff. Eff (Effects eff) Unit
 main = onDOMContentLoaded do
     canvasM <- toMaybe <$> querySelectorCanvas "#renderCanvas"
     canvas2dM <- getCanvasElementById "canvas2d"
-    minimapM <- getCanvasElementById "minimap"
-    case canvasM, canvas2dM, minimapM of
-        Just canvasGL, Just canvas2d, Just minimap -> runApp canvasGL canvas2d minimap
-        _, _, _ -> error "canvasGL not found"
+    case canvasM, canvas2dM of
+        Just canvasGL, Just canvas2d -> runApp canvasGL canvas2d
+        _, _ -> error "canvasGL not found"
