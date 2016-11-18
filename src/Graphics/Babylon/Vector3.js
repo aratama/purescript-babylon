@@ -18,7 +18,9 @@ exports.cross = function(v){
 
 exports.add = function(v){
     return function(r){
-        return v.add(r);
+        return function(){
+            return v.add(r);
+        }
     }
 }
 

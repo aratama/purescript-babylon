@@ -6,7 +6,12 @@ exports.importMesh = function(meshesNames){
                     return function(progressCallBack){
                         return function(onerror){
                             return function(){
-                                BABYLON.SceneLoader.ImportMesh(meshesNames, rootUrl, sceneFilename, scene, onsuccess && function(result){ onsuccess(result)() }, progressCallBack, onerror);
+                                BABYLON.SceneLoader.ImportMesh(
+                                    meshesNames, rootUrl, sceneFilename, scene, 
+                                    onsuccess && function(result){ onsuccess(result)() },
+                                    progressCallBack && function(result){ progressCallBack(result)() },
+                                    onerror && function(result){ onerror(result)() }
+                                );
                             }
                         }
                     }

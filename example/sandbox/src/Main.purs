@@ -96,13 +96,13 @@ runApp canvasGL canvas2d = do
         pure cam
 
     camera <- do
-        cameraPosition <- createVector3 30.0 30.0 30.0
+        cameraPosition <- createVector3 3.0 17.0 3.0
 
         cam <- createFreeCamera "free-camera" cameraPosition scene
         setCheckCollisions true cam
 
         -- target the camera to scene origin
-        cameraTarget <- createVector3 5.0 3.0 5.0
+        cameraTarget <- createVector3 0.0 15.0 0.0
         setTarget cameraTarget (freeCameraToTargetCamera cam)
 
         -- attach the camera to the canvasGL
@@ -217,12 +217,12 @@ runApp canvasGL canvas2d = do
 
     let onSucc result = do
             for_ result \mesh -> do
-                p <- createVector3 0.0 20.0 0.0
+                p <- createVector3 0.5 14.0 0.5
                 setPosition p mesh
                 setRenderingGroupId 1 mesh
             pure unit
 
-    importMesh "" "" "monkey.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
+    importMesh "" "/alicia/" "alicia.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
 
     onKeyDown \e -> do
         when (e.keyCode == 32) do
