@@ -20,9 +20,13 @@ newtype State = State {
     terrain :: Terrain,
     mousePosition :: { x :: Int, y :: Int },
     debugLayer :: Boolean,
+
+    -- player physics
     yaw :: Number,
     pitch :: Number,
+    position :: Vec,
     velocity :: Vec,
+
     totalFrames :: Int,
     minimap :: Boolean
 }

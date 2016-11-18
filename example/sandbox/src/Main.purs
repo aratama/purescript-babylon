@@ -1,40 +1,44 @@
 module Graphics.Babylon.Example.Sandbox.Main (main) where
 
 import Control.Alternative (pure)
-import Control.Bind (bind)
+import Control.Bind (bind, when)
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (error)
-import Control.Monad.Eff.Ref (newRef)
+import Control.Monad.Eff.Console (error, log)
+import Control.Monad.Eff.Ref (modifyRef, newRef)
 import Data.Maybe (Maybe(Just))
 import Data.Nullable (toMaybe)
 import Data.Ring (negate)
 import Data.Unit (Unit)
 import Graphics.Babylon (Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (setIsPickable, setIsVisible) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition)
+import Graphics.Babylon.AbstractMesh (setIsPickable, setIsVisible, setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Camera (oRTHOGRAPHIC_CAMERA, setMode, setViewport, setOrthoLeft, setOrthoRight, setOrthoTop, setOrthoBottom)
 import Graphics.Babylon.Color3 (createColor3)
 import Graphics.Babylon.CubeTexture (createCubeTexture, cubeTextureToTexture)
 import Graphics.Babylon.DirectionalLight (createDirectionalLight, directionalLightToLight)
 import Graphics.Babylon.Engine (createEngine, runRenderLoop)
+import Graphics.Babylon.Example.Sandbox.Event (onKeyDown)
 import Graphics.Babylon.Example.Sandbox.Terrain (emptyTerrain)
 import Graphics.Babylon.Example.Sandbox.Types (Effects, Mode(..), State(State))
-import Graphics.Babylon.Example.Sandbox.Update (update)
 import Graphics.Babylon.Example.Sandbox.UI (initializeUI)
+import Graphics.Babylon.Example.Sandbox.Update (update)
 import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraToCamera, freeCameraToTargetCamera, setCheckCollisions)
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
-import Graphics.Babylon.Mesh (createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId)
+import Graphics.Babylon.Mesh (setReceiveShadows, createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId)
+import Graphics.Babylon.Observable (add) as Observable
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setUsePoissonSampling)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
 import Graphics.Babylon.TargetCamera (createTargetCamera, setSpeed, setTarget, targetCameraToCamera)
 import Graphics.Babylon.Texture (createTexture, sKYBOX_MODE, setCoordinatesMode)
-import Graphics.Babylon.Vector3 (createVector3)
+import Graphics.Babylon.Types (AbstractMesh)
+import Graphics.Babylon.Vector3 (createVector3, runVector3)
 import Graphics.Babylon.Viewport (createViewport)
 import Graphics.Babylon.WaterMaterial (createWaterMaterial, setBumpTexture, addToRenderList, waterMaterialToMaterial, setWaveHeight, setWindForce)
 import Graphics.Canvas (CanvasElement, getCanvasElementById)
-import Prelude ((#), ($), (<$>))
+import Prelude ((#), ($), (<$>), (==), (-), (+), negate, (<), (>), (&&), (<>), show)
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -160,6 +164,15 @@ runApp canvasGL canvas2d = do
         setInfiniteDistance true skyboxMesh
         pure skyboxMesh
 
+    player <- do
+        mesh <- createBox "player" 1.0 scene
+        p <- createVector3 0.0 20.0 0.0
+        setPosition p (meshToAbstractMesh mesh)
+        setRenderingGroupId 1 mesh
+        setReceiveShadows true mesh
+        pure mesh
+
+
     -- prepare materials
     materials <- do
         texture <- createTexture "texture.png" scene
@@ -192,15 +205,26 @@ runApp canvasGL canvas2d = do
         debugLayer: false,
         yaw: 0.0,
         pitch: 0.0,
-        velocity: { x: 0.0, y: 0.0, z: 0.0 },
+        position: { x: 0.0, y: 20.0, z: 0.0 },
+        velocity: { x: 0.0, y: 0.2, z: 0.0 },
         minimap: false,
         totalFrames: 0
     }
 
-    initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials
+    initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials player
+
+    onKeyDown \e -> do
+        when (e.keyCode == 32) do
+            modifyRef ref \(State state) -> State state {
+                velocity = {
+                    x: state.velocity.x,
+                    y: state.velocity.y + 0.1,
+                    z: state.velocity.z
+                }
+            }
 
     engine # runRenderLoop do
-        update ref scene materials shadowMap cursor camera
+        update ref scene materials shadowMap cursor camera player
         render scene
 
 main :: forall eff. Eff (Effects eff) Unit

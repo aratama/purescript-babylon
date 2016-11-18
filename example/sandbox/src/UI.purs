@@ -9,7 +9,7 @@ import Data.BooleanAlgebra (not)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (Canvas)
-import Graphics.Babylon.AbstractMesh (setIsVisible) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (setIsVisible, setPosition) as AbstractMesh
 import Graphics.Babylon.DebugLayer (show, hide) as DebugLayer
 import Graphics.Babylon.Example.Sandbox.BlockType (grassBlock)
 import Graphics.Babylon.Example.Sandbox.BoxelMap (delete, insert)
@@ -24,7 +24,9 @@ import Graphics.Babylon.Mesh (meshToAbstractMesh)
 import Graphics.Babylon.Scene (getDebugLayer, setActiveCameras)
 import Graphics.Babylon.TargetCamera (TargetCamera, targetCameraToCamera)
 import Graphics.Babylon.Types (Mesh, Scene)
+import Graphics.Babylon.Vector3 (toVector3)
 import Graphics.Canvas (CanvasElement)
+import Prelude (($))
 
 shadowMapSize :: Int
 shadowMapSize = 4096
@@ -47,8 +49,8 @@ collesionEnabledRange = 1
 enableWaterMaterial :: Boolean
 enableWaterMaterial = false
 
-initializeUI :: forall eff. Canvas -> CanvasElement -> Ref State -> Mesh -> FreeCamera -> TargetCamera -> Scene -> Materials -> Eff (Effects eff) Unit
-initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials = do
+initializeUI :: forall eff. Canvas -> CanvasElement -> Ref State -> Mesh -> FreeCamera -> TargetCamera -> Scene -> Materials -> Mesh -> Eff (Effects eff) Unit
+initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials player = do
 
 
     onMouseMove \e -> do
@@ -70,6 +72,11 @@ initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials =
     prepareModeButton "move" Move
     prepareModeButton "add" Put
     prepareModeButton "remove" Remove
+
+    onButtonClick "position" $ void do
+        modifyRef ref \(State state) -> State state {
+            position = { x: 0.0, y: 30.0, z: 0.0 }
+        }
 
     onButtonClick "minimap" do
         modifyRef ref (\(State state) -> State state { minimap = not state.minimap })

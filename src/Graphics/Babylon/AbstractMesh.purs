@@ -4,6 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Node (Node)
+import Graphics.Babylon.Observable (Observable)
 import Graphics.Babylon.PhysicsImpostor (PhysicsImpostor)
 import Graphics.Babylon.Types (AbstractMesh, Mesh, Ray)
 import Graphics.Babylon.Vector3 (Vector3)
@@ -41,3 +42,5 @@ foreign import setPhysicsImpostor :: forall eff. PhysicsImpostor -> AbstractMesh
 foreign import setIsVisible :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setUseVertexColors :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import onCollisionPositionChangeObservable  :: AbstractMesh -> Observable Vector3

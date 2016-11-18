@@ -28,6 +28,13 @@ exports.runVector3 = function(v){
     }
 }
 
+exports.toVector3 = function(v){
+    return function(){
+        return new BABYLON.Vector3(v.x, v.y, v.z);
+    }
+}
+
+
 exports.rotationFromAxis = function(x){
     return function(y){
         return function(z){

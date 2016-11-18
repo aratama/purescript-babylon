@@ -5,7 +5,7 @@ import Control.Alternative (pure)
 import Control.Bind (bind, when, (>>=))
 import Control.Monad.Eff (Eff, forE)
 import Control.Monad.Eff.Console (log)
-import Control.Monad.Eff.Ref (REF, Ref, modifyRef, readRef)
+import Control.Monad.Eff.Ref (REF, Ref, modifyRef, readRef, writeRef)
 import Control.MonadPlus (guard)
 import DOM (DOM)
 import Data.Array (head, (..))
@@ -17,13 +17,14 @@ import Data.Ord (abs, min)
 import Data.Show (show)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions) as AbstractMesh
+import Graphics.Babylon.AbstractMesh (moveWithCollisions)
+import Graphics.Babylon.AbstractMesh (abstractMeshToNode, setCheckCollisions, getPosition, setPosition) as AbstractMesh
 import Graphics.Babylon.Camera (getPosition) as Camera
 import Graphics.Babylon.Example.Sandbox.BlockIndex (BlockIndex, runBlockIndex)
 import Graphics.Babylon.Example.Sandbox.Chunk (Chunk(..))
 import Graphics.Babylon.Example.Sandbox.ChunkIndex (chunkIndex, chunkIndexDistance, runChunkIndex)
 import Graphics.Babylon.Example.Sandbox.MeshBuilder (createChunkMesh)
-import Graphics.Babylon.Example.Sandbox.Terrain (chunkCount, getChunkMap, globalPositionToChunkIndex, globalPositionToGlobalIndex, lookupBlock, lookupChunk)
+import Graphics.Babylon.Example.Sandbox.Terrain (Terrain, chunkCount, getChunkMap, globalPositionToChunkIndex, globalPositionToGlobalIndex, lookupBlock, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.Types (Effects, Mode(..), State(State), Materials)
 import Graphics.Babylon.FreeCamera (FreeCamera, freeCameraToCamera, freeCameraToTargetCamera)
 import Graphics.Babylon.Mesh (meshToAbstractMesh, setPosition)
@@ -32,8 +33,8 @@ import Graphics.Babylon.PickingInfo (getHit, getPickedPoint)
 import Graphics.Babylon.Scene (pick)
 import Graphics.Babylon.ShadowGenerator (ShadowMap, setRenderList)
 import Graphics.Babylon.TargetCamera (getRotation)
-import Graphics.Babylon.Types (Mesh, Scene)
-import Graphics.Babylon.Vector3 (createVector3, runVector3)
+import Graphics.Babylon.Types (AbstractMesh, Mesh, Scene)
+import Graphics.Babylon.Vector3 (createVector3, runVector3, toVector3)
 import Math (round)
 import Prelude (mod, ($), (+), (-), (/=), (<=), (<>), (==))
 
@@ -53,7 +54,7 @@ terrainRenderingGroup :: Int
 terrainRenderingGroup = 1
 
 collesionEnabledRange :: Int
-collesionEnabledRange = 1
+collesionEnabledRange = 3
 
 enableWaterMaterial :: Boolean
 enableWaterMaterial = false
@@ -117,8 +118,8 @@ pickBlock scene cursor (State state) screenX screenY = do
 
     if getHit pickingInfo then pickup else pure Nothing
 
-update :: forall eff. Ref State -> Scene -> Materials -> ShadowMap -> Mesh -> FreeCamera -> Eff (Effects eff) Unit
-update ref scene materials shadowMap cursor camera = do
+update :: forall eff. Ref State -> Scene -> Materials -> ShadowMap -> Mesh -> FreeCamera -> Mesh -> Eff (Effects eff) Unit
+update ref scene materials shadowMap cursor camera player = do
 
         modifyRef ref \(State state) -> State state { totalFrames = state.totalFrames + 1 }
 
@@ -144,11 +145,12 @@ update ref scene materials shadowMap cursor camera = do
         -- update shadow rendering list
 
 
-        when (mod state.totalFrames 30 == 0) do
+        when (mod state.totalFrames 10 == 0) do
             let shadowRange = 2
             let ci = runChunkIndex cameraPositionChunkIndex
             chunks <- runSTArray do
                 list <- emptySTArray
+                pushSTArray list (meshToAbstractMesh player)
                 forE (ci.x - shadowRange) (ci.x + shadowRange) \dx -> do
                     forE (ci.y - shadowRange) (ci.y + shadowRange) \dy -> do
                         forE (ci.z - shadowRange) (ci.z + shadowRange) \dz -> do
@@ -189,6 +191,50 @@ update ref scene materials shadowMap cursor camera = do
                 let enabled = r <= collesionEnabledRange
                 AbstractMesh.setCheckCollisions enabled (meshToAbstractMesh dat.standardMaterialMesh)
 
+
+
+        do
+            State st@{ terrain } <- readRef ref
+            let next = {
+                        x: state.position.x + state.velocity.x,
+                        y: state.position.y + state.velocity.y,
+                        z: state.position.z + state.velocity.z
+                    }
+            let globalIndex = runBlockIndex (globalPositionToGlobalIndex next.x next.y next.z)
+            let st' = case lookupBlock next terrain of
+                            Nothing -> st {
+                                position = next,
+                                velocity = st.velocity { y = state.velocity.y - 0.01 }
+                            }
+                            Just _ -> st {
+                                position = {
+                                    x: st.position.x,
+                                    y: Int.toNumber (globalIndex.y + 1),
+                                    z: st.position.z
+                                },
+                                velocity = { x: 0.0, y: 0.0, z: 0.0 }
+                            }
+
+            writeRef ref (State st')
+
+            position <- createVector3 st'.position.x (st'.position.y + 0.501) st'.position.z
+            AbstractMesh.setPosition position (meshToAbstractMesh player)
+
+
+
+            pure unit
+            {-}
+
+            let velocity = {
+                        x: if state.position.x == currentPosition.x then 0.0 else state.velocity.x,
+                        y: (if state.position.y == currentPosition.y then 0.0 else state.velocity.y) - 0.01,
+                        z: if state.position.z == currentPosition.z then 0.0 else state.velocity.z
+                    }
+            modifyRef ref \(State state) -> State state {
+                position = currentPosition,
+                velocity = velocity
+            }
+-}
 
         do
             pos <- Camera.getPosition (freeCameraToCamera camera) >>= runVector3

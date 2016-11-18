@@ -140,3 +140,7 @@ exports.setUseVertexColors  = function(useVertexColors ){
         }
     }
 }
+
+exports.onCollisionPositionChangeObservable = function(mesh){
+    return mesh.onCollisionPositionChangeObservable;
+}

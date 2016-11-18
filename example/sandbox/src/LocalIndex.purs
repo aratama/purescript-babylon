@@ -10,6 +10,7 @@ import Graphics.Babylon.Example.Sandbox.Constants (chunkSize)
 import Prelude (class Eq, class Show, (+), (-), (*), (/), mod)
 import Data.Newtype (class Newtype)
 
+
 newtype LocalIndex = LocalIndex Int
 
 derive instance newtype_LocalIndex :: Newtype LocalIndex _
