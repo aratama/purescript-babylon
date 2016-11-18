@@ -44,3 +44,5 @@ foreign import setIsVisible :: forall eff. Boolean -> AbstractMesh -> Eff (babyl
 foreign import setUseVertexColors :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import onCollisionPositionChangeObservable  :: AbstractMesh -> Observable Vector3
+
+foreign import setRenderingGroupId :: forall eff. Int -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit

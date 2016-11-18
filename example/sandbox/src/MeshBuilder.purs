@@ -15,7 +15,7 @@ import Control.Monad.Eff.Ref (REF, Ref, modifyRef, readRef, writeRef)
 import Data.Maybe (Maybe(Just, Nothing))
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.AbstractMesh (setUseVertexColors)
+import Graphics.Babylon.AbstractMesh (setUseVertexColors, setRenderingGroupId)
 import Graphics.Babylon.Example.Sandbox.Generation (createBlockMap)
 import Graphics.Babylon.Example.Sandbox.MeshBuilder (createTerrainGeometry)
 import Graphics.Babylon.Example.Sandbox.Types (Materials, State(State))
@@ -24,7 +24,7 @@ import Graphics.Babylon.Example.Sandbox.ChunkIndex (ChunkIndex, runChunkIndex)
 import Graphics.Babylon.Example.Sandbox.Terrain (insertChunk, ChunkWithMesh, disposeChunk, lookupChunk)
 import Graphics.Babylon.Example.Sandbox.VertexDataPropsData (VertexDataPropsData(..))
 import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.Mesh (meshToAbstractMesh, createMesh, setMaterial, setReceiveShadows, setRenderingGroupId)
+import Graphics.Babylon.Mesh (meshToAbstractMesh, createMesh, setMaterial, setReceiveShadows)
 import Graphics.Babylon.Types (Mesh, Scene)
 import Graphics.Babylon.VertexData (VertexDataProps, applyToMesh, createVertexData)
 import Prelude (($), (=<<))
@@ -59,7 +59,7 @@ generateMesh index verts mat scene = do
     let cz = rci.z
     terrainMesh <- createMesh "terrain" scene
     applyToMesh terrainMesh false =<< createVertexData (verts)
-    setRenderingGroupId 1 terrainMesh
+    setRenderingGroupId 1 (meshToAbstractMesh terrainMesh)
     setReceiveShadows true terrainMesh
     setUseVertexColors true (meshToAbstractMesh terrainMesh)
     setMaterial mat terrainMesh

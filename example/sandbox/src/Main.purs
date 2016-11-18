@@ -5,12 +5,13 @@ import Control.Bind (bind, when)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (error, log)
 import Control.Monad.Eff.Ref (modifyRef, newRef)
-import Data.Maybe (Maybe(Just))
-import Data.Nullable (toMaybe)
+import Data.Foldable (for_)
+import Data.Maybe (Maybe(..))
+import Data.Nullable (toMaybe, toNullable)
 import Data.Ring (negate)
-import Data.Unit (Unit)
+import Data.Unit (Unit, unit)
 import Graphics.Babylon (Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition)
+import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition, setRenderingGroupId)
 import Graphics.Babylon.AbstractMesh (setIsPickable, setIsVisible, setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Camera (oRTHOGRAPHIC_CAMERA, setMode, setViewport, setOrthoLeft, setOrthoRight, setOrthoTop, setOrthoBottom)
 import Graphics.Babylon.Color3 (createColor3)
@@ -26,9 +27,10 @@ import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraT
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
-import Graphics.Babylon.Mesh (setReceiveShadows, createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial, setRenderingGroupId)
+import Graphics.Babylon.Mesh (setReceiveShadows, createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial)
 import Graphics.Babylon.Observable (add) as Observable
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
+import Graphics.Babylon.SceneLoader (importMesh)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setUsePoissonSampling)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
 import Graphics.Babylon.TargetCamera (createTargetCamera, setSpeed, setTarget, targetCameraToCamera)
@@ -133,7 +135,7 @@ runApp canvasGL canvas2d = do
 
     cursor <- do
         cursorbox <- createBox "cursor" 1.0 scene
-        setRenderingGroupId 1 cursorbox
+        setRenderingGroupId 1 (meshToAbstractMesh cursorbox)
         AbstractMesh.setIsPickable false (meshToAbstractMesh cursorbox)
         AbstractMesh.setIsVisible false (meshToAbstractMesh cursorbox)
 
@@ -159,7 +161,7 @@ runApp canvasGL canvas2d = do
         setReflectionTexture (cubeTextureToTexture skyBoxCubeTex) skyboxMaterial
 
         skyboxMesh <- createBox "skybox" 1000.0 scene
-        setRenderingGroupId skyBoxRenderingGruop skyboxMesh
+        setRenderingGroupId skyBoxRenderingGruop (meshToAbstractMesh skyboxMesh)
         setMaterial (standardMaterialToMaterial skyboxMaterial) skyboxMesh
         setInfiniteDistance true skyboxMesh
         pure skyboxMesh
@@ -168,7 +170,7 @@ runApp canvasGL canvas2d = do
         mesh <- createBox "player" 1.0 scene
         p <- createVector3 0.0 20.0 0.0
         setPosition p (meshToAbstractMesh mesh)
-        setRenderingGroupId 1 mesh
+        setRenderingGroupId 1 (meshToAbstractMesh mesh)
         setReceiveShadows true mesh
         pure mesh
 
@@ -212,6 +214,15 @@ runApp canvasGL canvas2d = do
     }
 
     initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials player
+
+    let onSucc result = do
+            for_ result \mesh -> do
+                p <- createVector3 0.0 20.0 0.0
+                setPosition p mesh
+                setRenderingGroupId 1 mesh
+            pure unit
+
+    importMesh "" "" "monkey.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
 
     onKeyDown \e -> do
         when (e.keyCode == 32) do

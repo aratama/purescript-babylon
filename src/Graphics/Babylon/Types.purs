@@ -11,3 +11,7 @@ foreign import data Ray :: *
 
 
 foreign import data PhysicsPlugin :: *
+
+foreign import data ParticleSystem :: *
+
+foreign import data Skeleton :: *

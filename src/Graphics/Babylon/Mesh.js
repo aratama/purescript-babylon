@@ -98,13 +98,7 @@ exports.setInfiniteDistance = function(value){
 }
 
 
-exports.setRenderingGroupId = function(value){
-    return function(mesh){
-        return function(){
-            mesh.renderingGroupId = value;
-        }
-    }
-}
+
 
 exports.getTotalIndices = function(mesh){
     return function(){

@@ -144,3 +144,11 @@ exports.setUseVertexColors  = function(useVertexColors ){
 exports.onCollisionPositionChangeObservable = function(mesh){
     return mesh.onCollisionPositionChangeObservable;
 }
+
+exports.setRenderingGroupId = function(value){
+    return function(mesh){
+        return function(){
+            mesh.renderingGroupId = value;
+        }
+    }
+}

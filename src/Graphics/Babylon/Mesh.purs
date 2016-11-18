@@ -32,6 +32,6 @@ foreign import setMaterial :: forall eff. Material -> Mesh -> Eff (babylon :: BA
 
 foreign import setInfiniteDistance :: forall eff. Boolean -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setRenderingGroupId :: forall eff. Int -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
+
 
 foreign import getTotalIndices :: forall eff. Mesh -> Eff (babylon :: BABYLON | eff) Int
