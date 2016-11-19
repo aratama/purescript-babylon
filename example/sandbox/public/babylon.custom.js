@@ -31,7 +31,7 @@ var BABYLON;
             return str.toUpperCase();
         };
         // Returns -1 when value is a negative number and
-        // +1 when value is a positive number.
+        // +1 when value is a positive number. 
         MathTools.Sign = function (value) {
             value = +value; // convert to a number
             if (value === 0 || isNaN(value))
@@ -4510,7 +4510,7 @@ var BABYLON;
             var bytes = new Uint8Array(buffer);
             while (i < bytes.length) {
                 chr1 = bytes[i++];
-                chr2 = i < bytes.length ? bytes[i++] : Number.NaN; // Not sure if the index
+                chr2 = i < bytes.length ? bytes[i++] : Number.NaN; // Not sure if the index 
                 chr3 = i < bytes.length ? bytes[i++] : Number.NaN; // checks are needed here
                 enc1 = chr1 >> 2;
                 enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
@@ -6842,7 +6842,7 @@ var BABYLON;
         Engine.prototype.setState = function (culling, zOffset, force, reverseSide) {
             if (zOffset === void 0) { zOffset = 0; }
             if (reverseSide === void 0) { reverseSide = false; }
-            // Culling
+            // Culling        
             var showSide = reverseSide ? this._gl.FRONT : this._gl.BACK;
             var hideSide = reverseSide ? this._gl.BACK : this._gl.FRONT;
             var cullFace = this.cullBackFaces ? showSide : hideSide;
@@ -8073,7 +8073,7 @@ var BABYLON;
                     this.animations[i].deleteRange(name, deleteFrames);
                 }
             }
-            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
+            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
         };
         Node.prototype.getAnimationRange = function (name) {
             return this._ranges[name];
@@ -9166,7 +9166,7 @@ var BABYLON;
             },
             set: function (quaternion) {
                 this._rotationQuaternion = quaternion;
-                //reset the rotation vector.
+                //reset the rotation vector. 
                 if (quaternion && this.rotation.length()) {
                     this.rotation.copyFromFloats(0, 0, 0);
                 }
@@ -10099,7 +10099,7 @@ var BABYLON;
                     serializationObject.includedOnlyMeshesIds.push(mesh.id);
                 });
             }
-            // Animations
+            // Animations  
             BABYLON.Animation.AppendSerializedAnimations(this, serializationObject);
             serializationObject.ranges = this.serializeAnimationRanges();
             return serializationObject;
@@ -10795,7 +10795,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect
+            // Get correct effect      
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -11706,7 +11706,7 @@ var BABYLON;
             for (var i = 0, len = this._rigCameras.length; i < len; i++) {
                 var cam = this._rigCameras[i];
                 var rigPostProcess = cam._rigPostProcess;
-                // for VR rig, there does not have to be a post process
+                // for VR rig, there does not have to be a post process 
                 if (rigPostProcess) {
                     var isPass = rigPostProcess instanceof BABYLON.PassPostProcess;
                     if (isPass) {
@@ -11733,7 +11733,7 @@ var BABYLON;
             else {
                 this._postProcesses.splice(insertAt, 0, postProcess);
             }
-            this._cascadePostProcessesToRigCams(); // also ensures framebuffer invalidated
+            this._cascadePostProcessesToRigCams(); // also ensures framebuffer invalidated            
             return this._postProcesses.indexOf(postProcess);
         };
         Camera.prototype.detachPostProcess = function (postProcess, atIndices) {
@@ -11839,7 +11839,7 @@ var BABYLON;
             }
             this.cameraRigMode = mode;
             this._cameraRigParams = {};
-            //we have to implement stereo camera calcultating left and right viewpoints from interaxialDistance and target,
+            //we have to implement stereo camera calcultating left and right viewpoints from interaxialDistance and target, 
             //not from a given angle as it is now, but until that complete code rewriting provisional stereoHalfAngle value is introduced
             this._cameraRigParams.interaxialDistance = rigParams.interaxialDistance || 0.0637;
             this._cameraRigParams.stereoHalfAngle = BABYLON.Tools.ToRadians(this._cameraRigParams.interaxialDistance / 0.0637);
@@ -12938,9 +12938,9 @@ var BABYLON;
                     }
                     cacheSoloPointer = null;
                     previousPinchDistance = 0;
-                    //would be better to use pointers.remove(evt.pointerId) for multitouch gestures,
-                    //but emptying completly pointers collection is required to fix a bug on iPhone :
-                    //when changing orientation while pinching camera, one pointer stay pressed forever if we don't release all pointers
+                    //would be better to use pointers.remove(evt.pointerId) for multitouch gestures, 
+                    //but emptying completly pointers collection is required to fix a bug on iPhone : 
+                    //when changing orientation while pinching camera, one pointer stay pressed forever if we don't release all pointers  
                     //will be ok to put back pointers.remove(evt.pointerId); when iPhone bug corrected
                     pointA = pointB = undefined;
                     if (!noPreventDefault) {
@@ -13902,7 +13902,7 @@ var BABYLON;
             this.upperRadiusLimit = null;
             this.inertialPanningX = 0;
             this.inertialPanningY = 0;
-            //-- end properties for backward compatibility for inputs
+            //-- end properties for backward compatibility for inputs        
             this.zoomOnFactor = 1;
             this.targetScreenOffset = BABYLON.Vector2.Zero();
             this.allowUpsideDown = true;
@@ -13964,7 +13964,7 @@ var BABYLON;
             this.inputs.addKeyboard().addMouseWheel().addPointers().addGamepad();
         }
         Object.defineProperty(ArcRotateCamera.prototype, "angularSensibilityX", {
-            //-- begin properties for backward compatibility for inputs
+            //-- begin properties for backward compatibility for inputs       
             get: function () {
                 var pointers = this.inputs.attached["pointers"];
                 if (pointers)
@@ -14491,7 +14491,7 @@ var BABYLON;
             if (!this._scene.spritesEnabled || this._scene.spriteManagers.length === 0) {
                 return;
             }
-            // Sprites
+            // Sprites       
             var activeCamera = this._scene.activeCamera;
             var beforeSpritessDate = BABYLON.Tools.Now;
             for (var id = 0; id < this._scene.spriteManagers.length; id++) {
@@ -14632,7 +14632,7 @@ var BABYLON;
                     }
                     return 0;
                 });
-                // Rendering
+                // Rendering                
                 for (subIndex = 0; subIndex < sortedArray.length; subIndex++) {
                     submesh = sortedArray[subIndex];
                     submesh.render(true);
@@ -15662,7 +15662,7 @@ var BABYLON;
         Scene.prototype.removeMesh = function (toRemove) {
             var index = this.meshes.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found
+                // Remove from the scene if mesh found 
                 this.meshes.splice(index, 1);
             }
             //notify the collision coordinator
@@ -15673,7 +15673,7 @@ var BABYLON;
         Scene.prototype.removeSkeleton = function (toRemove) {
             var index = this.skeletons.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found
+                // Remove from the scene if mesh found 
                 this.skeletons.splice(index, 1);
             }
             return index;
@@ -15681,7 +15681,7 @@ var BABYLON;
         Scene.prototype.removeLight = function (toRemove) {
             var index = this.lights.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found
+                // Remove from the scene if mesh found 
                 this.lights.splice(index, 1);
             }
             this.onLightRemovedObservable.notifyObservers(toRemove);
@@ -15690,7 +15690,7 @@ var BABYLON;
         Scene.prototype.removeCamera = function (toRemove) {
             var index = this.cameras.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found
+                // Remove from the scene if mesh found 
                 this.cameras.splice(index, 1);
             }
             // Remove from activeCameras
@@ -17518,7 +17518,7 @@ var BABYLON;
             if (parent === void 0) { parent = null; }
             if (clonePhysicsImpostor === void 0) { clonePhysicsImpostor = true; }
             _super.call(this, name, scene);
-            // Events
+            // Events 
             /**
              * An event triggered before rendering the mesh
              * @type {BABYLON.Observable}
@@ -17551,7 +17551,7 @@ var BABYLON;
                 }
                 // Deep copy
                 BABYLON.Tools.DeepCopy(source, this, ["name", "material", "skeleton", "instances"], ["_poseMatrix"]);
-                // Pivot
+                // Pivot                
                 this.setPivotMatrix(source.getPivotMatrix());
                 this.id = name + "." + source.id;
                 // Material
@@ -17567,7 +17567,7 @@ var BABYLON;
                         }
                     }
                 }
-                // Physics clone
+                // Physics clone  
                 var physicsEngine = this.getScene().getPhysicsEngine();
                 if (clonePhysicsImpostor && physicsEngine) {
                     var impostor = physicsEngine.getImpostorForPhysicsObject(source);
@@ -20010,7 +20010,7 @@ var BABYLON;
             }
             return intersectInfo;
         };
-        // Clone
+        // Clone    
         SubMesh.prototype.clone = function (newMesh, newRenderingMesh) {
             var result = new SubMesh(this.materialIndex, this.verticesStart, this.verticesCount, this.indexStart, this.indexCount, newMesh, newRenderingMesh, false);
             if (!this.IsGlobal) {
@@ -22133,32 +22133,32 @@ var BABYLON;
             for (var name in this._textures) {
                 this._effect.setTexture(name, this._textures[name]);
             }
-            // Float
+            // Float    
             for (name in this._floats) {
                 this._effect.setFloat(name, this._floats[name]);
             }
-            // Floats
+            // Floats   
             for (name in this._floatsArrays) {
                 this._effect.setArray(name, this._floatsArrays[name]);
             }
-            // Color3
+            // Color3        
             for (name in this._colors3) {
                 this._effect.setColor3(name, this._colors3[name]);
             }
-            // Color4
+            // Color4      
             for (name in this._colors4) {
                 var color = this._colors4[name];
                 this._effect.setFloat4(name, color.r, color.g, color.b, color.a);
             }
-            // Vector2
+            // Vector2        
             for (name in this._vectors2) {
                 this._effect.setVector2(name, this._vectors2[name]);
             }
-            // Vector3
+            // Vector3        
             for (name in this._vectors3) {
                 this._effect.setVector3(name, this._vectors3[name]);
             }
-            // Matrix
+            // Matrix      
             for (name in this._matrices) {
                 this._effect.setMatrix(name, this._matrices[name]);
             }
@@ -23821,7 +23821,7 @@ var BABYLON;
             _super.call(this, name, scene);
             this.ambientColor = new BABYLON.Color3(0, 0, 0);
             this.diffuseColor = new BABYLON.Color3(1, 1, 1);
-            this.specularColor = new BABYLON.Color3(0, 0, 0);
+            this.specularColor = new BABYLON.Color3(1, 1, 1);
             this.emissiveColor = new BABYLON.Color3(0, 0, 0);
             this.specularPower = 64;
             this.useAlphaFromDiffuseTexture = false;
@@ -23887,7 +23887,7 @@ var BABYLON;
         StandardMaterial.prototype.getAlphaTestTexture = function () {
             return this.diffuseTexture;
         };
-        // Methods
+        // Methods   
         StandardMaterial.prototype._checkCache = function (scene, mesh, useInstances) {
             if (!mesh) {
                 return true;
@@ -24147,7 +24147,7 @@ var BABYLON;
                     this._defines.INSTANCES = true;
                 }
             }
-            // Get correct effect
+            // Get correct effect      
             if (!this._defines.isEqual(this._cachedDefines)) {
                 this._defines.cloneTo(this._cachedDefines);
                 scene.resetCachedMaterial();
@@ -24261,7 +24261,7 @@ var BABYLON;
         };
         StandardMaterial.prototype.bind = function (world, mesh) {
             var scene = this.getScene();
-            // Matrices
+            // Matrices        
             this.bindOnlyWorldMatrix(world);
             // Bones
             BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
@@ -24289,7 +24289,7 @@ var BABYLON;
                         this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
                     }
                 }
-                // Textures
+                // Textures     
                 if (scene.texturesEnabled) {
                     if (this.diffuseTexture && StandardMaterial.DiffuseTextureEnabled) {
                         this._effect.setTexture("diffuseSampler", this.diffuseTexture);
@@ -26125,7 +26125,7 @@ var BABYLON;
             }
             this._currentRenderId = this._scene.getRenderId();
             this._scaledUpdateSpeed = this.updateSpeed * this._scene.getAnimationRatio();
-            // determine the number of particles we need to create
+            // determine the number of particles we need to create   
             var newParticles;
             if (this.manualEmitCount > -1) {
                 newParticles = this.manualEmitCount;
@@ -26552,7 +26552,7 @@ var BABYLON;
                         }
                     }
                 }
-                this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
+                this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
             }
         };
         Animation.prototype.getRange = function (name) {
@@ -27694,7 +27694,7 @@ var BABYLON;
                     this.bones[i].animations[0].deleteRange(name, deleteFrames);
                 }
             }
-            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
+            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
         };
         Skeleton.prototype.getAnimationRange = function (name) {
             return this._ranges[name];
@@ -31344,7 +31344,7 @@ var BABYLON;
             }
         };
         PostProcessRenderPipeline.prototype.dispose = function () {
-            // Must be implemented by children
+            // Must be implemented by children 
         };
         PostProcessRenderPipeline.PASS_EFFECT_NAME = "passEffect";
         PostProcessRenderPipeline.PASS_SAMPLER_NAME = "passSampler";
@@ -34118,7 +34118,7 @@ var BABYLON;
         DefaultLoadingScreen.prototype.displayLoadingUI = function () {
             var _this = this;
             if (this._loadingDiv) {
-                // Do not add a loading screen if there is already one
+                // Do not add a loading screen if there is already one  
                 return;
             }
             this._loadingDiv = document.createElement("div");
@@ -34278,7 +34278,7 @@ var BABYLON;
             try {
                 if (this.canUseWebAudio) {
                     this._audioContext = new AudioContext();
-                    // create a global volume gain node
+                    // create a global volume gain node 
                     this.masterGain = this._audioContext.createGain();
                     this.masterGain.gain.value = 1;
                     this.masterGain.connect(this._audioContext.destination);
@@ -34550,7 +34550,7 @@ var BABYLON;
         Sound.prototype._updateSpatialParameters = function () {
             if (this.spatialSound) {
                 if (this.useCustomAttenuation) {
-                    // Tricks to disable in a way embedded Web Audio attenuation
+                    // Tricks to disable in a way embedded Web Audio attenuation 
                     this._soundPanner.distanceModel = "linear";
                     this._soundPanner.maxDistance = Number.MAX_VALUE;
                     this._soundPanner.refDistance = 1;
@@ -35157,7 +35157,7 @@ var BABYLON;
             var up = SIMD.float32x4(upRef.x, upRef.y, upRef.z, 0);
             // cc.kmVec3Subtract(f, pCenter, pEye);
             var f = SIMD.float32x4.sub(center, eye);
-            // cc.kmVec3Normalize(f, f);
+            // cc.kmVec3Normalize(f, f);    
             var tmp = SIMD.float32x4.mul(f, f);
             tmp = SIMD.float32x4.add(tmp, SIMD.float32x4.add(SIMD.float32x4.swizzle(tmp, 1, 2, 0, 3), SIMD.float32x4.swizzle(tmp, 2, 0, 1, 3)));
             f = SIMD.float32x4.mul(f, SIMD.float32x4.reciprocalSqrtApproximation(tmp));
@@ -35744,15 +35744,15 @@ var BABYLON;
                     _this.buffer[src + i] = tps;
                 }
             };
-            // The fun part begin, sortedTable give us the ordered layout to obtain, to get that we have to move elements, but when we move an element:
-            //  it replaces an existing one.I don't want to allocate a new Float32Array and do a raw copy, because it's awful (GC - wise),
+            // The fun part begin, sortedTable give us the ordered layout to obtain, to get that we have to move elements, but when we move an element: 
+            //  it replaces an existing one.I don't want to allocate a new Float32Array and do a raw copy, because it's awful (GC - wise), 
             //  and I still want something with a good algorithm complexity.
-            // So here's the deal: we are going to swap elements, but we have to track the change of location of the element being replaced,
+            // So here's the deal: we are going to swap elements, but we have to track the change of location of the element being replaced, 
             //  we need sortTable for that, it contains the original layout of SortInfo object, not the sorted one.
             // The best way is to use an extra field in SortInfo, because potentially every element can be replaced.
-            // When we'll look for and element, we'll check if its swapedOffset is set, if so we reiterate the operation with the one there
+            // When we'll look for and element, we'll check if its swapedOffset is set, if so we reiterate the operation with the one there 
             //  until we find a SortInfo object without a swapedOffset which means we got the right location
-            // Yes, we may have to do multiple iterations to find the right location, but hey, it won't be huge: <3 in most cases, and it's better
+            // Yes, we may have to do multiple iterations to find the right location, but hey, it won't be huge: <3 in most cases, and it's better 
             //  than a double allocation of the whole float32Array or a O(n²/2) typical algorithm.
             for (var i = 0; i < count; i++) {
                 // Get the element to move
@@ -40452,7 +40452,7 @@ var BABYLON;
             else {
                 gii.opaqueDirty = true;
             }
-            this._clearFlags(BABYLON.SmartPropertyPrim.flagVisibilityChanged); // Reset the flag as we've handled the case
+            this._clearFlags(BABYLON.SmartPropertyPrim.flagVisibilityChanged); // Reset the flag as we've handled the case            
         };
         RenderablePrim2D.prototype._getFirstIndexInDataBuffer = function () {
             for (var _i = 0, _a = this._instanceDataParts; _i < _a.length; _i++) {
@@ -40608,7 +40608,7 @@ var BABYLON;
             }
             // Have to convert the coordinates to clip space which is ranged between [-1;1] on X and Y axis, with 0,0 being the left/bottom corner
             // Current coordinates are expressed in renderGroup coordinates ([0, renderGroup.actualSize.width|height]) with 0,0 being at the left/top corner
-            // So for X:
+            // So for X: 
             //  - tx.x = value * 2 / width: is to switch from [0, renderGroup.width] to [0, 2]
             //  - tx.w = (value * 2 / width) - 1: w stores the translation in renderGroup coordinates so (value * 2 / width) to switch to a clip space translation value. - 1 is to offset the overall [0;2] to [-1;1].
             var w = size.width;
@@ -41713,7 +41713,7 @@ var BABYLON;
             this.effectBorderInstanced = null;
         }
         Rectangle2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing
+            // Do nothing if the shader is still loading/preparing 
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -42143,7 +42143,7 @@ var BABYLON;
             this.effectBorder = null;
         }
         Ellipse2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing
+            // Do nothing if the shader is still loading/preparing 
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -42479,7 +42479,7 @@ var BABYLON;
             this.effectInstanced = null;
         }
         Sprite2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing
+            // Do nothing if the shader is still loading/preparing 
             if (!this.effectsReady) {
                 if ((this.effect && (!this.effect.isReady() || (this.effectInstanced && !this.effectInstanced.isReady())))) {
                     return false;
@@ -42832,7 +42832,7 @@ var BABYLON;
             this.effectInstanced = null;
         }
         Text2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing
+            // Do nothing if the shader is still loading/preparing 
             if (!this.effectsReady) {
                 if ((this.effect && (!this.effect.isReady() || (this.effectInstanced && !this.effectInstanced.isReady())))) {
                     return false;
@@ -43258,7 +43258,7 @@ var BABYLON;
             this.effectBorderInstanced = null;
         }
         Lines2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing
+            // Do nothing if the shader is still loading/preparing 
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -45890,36 +45890,36 @@ var BABYLON;
                 for (var name in this._textures) {
                     this._effect.setTexture(name, this._textures[name]);
                 }
-                // Float
+                // Float    
                 for (name in this._floats) {
                     this._effect.setFloat(name, this._floats[name]);
                 }
-                // Float s
+                // Float s   
                 for (name in this._floatsArrays) {
                     this._effect.setArray(name, this._floatsArrays[name]);
                 }
-                // Color3
+                // Color3        
                 for (name in this._colors3) {
                     this._effect.setColor3(name, this._colors3[name]);
                 }
-                // Color4
+                // Color4      
                 for (name in this._colors4) {
                     var color = this._colors4[name];
                     this._effect.setFloat4(name, color.r, color.g, color.b, color.a);
                 }
-                // Vector2
+                // Vector2        
                 for (name in this._vectors2) {
                     this._effect.setVector2(name, this._vectors2[name]);
                 }
-                // Vector3
+                // Vector3        
                 for (name in this._vectors3) {
                     this._effect.setVector3(name, this._vectors3[name]);
                 }
-                // Vector4
+                // Vector4        
                 for (name in this._vectors4) {
                     this._effect.setVector4(name, this._vectors4[name]);
                 }
-                // Matrix
+                // Matrix      
                 for (name in this._matrices) {
                     this._effect.setMatrix(name, this._matrices[name]);
                 }
@@ -45957,42 +45957,42 @@ var BABYLON;
             for (var name in this._textures) {
                 serializationObject.textures[name] = this._textures[name].serialize();
             }
-            // Float
+            // Float    
             serializationObject.floats = {};
             for (name in this._floats) {
                 serializationObject.floats[name] = this._floats[name];
             }
-            // Float s
+            // Float s   
             serializationObject.floatArrays = {};
             for (name in this._floatsArrays) {
                 serializationObject.floatArrays[name] = this._floatsArrays[name];
             }
-            // Color3
+            // Color3    
             serializationObject.colors3 = {};
             for (name in this._colors3) {
                 serializationObject.colors3[name] = this._colors3[name].asArray();
             }
-            // Color4
+            // Color4  
             serializationObject.colors4 = {};
             for (name in this._colors4) {
                 serializationObject.colors4[name] = this._colors4[name].asArray();
             }
-            // Vector2
+            // Vector2  
             serializationObject.vectors2 = {};
             for (name in this._vectors2) {
                 serializationObject.vectors2[name] = this._vectors2[name].asArray();
             }
-            // Vector3
+            // Vector3        
             serializationObject.vectors3 = {};
             for (name in this._vectors3) {
                 serializationObject.vectors3[name] = this._vectors3[name].asArray();
             }
-            // Vector4
+            // Vector4        
             serializationObject.vectors4 = {};
             for (name in this._vectors4) {
                 serializationObject.vectors4[name] = this._vectors4[name].asArray();
             }
-            // Matrix
+            // Matrix      
             serializationObject.matrices = {};
             for (name in this._matrices) {
                 serializationObject.matrices[name] = this._matrices[name].asArray();
@@ -46015,35 +46015,35 @@ var BABYLON;
             for (var name in source.textures) {
                 material.setTexture(name, BABYLON.Texture.Parse(source.textures[name], scene, rootUrl));
             }
-            // Float
+            // Float    
             for (name in source.floats) {
                 material.setFloat(name, source.floats[name]);
             }
-            // Float s
+            // Float s   
             for (name in source.floatsArrays) {
                 material.setFloats(name, source.floatsArrays[name]);
             }
-            // Color3
+            // Color3        
             for (name in source.colors3) {
                 material.setColor3(name, BABYLON.Color3.FromArray(source.colors3[name]));
             }
-            // Color4
+            // Color4      
             for (name in source.colors4) {
                 material.setColor4(name, BABYLON.Color4.FromArray(source.colors4[name]));
             }
-            // Vector2
+            // Vector2        
             for (name in source.vectors2) {
                 material.setVector2(name, BABYLON.Vector2.FromArray(source.vectors2[name]));
             }
-            // Vector3
+            // Vector3        
             for (name in source.vectors3) {
                 material.setVector3(name, BABYLON.Vector3.FromArray(source.vectors3[name]));
             }
-            // Vector4
+            // Vector4        
             for (name in source.vectors4) {
                 material.setVector4(name, BABYLON.Vector4.FromArray(source.vectors4[name]));
             }
-            // Matrix
+            // Matrix      
             for (name in source.matrices) {
                 material.setMatrix(name, BABYLON.Matrix.FromArray(source.matrices[name]));
             }
@@ -46589,7 +46589,7 @@ var BABYLON;
                 //calculate the translation
                 var translation = mesh.getBoundingInfo().boundingBox.center.subtract(center).subtract(mesh.position).negate();
                 this._tmpPosition.copyFromFloats(translation.x, translation.y - mesh.getBoundingInfo().boundingBox.extendSize.y, translation.z);
-                //add it inverted to the delta
+                //add it inverted to the delta 
                 this._tmpDeltaPosition.copyFrom(mesh.getBoundingInfo().boundingBox.center.subtract(c));
                 this._tmpDeltaPosition.y += mesh.getBoundingInfo().boundingBox.extendSize.y;
                 mesh.setPivotMatrix(oldPivot);
@@ -48023,14 +48023,14 @@ var BABYLON;
 })(BABYLON || (BABYLON = {}));
 
 // All the credit goes to this project and the guy who's behind it https://github.com/mapbox/earcut
-// Huge respect for a such great lib.
+// Huge respect for a such great lib. 
 // Earcut license:
 // Copyright (c) 2016, Mapbox
-//
+// 
 // Permission to use, copy, modify, and/or distribute this software for any purpose
 // with or without fee is hereby granted, provided that the above copyright notice
 // and this permission notice appear in all copies.
-//
+// 
 // THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
 // REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
 // FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
@@ -48593,7 +48593,7 @@ var BABYLON;
     // `flip()`, and `interpolate()` methods that behave analogous to the ones
     // defined by `BABYLON.CSG.Vertex`. This class provides `normal` so convenience
     // functions like `BABYLON.CSG.sphere()` can return a smooth vertex normal, but `normal`
-    // is not used anywhere else.
+    // is not used anywhere else. 
     // Same goes for uv, it allows to keep the original vertex uv coordinates of the 2 meshes
     var Vertex = (function () {
         function Vertex(pos, normal, uv) {
@@ -48712,7 +48712,7 @@ var BABYLON;
     // # class Polygon
     // Represents a convex polygon. The vertices used to initialize a polygon must
     // be coplanar and form a convex loop.
-    //
+    // 
     // Each convex polygon has a `shared` property, which is shared between all
     // polygons that are clones of each other or were split from the same polygon.
     // This can be used to define per-polygon properties (such as surface color).
@@ -49137,9 +49137,9 @@ var BABYLON;
     BABYLON.VRDistortionCorrectionPostProcess = VRDistortionCorrectionPostProcess;
 })(BABYLON || (BABYLON = {}));
 
-// Mainly based on these 2 articles :
+// Mainly based on these 2 articles : 
 // Creating an universal virtual touch joystick working for all Touch models thanks to Hand.JS : http://blogs.msdn.com/b/davrous/archive/2013/02/22/creating-an-universal-virtual-touch-joystick-working-for-all-touch-models-thanks-to-hand-js.aspx
-// & on Seb Lee-Delisle original work: http://seb.ly/2011/04/multi-touch-game-controller-in-javascripthtml5-for-ipad/
+// & on Seb Lee-Delisle original work: http://seb.ly/2011/04/multi-touch-game-controller-in-javascripthtml5-for-ipad/ 
 var BABYLON;
 (function (BABYLON) {
     (function (JoystickAxis) {
@@ -49339,7 +49339,7 @@ var BABYLON;
         VirtualJoystick.prototype.setActionOnTouch = function (action) {
             this._action = action;
         };
-        // Define which axis you'd like to control for left & right
+        // Define which axis you'd like to control for left & right 
         VirtualJoystick.prototype.setAxisForLeftRight = function (axis) {
             switch (axis) {
                 case JoystickAxis.X:
@@ -49352,7 +49352,7 @@ var BABYLON;
                     break;
             }
         };
-        // Define which axis you'd like to control for up & down
+        // Define which axis you'd like to control for up & down 
         VirtualJoystick.prototype.setAxisForUpDown = function (axis) {
             switch (axis) {
                 case JoystickAxis.X:
@@ -49606,7 +49606,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect
+            // Get correct effect      
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -52202,7 +52202,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect
+            // Get correct effect      
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -52629,7 +52629,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect
+            // Get correct effect      
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -53085,11 +53085,11 @@ var BABYLON;
 //
 //  This post-process allows the modification of rendered colors by using
 //  a 'look-up table' (LUT). This effect is also called Color Grading.
-//
+// 
 //  The object needs to be provided an url to a texture containing the color
 //  look-up table: the texture must be 256 pixels wide and 16 pixels high.
 //  Use an image editing software to tweak the LUT to match your needs.
-//
+// 
 //  For an example of a color LUT, see here:
 //      http://udn.epicgames.com/Three/rsrc/Three/ColorGrading/RGBTable16x1.png
 //  For explanations on color grading, see here:
@@ -53997,7 +53997,7 @@ var BABYLON;
         ReflectionProbe.prototype.dispose = function () {
             var index = this._scene.reflectionProbes.indexOf(this);
             if (index !== -1) {
-                // Remove from the scene if found
+                // Remove from the scene if found 
                 this._scene.reflectionProbes.splice(index, 1);
             }
             if (this._renderTargetTexture) {
@@ -55382,7 +55382,7 @@ var BABYLON;
 })(BABYLON || (BABYLON = {}));
 
 //_______________________________________________________________
-// Extracted from CubeMapGen:
+// Extracted from CubeMapGen: 
 // https://code.google.com/archive/p/cubemapgen/
 //
 // Following https://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering/
@@ -55499,7 +55499,7 @@ var BABYLON;
                 if (this.maxNumMipLevels == 0) {
                     this.maxNumMipLevels = PMREMGenerator.CP_MAX_MIPLEVELS;
                 }
-                //first miplevel size
+                //first miplevel size 
                 mipLevelSize = this.outputSize;
                 //Iterate over mip chain, and init ArrayBufferView for mip-chain
                 for (j = 0; j < this.maxNumMipLevels; j++) {
@@ -55529,25 +55529,25 @@ var BABYLON;
             //--------------------------------------------------------------------------------------
             //Cube map filtering and mip chain generation.
             // the cube map filtereing is specified using a number of parameters:
-            // Filtering per miplevel is specified using 2D cone angle (in degrees) that
-            //  indicates the region of the hemisphere to filter over for each tap.
-            //
-            // Note that the top mip level is also a filtered version of the original input images
+            // Filtering per miplevel is specified using 2D cone angle (in degrees) that 
+            //  indicates the region of the hemisphere to filter over for each tap. 
+            //                
+            // Note that the top mip level is also a filtered version of the original input images 
             //  as well in order to create mip chains for diffuse environment illumination.
             // The cone angle for the top level is specified by a_BaseAngle.  This can be used to
             //  generate mipchains used to store the resutls of preintegration across the hemisphere.
             //
-            // Then the mip angle used to genreate the next level of the mip chain from the first level
+            // Then the mip angle used to genreate the next level of the mip chain from the first level 
             //  is a_InitialMipAngle
             //
-            // The angle for the subsequent levels of the mip chain are specified by their parents
+            // The angle for the subsequent levels of the mip chain are specified by their parents 
             //  filtering angle and a per-level scale and bias
             //   newAngle = oldAngle * a_MipAnglePerLevelScale;
             //
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.filterCubeMapMipChain = function () {
                 // First, take count of the lighting model to modify SpecularPower
-                // var refSpecularPower = (a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN || a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN_BRDF) ? a_MCO.SpecularPower / GetSpecularPowerFactorToMatchPhong(a_MCO.SpecularPower) : a_MCO.SpecularPower;
+                // var refSpecularPower = (a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN || a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN_BRDF) ? a_MCO.SpecularPower / GetSpecularPowerFactorToMatchPhong(a_MCO.SpecularPower) : a_MCO.SpecularPower; 
                 // var refSpecularPower = this.specularPower; // Only Phong BRDF yet. This explains the line below using this.specularpower.
                 //Cone angle start (for generating subsequent mip levels)
                 var currentSpecularPower = this.specularPower;
@@ -55601,14 +55601,14 @@ var BABYLON;
             //Builds the following lookup tables prior to filtering:
             //  -normalizer cube map
             //  -tap weight lookup table
-            //
+            // 
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.precomputeFilterLookupTables = function (srcCubeMapWidth) {
                 var srcTexelAngle;
                 var iCubeFace;
                 //clear pre-existing normalizer cube map
                 this._normCubeMap = [];
-                //Normalized vectors per cubeface and per-texel solid angle
+                //Normalized vectors per cubeface and per-texel solid angle 
                 this.buildNormalizerSolidAngleCubemap(srcCubeMapWidth);
             };
             //--------------------------------------------------------------------------------------
@@ -55681,12 +55681,12 @@ var BABYLON;
                 PMREMGenerator._vectorTemp.x += faceAxis[0];
                 PMREMGenerator._vectorTemp.y += faceAxis[1];
                 PMREMGenerator._vectorTemp.z += faceAxis[2];
-                //normalize vector
+                //normalize vector              
                 PMREMGenerator._vectorTemp.normalize();
                 return PMREMGenerator._vectorTemp;
             };
             //--------------------------------------------------------------------------------------
-            // Convert 3D vector to cubemap face texel coordinates and face idx
+            // Convert 3D vector to cubemap face texel coordinates and face idx 
             // note the U and V coords are integer coords and range from 0 to size-1
             //  this routine can be used to generate a normalizer cube map
             //
@@ -55705,7 +55705,7 @@ var BABYLON;
             selects one of the cube map face's 2D mipmap sets based on the largest magnitude coordinate direction
             the major axis direction). The target column in the table below explains how the major axis direction
             maps to the 2D image of a particular cube map target.
-
+    
             major axis
             direction     target                              sc     tc    ma
             ----------    ---------------------------------   ---    ---   ---
@@ -55715,7 +55715,7 @@ var BABYLON;
             -ry          GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT   +rx    -rz   ry
             +rz          GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT   +rx    -ry   rz
             -rz          GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT   -rx    -ry   rz
-
+    
             Using the sc, tc, and ma determined by the major axis direction as specified in the table above,
             an updated (s,t) is calculated as follows
             s   =   ( sc/|ma| + 1 ) / 2
@@ -55805,20 +55805,20 @@ var BABYLON;
                 return solidAngle;
             };
             //--------------------------------------------------------------------------------------
-            //The key to the speed of these filtering routines is to quickly define a per-face
-            //  bounding box of pixels which enclose all the taps in the filter kernel efficiently.
-            //  Later these pixels are selectively processed based on their dot products to see if
+            //The key to the speed of these filtering routines is to quickly define a per-face 
+            //  bounding box of pixels which enclose all the taps in the filter kernel efficiently.  
+            //  Later these pixels are selectively processed based on their dot products to see if 
             //  they reside within the filtering cone.
             //
-            //This is done by computing the smallest per-texel angle to get a conservative estimate
+            //This is done by computing the smallest per-texel angle to get a conservative estimate 
             // of the number of texels needed to be covered in width and height order to filter the
-            // region.  the bounding box for the center taps face is defined first, and if the
-            // filtereing region bleeds onto the other faces, bounding boxes for the other faces are
+            // region.  the bounding box for the center taps face is defined first, and if the 
+            // filtereing region bleeds onto the other faces, bounding boxes for the other faces are 
             // defined next
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.filterCubeSurfaces = function (srcCubeMap, srcSize, dstCubeMap, dstSize, filterConeAngle, specularPower) {
-                // note that pixels within these regions may be rejected
-                // based on the anlge
+                // note that pixels within these regions may be rejected 
+                // based on the anlge    
                 var iCubeFace;
                 var u;
                 var v;
@@ -55847,7 +55847,7 @@ var BABYLON;
                 if (filterSize < 1) {
                     filterSize = 1;
                 }
-                // dotProdThresh threshold based on cone angle to determine whether or not taps
+                // dotProdThresh threshold based on cone angle to determine whether or not taps 
                 //  reside within the cone angle
                 var dotProdThresh = Math.cos((Math.PI / 180.0) * filterAngle);
                 // process required faces
@@ -55861,7 +55861,7 @@ var BABYLON;
                             this.clearFilterExtents(filterExtents);
                             //define per-face filter extents
                             this.determineFilterExtents(centerTapDir, srcSize, filterSize, filterExtents);
-                            //perform filtering of src faces using filter extents
+                            //perform filtering of src faces using filter extents 
                             var vect = this.processFilterExtents(centerTapDir, dotProdThresh, filterExtents, srcCubeMap, srcSize, specularPower);
                             dstCubeMap[iCubeFace][(v * dstSize + u) * this.numChannels + 0] = vect.x;
                             dstCubeMap[iCubeFace][(v * dstSize + u) * this.numChannels + 1] = vect.y;
@@ -55881,9 +55881,9 @@ var BABYLON;
             //--------------------------------------------------------------------------------------
             //Define per-face bounding box filter extents
             //
-            // These define conservative texel regions in each of the faces the filter can possibly
-            // process.  When the pixels in the regions are actually processed, the dot product
-            // between the tap vector and the center tap vector is used to determine the weight of
+            // These define conservative texel regions in each of the faces the filter can possibly 
+            // process.  When the pixels in the regions are actually processed, the dot product  
+            // between the tap vector and the center tap vector is used to determine the weight of 
             // the tap and whether or not the tap is within the cone.
             //
             //--------------------------------------------------------------------------------------
@@ -55911,11 +55911,11 @@ var BABYLON;
                 var minV = filterExtents[faceIdx].min.y;
                 var maxU = filterExtents[faceIdx].max.x;
                 var maxV = filterExtents[faceIdx].max.y;
-                //bleed over amounts for face across u=0 edge (left)
+                //bleed over amounts for face across u=0 edge (left)    
                 bleedOverAmount[0] = (bboxSize - u);
                 bleedOverBBoxMin[0] = minV;
                 bleedOverBBoxMax[0] = maxV;
-                //bleed over amounts for face across u=1 edge (right)
+                //bleed over amounts for face across u=1 edge (right)    
                 bleedOverAmount[1] = (u + bboxSize) - (srcSize - 1);
                 bleedOverBBoxMin[1] = minV;
                 bleedOverBBoxMax[1] = maxV;
@@ -55932,19 +55932,19 @@ var BABYLON;
                     if (bleedOverAmount[i] > 0) {
                         neighborFace = PMREMGenerator._sgCubeNgh[faceIdx][i][0];
                         neighborEdge = PMREMGenerator._sgCubeNgh[faceIdx][i][1];
-                        //For certain types of edge abutments, the bleedOverBBoxMin, and bleedOverBBoxMax need to
-                        //  be flipped: the cases are
+                        //For certain types of edge abutments, the bleedOverBBoxMin, and bleedOverBBoxMax need to 
+                        //  be flipped: the cases are 
                         // if a left   edge mates with a left or bottom  edge on the neighbor
                         // if a top    edge mates with a top or right edge on the neighbor
                         // if a right  edge mates with a right or top edge on the neighbor
                         // if a bottom edge mates with a bottom or left  edge on the neighbor
-                        //Seeing as the edges are enumerated as follows
-                        // left   =0
-                        // right  =1
-                        // top    =2
-                        // bottom =3
-                        //
-                        // so if the edge enums are the same, or the sum of the enums == 3,
+                        //Seeing as the edges are enumerated as follows 
+                        // left   =0 
+                        // right  =1 
+                        // top    =2 
+                        // bottom =3            
+                        // 
+                        // so if the edge enums are the same, or the sum of the enums == 3, 
                         //  the bbox needs to be flipped
                         if ((i == neighborEdge) || ((i + neighborEdge) == 3)) {
                             bleedOverBBoxMin[i] = (srcSize - 1) - bleedOverBBoxMin[i];
@@ -55974,13 +55974,13 @@ var BABYLON;
                         filterExtents[neighborFace].clampMin(0, 0, 0);
                         filterExtents[neighborFace].clampMax(srcSize - 1, srcSize - 1, 0);
                     }
-                    //If the bleed over amount bleeds past the adjacent face onto the opposite face
-                    // from the center tap face, then process the opposite face entirely for now.
-                    //Note that the cases in which this happens, what usually happens is that
-                    // more than one edge bleeds onto the opposite face, and the bounding box
+                    //If the bleed over amount bleeds past the adjacent face onto the opposite face 
+                    // from the center tap face, then process the opposite face entirely for now. 
+                    //Note that the cases in which this happens, what usually happens is that 
+                    // more than one edge bleeds onto the opposite face, and the bounding box 
                     // encompasses the entire cube map face.
                     if (bleedOverAmount[i] > srcSize) {
-                        //determine opposite face
+                        //determine opposite face 
                         switch (faceIdx) {
                             case PMREMGenerator.CP_FACE_X_POS:
                                 oppositeFaceIdx = PMREMGenerator.CP_FACE_X_NEG;
@@ -56010,13 +56010,13 @@ var BABYLON;
                 }
             };
             //--------------------------------------------------------------------------------------
-            //ProcessFilterExtents
-            //  Process bounding box in each cube face
+            //ProcessFilterExtents 
+            //  Process bounding box in each cube face 
             //
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.processFilterExtents = function (centerTapDir, dotProdThresh, filterExtents, srcCubeMap, srcSize, specularPower) {
-                //accumulators are 64-bit floats in order to have the precision needed
-                // over a summation of a large number of pixels
+                //accumulators are 64-bit floats in order to have the precision needed 
+                // over a summation of a large number of pixels 
                 var dstAccum = [0, 0, 0, 0];
                 var weightAccum = 0;
                 var k = 0;
@@ -56056,7 +56056,7 @@ var BABYLON;
                                     var weight = this._normCubeMap[iFaceIdx][startIndexNormCubeMap + normCubeRowWalk + 3];
                                     // Here we decide if we use a Phong/Blinn or a Phong/Blinn BRDF.
                                     // Phong/Blinn BRDF is just the Phong/Blinn model multiply by the cosine of the lambert law
-                                    // so just adding one to specularpower do the trick.
+                                    // so just adding one to specularpower do the trick.					   
                                     weight *= Math.pow(tapDotProd, (specularPower + IsPhongBRDF));
                                     //iterate over channels
                                     for (k = 0; k < nSrcChannels; k++) {
@@ -56112,7 +56112,7 @@ var BABYLON;
                 var iCorner = 0;
                 var cornerNumPtrs = [0, 0, 0, 0, 0, 0, 0, 0]; //indexed by corner and face idx
                 var faceCornerStartIndicies = [[], [], [], []]; //corner pointers for face keeping track of the face they belong to.
-                // note that if functionality to filter across the three texels for each corner, then
+                // note that if functionality to filter across the three texels for each corner, then 
                 //indexed by corner and face idx. the array contains the face the start points belongs to.
                 var cornerPtr = [
                     [[], [], []],
@@ -56190,7 +56190,7 @@ var BABYLON;
                     // e.g. CP_EDGE_LEFT, CP_EDGE_RIGHT, CP_EDGE_TOP, CP_EDGE_BOTTOM
                     switch (edge) {
                         case PMREMGenerator.CP_EDGE_LEFT:
-                            // no change to faceEdgeStartPtr
+                            // no change to faceEdgeStartPtr  
                             edgeWalk = this.numChannels * cubeMapSize;
                             break;
                         case PMREMGenerator.CP_EDGE_RIGHT:
@@ -56198,7 +56198,7 @@ var BABYLON;
                             edgeWalk = this.numChannels * cubeMapSize;
                             break;
                         case PMREMGenerator.CP_EDGE_TOP:
-                            // no change to faceEdgeStartPtr
+                            // no change to faceEdgeStartPtr  
                             edgeWalk = this.numChannels;
                             break;
                         case PMREMGenerator.CP_EDGE_BOTTOM:
@@ -56206,19 +56206,19 @@ var BABYLON;
                             edgeWalk = this.numChannels;
                             break;
                     }
-                    //For certain types of edge abutments, the neighbor edge walk needs to
-                    //  be flipped: the cases are
+                    //For certain types of edge abutments, the neighbor edge walk needs to 
+                    //  be flipped: the cases are 
                     // if a left   edge mates with a left or bottom  edge on the neighbor
                     // if a top    edge mates with a top or right edge on the neighbor
                     // if a right  edge mates with a right or top edge on the neighbor
                     // if a bottom edge mates with a bottom or left  edge on the neighbor
-                    //Seeing as the edges are enumerated as follows
-                    // left   =0
-                    // right  =1
-                    // top    =2
-                    // bottom =3
-                    //
-                    //If the edge enums are the same, or the sum of the enums == 3,
+                    //Seeing as the edges are enumerated as follows 
+                    // left   =0 
+                    // right  =1 
+                    // top    =2 
+                    // bottom =3            
+                    // 
+                    //If the edge enums are the same, or the sum of the enums == 3, 
                     //  the neighbor edge walk needs to be flipped
                     if ((edge == neighborEdge) || ((edge + neighborEdge) == 3)) {
                         switch (neighborEdge) {
@@ -56244,7 +56244,7 @@ var BABYLON;
                         //swapped direction neighbor edge walk
                         switch (neighborEdge) {
                             case PMREMGenerator.CP_EDGE_LEFT:
-                                //no change to neighborEdgeStartPtr for this case since it points
+                                //no change to neighborEdgeStartPtr for this case since it points 
                                 // to the upper left corner already
                                 neighborEdgeWalk = this.numChannels * cubeMapSize;
                                 break;
@@ -56253,7 +56253,7 @@ var BABYLON;
                                 neighborEdgeWalk = this.numChannels * cubeMapSize;
                                 break;
                             case PMREMGenerator.CP_EDGE_TOP:
-                                //no change to neighborEdgeStartPtr for this case since it points
+                                //no change to neighborEdgeStartPtr for this case since it points 
                                 // to the upper left corner already
                                 neighborEdgeWalk = this.numChannels;
                                 break;
@@ -56263,7 +56263,7 @@ var BABYLON;
                                 break;
                         }
                     }
-                    //Perform edge walk, to average across the 12 edges and smoothly propagate change to
+                    //Perform edge walk, to average across the 12 edges and smoothly propagate change to 
                     //nearby neighborhood
                     //step ahead one texel on edge
                     edgeStartIndex += edgeWalk;
@@ -56310,7 +56310,7 @@ var BABYLON;
             PMREMGenerator.CP_EDGE_RIGHT = 1;
             PMREMGenerator.CP_EDGE_TOP = 2;
             PMREMGenerator.CP_EDGE_BOTTOM = 3;
-            //corners of CUBE map (P or N specifys if it corresponds to the
+            //corners of CUBE map (P or N specifys if it corresponds to the 
             //  positive or negative direction each of X, Y, and Z
             PMREMGenerator.CP_CORNER_NNN = 0;
             PMREMGenerator.CP_CORNER_NNP = 1;
@@ -56321,8 +56321,8 @@ var BABYLON;
             PMREMGenerator.CP_CORNER_PPN = 6;
             PMREMGenerator.CP_CORNER_PPP = 7;
             PMREMGenerator._vectorTemp = new BABYLON.Vector4(0, 0, 0, 0);
-            //3x2 matrices that map cube map indexing vectors in 3d
-            // (after face selection and divide through by the
+            //3x2 matrices that map cube map indexing vectors in 3d 
+            // (after face selection and divide through by the 
             //  _ABSOLUTE VALUE_ of the max coord)
             // into NVC space
             //Note this currently assumes the D3D cube face ordering and orientation
@@ -56354,10 +56354,10 @@ var BABYLON;
             ];
             //------------------------------------------------------------------------------
             // D3D cube map face specification
-            //   mapping from 3D x,y,z cube map lookup coordinates
+            //   mapping from 3D x,y,z cube map lookup coordinates 
             //   to 2D within face u,v coordinates
             //
-            //   --------------------> U direction
+            //   --------------------> U direction 
             //   |                   (within-face texture space)
             //   |         _____
             //   |        |     |
@@ -56373,8 +56373,8 @@ var BABYLON;
             //   v   V direction
             //      (within-face texture space)
             //------------------------------------------------------------------------------
-            //Information about neighbors and how texture coorrdinates change across faces
-            //  in ORDER of left, right, top, bottom (e.g. edges corresponding to u=0,
+            //Information about neighbors and how texture coorrdinates change across faces 
+            //  in ORDER of left, right, top, bottom (e.g. edges corresponding to u=0, 
             //  u=1, v=0, v=1 in the 2D coordinate system of the particular face.
             //Note this currently assumes the D3D cube face ordering and orientation
             PMREMGenerator._sgCubeNgh = [
@@ -56425,7 +56425,7 @@ var BABYLON;
                 [PMREMGenerator.CP_FACE_Z_NEG, PMREMGenerator.CP_EDGE_TOP],
                 [PMREMGenerator.CP_FACE_Z_NEG, PMREMGenerator.CP_EDGE_BOTTOM]
             ];
-            //Information about which of the 8 cube corners are correspond to the
+            //Information about which of the 8 cube corners are correspond to the 
             //  the 4 corners in each cube face
             //  the order is upper left, upper right, lower left, lower right
             PMREMGenerator._sgCubeCornerList = [
@@ -57409,7 +57409,7 @@ var BABYLON;
             saturation = ColorCurves.clamp(saturation, -100, 100);
             exposure = ColorCurves.clamp(exposure, -100, 100);
             // Remap the slider/config filter density with non-linear mapping and also scale by half
-            // so that the maximum filter density is only 50% control. This provides fine control
+            // so that the maximum filter density is only 50% control. This provides fine control 
             // for small values and reasonable range.
             density = ColorCurves.applyColorGradingSliderNonlinear(density);
             density *= 0.5;
@@ -57982,7 +57982,7 @@ var BABYLON;
             this.reflectionColor = new BABYLON.Color3(0.5, 0.5, 0.5);
             this.emissiveColor = new BABYLON.Color3(0, 0, 0);
             /**
-
+    
              * AKA Glossiness in other nomenclature.
              */
             this.microSurface = 0.9;
@@ -58576,7 +58576,7 @@ var BABYLON;
         };
         PBRMaterial.prototype.bind = function (world, mesh) {
             this._myScene = this.getScene();
-            // Matrices
+            // Matrices        
             this.bindOnlyWorldMatrix(world);
             // Bones
             BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
@@ -58591,7 +58591,7 @@ var BABYLON;
                         this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
                     }
                 }
-                // Textures
+                // Textures        
                 if (this._myScene.texturesEnabled) {
                     if (this.albedoTexture && BABYLON.StandardMaterial.DiffuseTextureEnabled) {
                         this._effect.setTexture("albedoSampler", this.albedoTexture);
@@ -58680,7 +58680,7 @@ var BABYLON;
                         this._cameraColorGradingScaleOffset.x = this._cameraColorGradingInfos.z * slicePixelSizeU; // Extent of lookup range in U for a single slice so that range corresponds to (size-1) texels, for example 7/64
                         this._cameraColorGradingScaleOffset.y = this._cameraColorGradingInfos.z /
                             this._cameraColorGradingInfos.y; // Extent of lookup range in V for a single slice so that range corresponds to (size-1) texels, for example 7/8
-                        this._cameraColorGradingScaleOffset.z = 0.5 * slicePixelSizeU; // Offset of lookup range in U to align sample position with texel centre, for example 0.5/64
+                        this._cameraColorGradingScaleOffset.z = 0.5 * slicePixelSizeU; // Offset of lookup range in U to align sample position with texel centre, for example 0.5/64 
                         this._cameraColorGradingScaleOffset.w = 0.5 * slicePixelSizeV; // Offset of lookup range in V to align sample position with texel centre, for example 0.5/8
                         this._effect.setFloat4("vCameraColorGradingScaleOffset", this._cameraColorGradingScaleOffset.x, this._cameraColorGradingScaleOffset.y, this._cameraColorGradingScaleOffset.z, this._cameraColorGradingScaleOffset.w);
                     }
@@ -59718,835 +59718,3 @@ BABYLON.CollisionWorker="var BABYLON;!function(t){var e=function(t,e,o,i){return
 if (((typeof window != "undefined" && window.module) || (typeof module != "undefined")) && typeof module.exports != "undefined") {
     module.exports = BABYLON;
 };
-
-
-/// <reference path="../../../dist/preview release/babylon.d.ts"/>
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
-    switch (arguments.length) {
-        case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
-        case 3: return decorators.reduceRight(function(o, d) { return (d && d(target, key)), void 0; }, void 0);
-        case 4: return decorators.reduceRight(function(o, d) { return (d && d(target, key, o)) || o; }, desc);
-    }
-};
-var BABYLON;
-(function (BABYLON) {
-    var SkyMaterialDefines = (function (_super) {
-        __extends(SkyMaterialDefines, _super);
-        function SkyMaterialDefines() {
-            _super.call(this);
-            this.CLIPPLANE = false;
-            this.POINTSIZE = false;
-            this.FOG = false;
-            this.VERTEXCOLOR = false;
-            this.VERTEXALPHA = false;
-            this._keys = Object.keys(this);
-        }
-        return SkyMaterialDefines;
-    })(BABYLON.MaterialDefines);
-    var SkyMaterial = (function (_super) {
-        __extends(SkyMaterial, _super);
-        function SkyMaterial(name, scene) {
-            _super.call(this, name, scene);
-            // Public members
-            this.luminance = 1.0;
-            this.turbidity = 10.0;
-            this.rayleigh = 2.0;
-            this.mieCoefficient = 0.005;
-            this.mieDirectionalG = 0.8;
-            this.distance = 500;
-            this.inclination = 0.49;
-            this.azimuth = 0.25;
-            this.sunPosition = new BABYLON.Vector3(0, 100, 0);
-            this.useSunPosition = false;
-            // Private members
-            this._cameraPosition = BABYLON.Vector3.Zero();
-            this._defines = new SkyMaterialDefines();
-            this._cachedDefines = new SkyMaterialDefines();
-        }
-        SkyMaterial.prototype.needAlphaBlending = function () {
-            return (this.alpha < 1.0);
-        };
-        SkyMaterial.prototype.needAlphaTesting = function () {
-            return false;
-        };
-        SkyMaterial.prototype.getAlphaTestTexture = function () {
-            return null;
-        };
-        // Methods
-        SkyMaterial.prototype._checkCache = function (scene, mesh, useInstances) {
-            if (!mesh) {
-                return true;
-            }
-            if (mesh._materialDefines && mesh._materialDefines.isEqual(this._defines)) {
-                return true;
-            }
-            return false;
-        };
-        SkyMaterial.prototype.isReady = function (mesh, useInstances) {
-            if (this.checkReadyOnlyOnce) {
-                if (this._wasPreviouslyReady) {
-                    return true;
-                }
-            }
-            var scene = this.getScene();
-            if (!this.checkReadyOnEveryCall) {
-                if (this._renderId === scene.getRenderId()) {
-                    if (this._checkCache(scene, mesh, useInstances)) {
-                        return true;
-                    }
-                }
-            }
-            var engine = scene.getEngine();
-            this._defines.reset();
-            // Effect
-            if (scene.clipPlane) {
-                this._defines.CLIPPLANE = true;
-            }
-            // Point size
-            if (this.pointsCloud || scene.forcePointsCloud) {
-                this._defines.POINTSIZE = true;
-            }
-            // Fog
-            if (scene.fogEnabled && mesh && mesh.applyFog && scene.fogMode !== BABYLON.Scene.FOGMODE_NONE && this.fogEnabled) {
-                this._defines.FOG = true;
-            }
-            // Attribs
-            if (mesh) {
-                if (mesh.useVertexColors && mesh.isVerticesDataPresent(BABYLON.VertexBuffer.ColorKind)) {
-                    this._defines.VERTEXCOLOR = true;
-                    if (mesh.hasVertexAlpha) {
-                        this._defines.VERTEXALPHA = true;
-                    }
-                }
-            }
-            // Get correct effect
-            if (!this._defines.isEqual(this._cachedDefines) || !this._effect) {
-                this._defines.cloneTo(this._cachedDefines);
-                scene.resetCachedMaterial();
-                // Fallbacks
-                var fallbacks = new BABYLON.EffectFallbacks();
-                if (this._defines.FOG) {
-                    fallbacks.addFallback(1, "FOG");
-                }
-                //Attributes
-                var attribs = [BABYLON.VertexBuffer.PositionKind];
-                if (this._defines.VERTEXCOLOR) {
-                    attribs.push(BABYLON.VertexBuffer.ColorKind);
-                }
-                // Legacy browser patch
-                var shaderName = "sky";
-                var join = this._defines.toString();
-                this._effect = scene.getEngine().createEffect(shaderName, attribs, ["world", "viewProjection", "view",
-                    "vFogInfos", "vFogColor", "pointSize", "vClipPlane",
-                    "luminance", "turbidity", "rayleigh", "mieCoefficient", "mieDirectionalG", "sunPosition",
-                    "cameraPosition"
-                ], [], join, fallbacks, this.onCompiled, this.onError);
-            }
-            if (!this._effect.isReady()) {
-                return false;
-            }
-            this._renderId = scene.getRenderId();
-            this._wasPreviouslyReady = true;
-            if (mesh) {
-                if (!mesh._materialDefines) {
-                    mesh._materialDefines = new SkyMaterialDefines();
-                }
-                this._defines.cloneTo(mesh._materialDefines);
-            }
-            return true;
-        };
-        SkyMaterial.prototype.bindOnlyWorldMatrix = function (world) {
-            this._effect.setMatrix("world", world);
-        };
-        SkyMaterial.prototype.bind = function (world, mesh) {
-            var scene = this.getScene();
-            // Matrices
-            this.bindOnlyWorldMatrix(world);
-            this._effect.setMatrix("viewProjection", scene.getTransformMatrix());
-            if (scene.getCachedMaterial() !== this) {
-                // Clip plane
-                if (scene.clipPlane) {
-                    var clipPlane = scene.clipPlane;
-                    this._effect.setFloat4("vClipPlane", clipPlane.normal.x, clipPlane.normal.y, clipPlane.normal.z, clipPlane.d);
-                }
-                // Point size
-                if (this.pointsCloud) {
-                    this._effect.setFloat("pointSize", this.pointSize);
-                }
-            }
-            // View
-            if (scene.fogEnabled && mesh.applyFog && scene.fogMode !== BABYLON.Scene.FOGMODE_NONE) {
-                this._effect.setMatrix("view", scene.getViewMatrix());
-            }
-            // Fog
-            BABYLON.MaterialHelper.BindFogParameters(scene, mesh, this._effect);
-            // Sky
-            var camera = scene.activeCamera;
-            if (camera) {
-                var cameraWorldMatrix = camera.getWorldMatrix();
-                this._cameraPosition.x = cameraWorldMatrix.m[12];
-                this._cameraPosition.y = cameraWorldMatrix.m[13];
-                this._cameraPosition.z = cameraWorldMatrix.m[14];
-                this._effect.setVector3("cameraPosition", this._cameraPosition);
-            }
-            if (this.luminance > 0) {
-                this._effect.setFloat("luminance", this.luminance);
-            }
-            this._effect.setFloat("turbidity", this.turbidity);
-            this._effect.setFloat("rayleigh", this.rayleigh);
-            this._effect.setFloat("mieCoefficient", this.mieCoefficient);
-            this._effect.setFloat("mieDirectionalG", this.mieDirectionalG);
-            if (!this.useSunPosition) {
-                var theta = Math.PI * (this.inclination - 0.5);
-                var phi = 2 * Math.PI * (this.azimuth - 0.5);
-                this.sunPosition.x = this.distance * Math.cos(phi);
-                this.sunPosition.y = this.distance * Math.sin(phi) * Math.sin(theta);
-                this.sunPosition.z = this.distance * Math.sin(phi) * Math.cos(theta);
-            }
-            this._effect.setVector3("sunPosition", this.sunPosition);
-            _super.prototype.bind.call(this, world, mesh);
-        };
-        SkyMaterial.prototype.getAnimatables = function () {
-            return [];
-        };
-        SkyMaterial.prototype.dispose = function (forceDisposeEffect) {
-            _super.prototype.dispose.call(this, forceDisposeEffect);
-        };
-        SkyMaterial.prototype.clone = function (name) {
-            var _this = this;
-            return BABYLON.SerializationHelper.Clone(function () { return new SkyMaterial(name, _this.getScene()); }, this);
-        };
-        SkyMaterial.prototype.serialize = function () {
-            var serializationObject = BABYLON.SerializationHelper.Serialize(this);
-            serializationObject.customType = "BABYLON.SkyMaterial";
-            return serializationObject;
-        };
-        // Statics
-        SkyMaterial.Parse = function (source, scene, rootUrl) {
-            return BABYLON.SerializationHelper.Parse(function () { return new SkyMaterial(source.name, scene); }, source, scene, rootUrl);
-        };
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "luminance");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "turbidity");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "rayleigh");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "mieCoefficient");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "mieDirectionalG");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "distance");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "inclination");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "azimuth");
-        __decorate([
-            BABYLON.serializeAsVector3()
-        ], SkyMaterial.prototype, "sunPosition");
-        __decorate([
-            BABYLON.serialize()
-        ], SkyMaterial.prototype, "useSunPosition");
-        return SkyMaterial;
-    })(BABYLON.Material);
-    BABYLON.SkyMaterial = SkyMaterial;
-})(BABYLON || (BABYLON = {}));
-
-BABYLON.Effect.ShadersStore['skyVertexShader'] = "precision highp float;\n\nattribute vec3 position;\n#ifdef VERTEXCOLOR\nattribute vec4 color;\n#endif\n\nuniform mat4 world;\nuniform mat4 view;\nuniform mat4 viewProjection;\n#ifdef POINTSIZE\nuniform float pointSize;\n#endif\n\nvarying vec3 vPositionW;\n#ifdef VERTEXCOLOR\nvarying vec4 vColor;\n#endif\n#include<clipPlaneVertexDeclaration>\n#include<fogVertexDeclaration>\nvoid main(void) {\ngl_Position=viewProjection*world*vec4(position,1.0);\nvec4 worldPos=world*vec4(position,1.0);\nvPositionW=vec3(worldPos);\n\n#include<clipPlaneVertex>\n\n#include<fogVertex>\n\n#ifdef VERTEXCOLOR\nvColor=color;\n#endif\n\n#ifdef POINTSIZE\ngl_PointSize=pointSize;\n#endif\n}\n";
-BABYLON.Effect.ShadersStore['skyPixelShader'] = "precision highp float;\n\nvarying vec3 vPositionW;\n#ifdef VERTEXCOLOR\nvarying vec4 vColor;\n#endif\n#include<clipPlaneFragmentDeclaration>\n\nuniform vec3 cameraPosition;\nuniform float luminance;\nuniform float turbidity;\nuniform float rayleigh;\nuniform float mieCoefficient;\nuniform float mieDirectionalG;\nuniform vec3 sunPosition;\n\n#include<fogFragmentDeclaration>\n\nconst float e=2.71828182845904523536028747135266249775724709369995957;\nconst float pi=3.141592653589793238462643383279502884197169;\nconst float n=1.0003;\nconst float N=2.545E25;\nconst float pn=0.035;\nconst vec3 lambda=vec3(680E-9,550E-9,450E-9);\nconst vec3 K=vec3(0.686,0.678,0.666);\nconst float v=4.0;\nconst float rayleighZenithLength=8.4E3;\nconst float mieZenithLength=1.25E3;\nconst vec3 up=vec3(0.0,1.0,0.0);\nconst float EE=1000.0;\nconst float sunAngularDiameterCos=0.999956676946448443553574619906976478926848692873900859324;\nconst float cutoffAngle=pi/1.95;\nconst float steepness=1.5;\nvec3 totalRayleigh(vec3 lambda)\n{\nreturn (8.0*pow(pi,3.0)*pow(pow(n,2.0)-1.0,2.0)*(6.0+3.0*pn))/(3.0*N*pow(lambda,vec3(4.0))*(6.0-7.0*pn));\n}\nvec3 simplifiedRayleigh()\n{\nreturn 0.0005/vec3(94,40,18);\n}\nfloat rayleighPhase(float cosTheta)\n{ \nreturn (3.0/(16.0*pi))*(1.0+pow(cosTheta,2.0));\n}\nvec3 totalMie(vec3 lambda,vec3 K,float T)\n{\nfloat c=(0.2*T )*10E-18;\nreturn 0.434*c*pi*pow((2.0*pi)/lambda,vec3(v-2.0))*K;\n}\nfloat hgPhase(float cosTheta,float g)\n{\nreturn (1.0/(4.0*pi))*((1.0-pow(g,2.0))/pow(1.0-2.0*g*cosTheta+pow(g,2.0),1.5));\n}\nfloat sunIntensity(float zenithAngleCos)\n{\nreturn EE*max(0.0,1.0-exp(-((cutoffAngle-acos(zenithAngleCos))/steepness)));\n}\nfloat A=0.15;\nfloat B=0.50;\nfloat C=0.10;\nfloat D=0.20;\nfloat EEE=0.02;\nfloat F=0.30;\nfloat W=1000.0;\nvec3 Uncharted2Tonemap(vec3 x)\n{\nreturn ((x*(A*x+C*B)+D*EEE)/(x*(A*x+B)+D*F))-EEE/F;\n}\nvoid main(void) {\n\n#include<clipPlaneFragment>\n\nfloat sunfade=1.0-clamp(1.0-exp((sunPosition.y/450000.0)),0.0,1.0);\nfloat rayleighCoefficient=rayleigh-(1.0*(1.0-sunfade));\nvec3 sunDirection=normalize(sunPosition);\nfloat sunE=sunIntensity(dot(sunDirection,up));\nvec3 betaR=simplifiedRayleigh()*rayleighCoefficient;\nvec3 betaM=totalMie(lambda,K,turbidity)*mieCoefficient;\nfloat zenithAngle=acos(max(0.0,dot(up,normalize(vPositionW-cameraPosition))));\nfloat sR=rayleighZenithLength/(cos(zenithAngle)+0.15*pow(93.885-((zenithAngle*180.0)/pi),-1.253));\nfloat sM=mieZenithLength/(cos(zenithAngle)+0.15*pow(93.885-((zenithAngle*180.0)/pi),-1.253));\nvec3 Fex=exp(-(betaR*sR+betaM*sM));\nfloat cosTheta=dot(normalize(vPositionW-cameraPosition),sunDirection);\nfloat rPhase=rayleighPhase(cosTheta*0.5+0.5);\nvec3 betaRTheta=betaR*rPhase;\nfloat mPhase=hgPhase(cosTheta,mieDirectionalG);\nvec3 betaMTheta=betaM*mPhase;\nvec3 Lin=pow(sunE*((betaRTheta+betaMTheta)/(betaR+betaM))*(1.0-Fex),vec3(1.5));\nLin*=mix(vec3(1.0),pow(sunE*((betaRTheta+betaMTheta)/(betaR+betaM))*Fex,vec3(1.0/2.0)),clamp(pow(1.0-dot(up,sunDirection),5.0),0.0,1.0));\nvec3 direction=normalize(vPositionW-cameraPosition);\nfloat theta=acos(direction.y);\nfloat phi=atan(direction.z,direction.x);\nvec2 uv=vec2(phi,theta)/vec2(2.0*pi,pi)+vec2(0.5,0.0);\nvec3 L0=vec3(0.1)*Fex;\nfloat sundisk=smoothstep(sunAngularDiameterCos,sunAngularDiameterCos+0.00002,cosTheta);\nL0+=(sunE*19000.0*Fex)*sundisk;\nvec3 whiteScale=1.0/Uncharted2Tonemap(vec3(W));\nvec3 texColor=(Lin+L0); \ntexColor*=0.04 ;\ntexColor+=vec3(0.0,0.001,0.0025)*0.3;\nfloat g_fMaxLuminance=1.0;\nfloat fLumScaled=0.1/luminance; \nfloat fLumCompressed=(fLumScaled*(1.0+(fLumScaled/(g_fMaxLuminance*g_fMaxLuminance))))/(1.0+fLumScaled); \nfloat ExposureBias=fLumCompressed;\nvec3 curr=Uncharted2Tonemap((log2(2.0/pow(luminance,4.0)))*texColor);\n\n\n\nvec3 retColor=curr*whiteScale;\n\n\nfloat alpha=1.0;\n#ifdef VERTEXCOLOR\nretColor.rgb*=vColor.rgb;\n#endif\n#ifdef VERTEXALPHA\nalpha*=vColor.a;\n#endif\n\nvec4 color=clamp(vec4(retColor.rgb,alpha),0.0,1.0);\n\n#include<fogFragment>\ngl_FragColor=color;\n}";
-
-
-/// <reference path="../../../dist/preview release/babylon.d.ts"/>
-/// <reference path="../simple/babylon.simpleMaterial.ts"/>
-
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") return Reflect.decorate(decorators, target, key, desc);
-    switch (arguments.length) {
-        case 2: return decorators.reduceRight(function(o, d) { return (d && d(o)) || o; }, target);
-        case 3: return decorators.reduceRight(function(o, d) { return (d && d(target, key)), void 0; }, void 0);
-        case 4: return decorators.reduceRight(function(o, d) { return (d && d(target, key, o)) || o; }, desc);
-    }
-};
-var BABYLON;
-(function (BABYLON) {
-    var WaterMaterialDefines = (function (_super) {
-        __extends(WaterMaterialDefines, _super);
-        function WaterMaterialDefines() {
-            _super.call(this);
-            this.BUMP = false;
-            this.REFLECTION = false;
-            this.CLIPPLANE = false;
-            this.ALPHATEST = false;
-            this.POINTSIZE = false;
-            this.FOG = false;
-            this.NORMAL = false;
-            this.UV1 = false;
-            this.UV2 = false;
-            this.VERTEXCOLOR = false;
-            this.VERTEXALPHA = false;
-            this.NUM_BONE_INFLUENCERS = 0;
-            this.BonesPerMesh = 0;
-            this.INSTANCES = false;
-            this.SPECULARTERM = false;
-            this.LOGARITHMICDEPTH = false;
-            this.FRESNELSEPARATE = false;
-            this.BUMPSUPERIMPOSE = false;
-            this.BUMPAFFECTSREFLECTION = false;
-            this.rebuild();
-        }
-        return WaterMaterialDefines;
-    })(BABYLON.MaterialDefines);
-    var WaterMaterial = (function (_super) {
-        __extends(WaterMaterial, _super);
-        /**
-        * Constructor
-        */
-        function WaterMaterial(name, scene, renderTargetSize) {
-            if (renderTargetSize === void 0) { renderTargetSize = new BABYLON.Vector2(512, 512); }
-            _super.call(this, name, scene);
-            this.renderTargetSize = renderTargetSize;
-            this.diffuseColor = new BABYLON.Color3(1, 1, 1);
-            this.specularColor = new BABYLON.Color3(0, 0, 0);
-            this.specularPower = 64;
-            this.disableLighting = false;
-            this.maxSimultaneousLights = 4;
-            /**
-            * @param {number}: Represents the wind force
-            */
-            this.windForce = 6;
-            /**
-            * @param {Vector2}: The direction of the wind in the plane (X, Z)
-            */
-            this.windDirection = new BABYLON.Vector2(0, 1);
-            /**
-            * @param {number}: Wave height, represents the height of the waves
-            */
-            this.waveHeight = 0.4;
-            /**
-            * @param {number}: Bump height, represents the bump height related to the bump map
-            */
-            this.bumpHeight = 0.4;
-            /**
-             * @param {boolean}: Add a smaller moving bump to less steady waves.
-             */
-            this.bumpSuperimpose = false;
-            /**
-             * @param {boolean}: Color refraction and reflection differently with .waterColor2 and .colorBlendFactor2. Non-linear (physically correct) fresnel.
-             */
-            this.fresnelSeparate = false;
-            /**
-             * @param {boolean}: bump Waves modify the reflection.
-             */
-            this.bumpAffectsReflection = false;
-            /**
-            * @param {number}: The water color blended with the refraction (near)
-            */
-            this.waterColor = new BABYLON.Color3(0.1, 0.1, 0.6);
-            /**
-            * @param {number}: The blend factor related to the water color
-            */
-            this.colorBlendFactor = 0.2;
-            /**
-             * @param {number}: The water color blended with the reflection (far)
-             */
-            this.waterColor2 = new BABYLON.Color3(0.1, 0.1, 0.6);
-            /**
-             * @param {number}: The blend factor related to the water color (reflection, far)
-             */
-            this.colorBlendFactor2 = 0.2;
-            /**
-            * @param {number}: Represents the maximum length of a wave
-            */
-            this.waveLength = 0.1;
-            /**
-            * @param {number}: Defines the waves speed
-            */
-            this.waveSpeed = 1.0;
-            /*
-            * Private members
-            */
-            this._mesh = null;
-            this._reflectionTransform = BABYLON.Matrix.Zero();
-            this._lastTime = 0;
-            this._defines = new WaterMaterialDefines();
-            this._cachedDefines = new WaterMaterialDefines();
-            // Create render targets
-            this._createRenderTargets(scene, renderTargetSize);
-        }
-        Object.defineProperty(WaterMaterial.prototype, "useLogarithmicDepth", {
-            get: function () {
-                return this._useLogarithmicDepth;
-            },
-            set: function (value) {
-                this._useLogarithmicDepth = value && this.getScene().getEngine().getCaps().fragmentDepthSupported;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(WaterMaterial.prototype, "refractionTexture", {
-            // Get / Set
-            get: function () {
-                return this._refractionRTT;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        Object.defineProperty(WaterMaterial.prototype, "reflectionTexture", {
-            get: function () {
-                return this._reflectionRTT;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        // Methods
-        WaterMaterial.prototype.addToRenderList = function (node) {
-            this._refractionRTT.renderList.push(node);
-            this._reflectionRTT.renderList.push(node);
-        };
-        WaterMaterial.prototype.enableRenderTargets = function (enable) {
-            var refreshRate = enable ? 1 : 0;
-            this._refractionRTT.refreshRate = refreshRate;
-            this._reflectionRTT.refreshRate = refreshRate;
-        };
-        WaterMaterial.prototype.getRenderList = function () {
-            return this._refractionRTT.renderList;
-        };
-        Object.defineProperty(WaterMaterial.prototype, "renderTargetsEnabled", {
-            get: function () {
-                return !(this._refractionRTT.refreshRate === 0);
-            },
-            enumerable: true,
-            configurable: true
-        });
-        WaterMaterial.prototype.needAlphaBlending = function () {
-            return (this.alpha < 1.0);
-        };
-        WaterMaterial.prototype.needAlphaTesting = function () {
-            return false;
-        };
-        WaterMaterial.prototype.getAlphaTestTexture = function () {
-            return null;
-        };
-        WaterMaterial.prototype._checkCache = function (scene, mesh, useInstances) {
-            if (!mesh) {
-                return true;
-            }
-            if (this._defines.INSTANCES !== useInstances) {
-                return false;
-            }
-            if (mesh._materialDefines && mesh._materialDefines.isEqual(this._defines)) {
-                return true;
-            }
-            return false;
-        };
-        WaterMaterial.prototype.isReady = function (mesh, useInstances) {
-            if (this.checkReadyOnlyOnce) {
-                if (this._wasPreviouslyReady) {
-                    return true;
-                }
-            }
-            var scene = this.getScene();
-            if (!this.checkReadyOnEveryCall) {
-                if (this._renderId === scene.getRenderId()) {
-                    if (this._checkCache(scene, mesh, useInstances)) {
-                        return true;
-                    }
-                }
-            }
-            var engine = scene.getEngine();
-            var needNormals = false;
-            var needUVs = false;
-            this._defines.reset();
-            // Textures
-            if (scene.texturesEnabled) {
-                if (this.bumpTexture && BABYLON.StandardMaterial.BumpTextureEnabled) {
-                    if (!this.bumpTexture.isReady()) {
-                        return false;
-                    }
-                    else {
-                        needUVs = true;
-                        this._defines.BUMP = true;
-                    }
-                }
-                if (BABYLON.StandardMaterial.ReflectionTextureEnabled) {
-                    this._defines.REFLECTION = true;
-                }
-            }
-            // Effect
-            if (scene.clipPlane) {
-                this._defines.CLIPPLANE = true;
-            }
-            if (engine.getAlphaTesting()) {
-                this._defines.ALPHATEST = true;
-            }
-            // Point size
-            if (this.pointsCloud || scene.forcePointsCloud) {
-                this._defines.POINTSIZE = true;
-            }
-            if (this.useLogarithmicDepth) {
-                this._defines.LOGARITHMICDEPTH = true;
-            }
-            if (this.fresnelSeparate) {
-                this._defines.FRESNELSEPARATE = true;
-            }
-            if (this.bumpSuperimpose) {
-                this._defines.BUMPSUPERIMPOSE = true;
-            }
-            if (this.bumpAffectsReflection) {
-                this._defines.BUMPAFFECTSREFLECTION = true;
-            }
-            // Fog
-            if (scene.fogEnabled && mesh && mesh.applyFog && scene.fogMode !== BABYLON.Scene.FOGMODE_NONE && this.fogEnabled) {
-                this._defines.FOG = true;
-            }
-            // Lights
-            if (scene.lightsEnabled && !this.disableLighting) {
-                needNormals = BABYLON.MaterialHelper.PrepareDefinesForLights(scene, mesh, this._defines, this.maxSimultaneousLights);
-            }
-            // Attribs
-            if (mesh) {
-                if (needNormals && mesh.isVerticesDataPresent(BABYLON.VertexBuffer.NormalKind)) {
-                    this._defines.NORMAL = true;
-                }
-                if (needUVs) {
-                    if (mesh.isVerticesDataPresent(BABYLON.VertexBuffer.UVKind)) {
-                        this._defines.UV1 = true;
-                    }
-                    if (mesh.isVerticesDataPresent(BABYLON.VertexBuffer.UV2Kind)) {
-                        this._defines.UV2 = true;
-                    }
-                }
-                if (mesh.useVertexColors && mesh.isVerticesDataPresent(BABYLON.VertexBuffer.ColorKind)) {
-                    this._defines.VERTEXCOLOR = true;
-                    if (mesh.hasVertexAlpha) {
-                        this._defines.VERTEXALPHA = true;
-                    }
-                }
-                if (mesh.useBones && mesh.computeBonesUsingShaders) {
-                    this._defines.NUM_BONE_INFLUENCERS = mesh.numBoneInfluencers;
-                    this._defines.BonesPerMesh = (mesh.skeleton.bones.length + 1);
-                }
-                // Instances
-                if (useInstances) {
-                    this._defines.INSTANCES = true;
-                }
-            }
-            this._mesh = mesh;
-            // Get correct effect
-            if (!this._defines.isEqual(this._cachedDefines)) {
-                this._defines.cloneTo(this._cachedDefines);
-                scene.resetCachedMaterial();
-                // Fallbacks
-                var fallbacks = new BABYLON.EffectFallbacks();
-                if (this._defines.FOG) {
-                    fallbacks.addFallback(1, "FOG");
-                }
-                if (this._defines.LOGARITHMICDEPTH) {
-                    fallbacks.addFallback(0, "LOGARITHMICDEPTH");
-                }
-                BABYLON.MaterialHelper.HandleFallbacksForShadows(this._defines, fallbacks, this.maxSimultaneousLights);
-                if (this._defines.NUM_BONE_INFLUENCERS > 0) {
-                    fallbacks.addCPUSkinningFallback(0, mesh);
-                }
-                //Attributes
-                var attribs = [BABYLON.VertexBuffer.PositionKind];
-                if (this._defines.NORMAL) {
-                    attribs.push(BABYLON.VertexBuffer.NormalKind);
-                }
-                if (this._defines.UV1) {
-                    attribs.push(BABYLON.VertexBuffer.UVKind);
-                }
-                if (this._defines.UV2) {
-                    attribs.push(BABYLON.VertexBuffer.UV2Kind);
-                }
-                if (this._defines.VERTEXCOLOR) {
-                    attribs.push(BABYLON.VertexBuffer.ColorKind);
-                }
-                BABYLON.MaterialHelper.PrepareAttributesForBones(attribs, mesh, this._defines, fallbacks);
-                BABYLON.MaterialHelper.PrepareAttributesForInstances(attribs, this._defines);
-                // Legacy browser patch
-                var shaderName = "water";
-                var join = this._defines.toString();
-                var uniforms = ["world", "view", "viewProjection", "vEyePosition", "vLightsType", "vDiffuseColor", "vSpecularColor",
-                    "vFogInfos", "vFogColor", "pointSize",
-                    "vNormalInfos",
-                    "mBones",
-                    "vClipPlane", "normalMatrix",
-                    "logarithmicDepthConstant",
-                    // Water
-                    "worldReflectionViewProjection", "windDirection", "waveLength", "time", "windForce",
-                    "cameraPosition", "bumpHeight", "waveHeight", "waterColor", "waterColor2", "colorBlendFactor", "colorBlendFactor2", "waveSpeed"
-                ];
-                var samplers = ["normalSampler",
-                    // Water
-                    "refractionSampler", "reflectionSampler"
-                ];
-                BABYLON.MaterialHelper.PrepareUniformsAndSamplersList(uniforms, samplers, this._defines, this.maxSimultaneousLights);
-                this._effect = scene.getEngine().createEffect(shaderName, attribs, uniforms, samplers, join, fallbacks, this.onCompiled, this.onError, { maxSimultaneousLights: this.maxSimultaneousLights });
-            }
-            if (!this._effect.isReady()) {
-                return false;
-            }
-            this._renderId = scene.getRenderId();
-            this._wasPreviouslyReady = true;
-            if (mesh) {
-                if (!mesh._materialDefines) {
-                    mesh._materialDefines = new WaterMaterialDefines();
-                }
-                this._defines.cloneTo(mesh._materialDefines);
-            }
-            return true;
-        };
-        WaterMaterial.prototype.bindOnlyWorldMatrix = function (world) {
-            this._effect.setMatrix("world", world);
-        };
-        WaterMaterial.prototype.bind = function (world, mesh) {
-            var scene = this.getScene();
-            // Matrices
-            this.bindOnlyWorldMatrix(world);
-            this._effect.setMatrix("viewProjection", scene.getTransformMatrix());
-            // Bones
-            BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
-            if (scene.getCachedMaterial() !== this) {
-                // Textures
-                if (this.bumpTexture && BABYLON.StandardMaterial.BumpTextureEnabled) {
-                    this._effect.setTexture("normalSampler", this.bumpTexture);
-                    this._effect.setFloat2("vNormalInfos", this.bumpTexture.coordinatesIndex, this.bumpTexture.level);
-                    this._effect.setMatrix("normalMatrix", this.bumpTexture.getTextureMatrix());
-                }
-                // Clip plane
-                BABYLON.MaterialHelper.BindClipPlane(this._effect, scene);
-                // Point size
-                if (this.pointsCloud) {
-                    this._effect.setFloat("pointSize", this.pointSize);
-                }
-                this._effect.setVector3("vEyePosition", scene._mirroredCameraPosition ? scene._mirroredCameraPosition : scene.activeCamera.position);
-            }
-            this._effect.setColor4("vDiffuseColor", this.diffuseColor, this.alpha * mesh.visibility);
-            if (this._defines.SPECULARTERM) {
-                this._effect.setColor4("vSpecularColor", this.specularColor, this.specularPower);
-            }
-            if (scene.lightsEnabled && !this.disableLighting) {
-                BABYLON.MaterialHelper.BindLights(scene, mesh, this._effect, this._defines, this.maxSimultaneousLights);
-            }
-            // View
-            if (scene.fogEnabled && mesh.applyFog && scene.fogMode !== BABYLON.Scene.FOGMODE_NONE) {
-                this._effect.setMatrix("view", scene.getViewMatrix());
-            }
-            // Fog
-            BABYLON.MaterialHelper.BindFogParameters(scene, mesh, this._effect);
-            // Log. depth
-            BABYLON.MaterialHelper.BindLogDepth(this._defines, this._effect, scene);
-            // Water
-            if (BABYLON.StandardMaterial.ReflectionTextureEnabled) {
-                this._effect.setTexture("refractionSampler", this._refractionRTT);
-                this._effect.setTexture("reflectionSampler", this._reflectionRTT);
-            }
-            var wrvp = this._mesh.getWorldMatrix().multiply(this._reflectionTransform).multiply(scene.getProjectionMatrix());
-            this._lastTime += scene.getEngine().getDeltaTime();
-            this._effect.setMatrix("worldReflectionViewProjection", wrvp);
-            this._effect.setVector2("windDirection", this.windDirection);
-            this._effect.setFloat("waveLength", this.waveLength);
-            this._effect.setFloat("time", this._lastTime / 100000);
-            this._effect.setFloat("windForce", this.windForce);
-            this._effect.setFloat("waveHeight", this.waveHeight);
-            this._effect.setFloat("bumpHeight", this.bumpHeight);
-            this._effect.setColor4("waterColor", this.waterColor, 1.0);
-            this._effect.setFloat("colorBlendFactor", this.colorBlendFactor);
-            this._effect.setColor4("waterColor2", this.waterColor2, 1.0);
-            this._effect.setFloat("colorBlendFactor2", this.colorBlendFactor2);
-            this._effect.setFloat("waveSpeed", this.waveSpeed);
-            _super.prototype.bind.call(this, world, mesh);
-        };
-        WaterMaterial.prototype._createRenderTargets = function (scene, renderTargetSize) {
-            var _this = this;
-            // Render targets
-            this._refractionRTT = new BABYLON.RenderTargetTexture(name + "_refraction", { width: renderTargetSize.x, height: renderTargetSize.y }, scene, false, true);
-            this._refractionRTT.wrapU = BABYLON.Texture.MIRROR_ADDRESSMODE;
-            this._refractionRTT.wrapV = BABYLON.Texture.MIRROR_ADDRESSMODE;
-            this._reflectionRTT = new BABYLON.RenderTargetTexture(name + "_reflection", { width: renderTargetSize.x, height: renderTargetSize.y }, scene, false, true);
-            this._reflectionRTT.wrapU = BABYLON.Texture.MIRROR_ADDRESSMODE;
-            this._reflectionRTT.wrapV = BABYLON.Texture.MIRROR_ADDRESSMODE;
-            scene.customRenderTargets.push(this._refractionRTT);
-            scene.customRenderTargets.push(this._reflectionRTT);
-            var isVisible;
-            var clipPlane = null;
-            var savedViewMatrix;
-            var mirrorMatrix = BABYLON.Matrix.Zero();
-            this._refractionRTT.onBeforeRender = function () {
-                if (_this._mesh) {
-                    isVisible = _this._mesh.isVisible;
-                    _this._mesh.isVisible = false;
-                }
-                // Clip plane
-                clipPlane = scene.clipPlane;
-                var positiony = _this._mesh ? _this._mesh.position.y : 0.0;
-                scene.clipPlane = BABYLON.Plane.FromPositionAndNormal(new BABYLON.Vector3(0, positiony + 0.05, 0), new BABYLON.Vector3(0, 1, 0));
-            };
-            this._refractionRTT.onAfterRender = function () {
-                if (_this._mesh) {
-                    _this._mesh.isVisible = isVisible;
-                }
-                // Clip plane
-                scene.clipPlane = clipPlane;
-            };
-            this._reflectionRTT.onBeforeRender = function () {
-                if (_this._mesh) {
-                    isVisible = _this._mesh.isVisible;
-                    _this._mesh.isVisible = false;
-                }
-                // Clip plane
-                clipPlane = scene.clipPlane;
-                var positiony = _this._mesh ? _this._mesh.position.y : 0.0;
-                scene.clipPlane = BABYLON.Plane.FromPositionAndNormal(new BABYLON.Vector3(0, positiony - 0.05, 0), new BABYLON.Vector3(0, -1, 0));
-                // Transform
-                BABYLON.Matrix.ReflectionToRef(scene.clipPlane, mirrorMatrix);
-                savedViewMatrix = scene.getViewMatrix();
-                mirrorMatrix.multiplyToRef(savedViewMatrix, _this._reflectionTransform);
-                scene.setTransformMatrix(_this._reflectionTransform, scene.getProjectionMatrix());
-                scene.getEngine().cullBackFaces = false;
-                scene._mirroredCameraPosition = BABYLON.Vector3.TransformCoordinates(scene.activeCamera.position, mirrorMatrix);
-            };
-            this._reflectionRTT.onAfterRender = function () {
-                if (_this._mesh) {
-                    _this._mesh.isVisible = isVisible;
-                }
-                // Clip plane
-                scene.clipPlane = clipPlane;
-                // Transform
-                scene.setTransformMatrix(savedViewMatrix, scene.getProjectionMatrix());
-                scene.getEngine().cullBackFaces = true;
-                scene._mirroredCameraPosition = null;
-            };
-        };
-        WaterMaterial.prototype.getAnimatables = function () {
-            var results = [];
-            if (this.bumpTexture && this.bumpTexture.animations && this.bumpTexture.animations.length > 0) {
-                results.push(this.bumpTexture);
-            }
-            if (this._reflectionRTT && this._reflectionRTT.animations && this._reflectionRTT.animations.length > 0) {
-                results.push(this._reflectionRTT);
-            }
-            if (this._refractionRTT && this._refractionRTT.animations && this._refractionRTT.animations.length > 0) {
-                results.push(this._refractionRTT);
-            }
-            return results;
-        };
-        WaterMaterial.prototype.dispose = function (forceDisposeEffect) {
-            if (this.bumpTexture) {
-                this.bumpTexture.dispose();
-            }
-            var index = this.getScene().customRenderTargets.indexOf(this._refractionRTT);
-            if (index != -1) {
-                this.getScene().customRenderTargets.splice(index, 1);
-            }
-            index = -1;
-            index = this.getScene().customRenderTargets.indexOf(this._reflectionRTT);
-            if (index != -1) {
-                this.getScene().customRenderTargets.splice(index, 1);
-            }
-            if (this._reflectionRTT) {
-                this._reflectionRTT.dispose();
-            }
-            if (this._refractionRTT) {
-                this._refractionRTT.dispose();
-            }
-            _super.prototype.dispose.call(this, forceDisposeEffect);
-        };
-        WaterMaterial.prototype.clone = function (name) {
-            var _this = this;
-            return BABYLON.SerializationHelper.Clone(function () { return new WaterMaterial(name, _this.getScene()); }, this);
-        };
-        WaterMaterial.prototype.serialize = function () {
-            var serializationObject = BABYLON.SerializationHelper.Serialize(this);
-            serializationObject.customType = "BABYLON.WaterMaterial";
-            serializationObject.reflectionTexture.isRenderTarget = true;
-            serializationObject.refractionTexture.isRenderTarget = true;
-            return serializationObject;
-        };
-        // Statics
-        WaterMaterial.Parse = function (source, scene, rootUrl) {
-            return BABYLON.SerializationHelper.Parse(function () { return new WaterMaterial(source.name, scene); }, source, scene, rootUrl);
-        };
-        WaterMaterial.CreateDefaultMesh = function (name, scene) {
-            var mesh = BABYLON.Mesh.CreateGround(name, 512, 512, 32, scene, false);
-            return mesh;
-        };
-        __decorate([
-            BABYLON.serializeAsTexture()
-        ], WaterMaterial.prototype, "bumpTexture");
-        __decorate([
-            BABYLON.serializeAsColor3()
-        ], WaterMaterial.prototype, "diffuseColor");
-        __decorate([
-            BABYLON.serializeAsColor3()
-        ], WaterMaterial.prototype, "specularColor");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "specularPower");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "disableLighting");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "maxSimultaneousLights");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "windForce");
-        __decorate([
-            BABYLON.serializeAsVector2()
-        ], WaterMaterial.prototype, "windDirection");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "waveHeight");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "bumpHeight");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "bumpSuperimpose");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "fresnelSeparate");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "bumpAffectsReflection");
-        __decorate([
-            BABYLON.serializeAsColor3()
-        ], WaterMaterial.prototype, "waterColor");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "colorBlendFactor");
-        __decorate([
-            BABYLON.serializeAsColor3()
-        ], WaterMaterial.prototype, "waterColor2");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "colorBlendFactor2");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "waveLength");
-        __decorate([
-            BABYLON.serialize()
-        ], WaterMaterial.prototype, "waveSpeed");
-        Object.defineProperty(WaterMaterial.prototype, "useLogarithmicDepth",
-            __decorate([
-                BABYLON.serialize()
-            ], WaterMaterial.prototype, "useLogarithmicDepth", Object.getOwnPropertyDescriptor(WaterMaterial.prototype, "useLogarithmicDepth")));
-        return WaterMaterial;
-    })(BABYLON.Material);
-    BABYLON.WaterMaterial = WaterMaterial;
-})(BABYLON || (BABYLON = {}));
-
-BABYLON.Effect.ShadersStore['waterVertexShader'] = "precision highp float;\n\nattribute vec3 position;\n#ifdef NORMAL\nattribute vec3 normal;\n#endif\n#ifdef UV1\nattribute vec2 uv;\n#endif\n#ifdef UV2\nattribute vec2 uv2;\n#endif\n#ifdef VERTEXCOLOR\nattribute vec4 color;\n#endif\n#include<bonesDeclaration>\n\n#include<instancesDeclaration>\nuniform mat4 view;\nuniform mat4 viewProjection;\n#ifdef BUMP\nvarying vec2 vNormalUV;\n#ifdef BUMPSUPERIMPOSE\nvarying vec2 vNormalUV2;\n#endif\nuniform mat4 normalMatrix;\nuniform vec2 vNormalInfos;\n#endif\n#ifdef POINTSIZE\nuniform float pointSize;\n#endif\n\nvarying vec3 vPositionW;\n#ifdef NORMAL\nvarying vec3 vNormalW;\n#endif\n#ifdef VERTEXCOLOR\nvarying vec4 vColor;\n#endif\n#include<clipPlaneVertexDeclaration>\n#include<fogVertexDeclaration>\n#include<shadowsVertexDeclaration>[0..maxSimultaneousLights]\n#include<logDepthDeclaration>\n\nuniform mat4 worldReflectionViewProjection;\nuniform vec2 windDirection;\nuniform float waveLength;\nuniform float time;\nuniform float windForce;\nuniform float waveHeight;\nuniform float waveSpeed;\n\nvarying vec3 vPosition;\nvarying vec3 vRefractionMapTexCoord;\nvarying vec3 vReflectionMapTexCoord;\nvoid main(void) {\n#include<instancesVertex>\n#include<bonesVertex>\nvec4 worldPos=finalWorld*vec4(position,1.0);\nvPositionW=vec3(worldPos);\n#ifdef NORMAL\nvNormalW=normalize(vec3(finalWorld*vec4(normal,0.0)));\n#endif\n\n#ifndef UV1\nvec2 uv=vec2(0.,0.);\n#endif\n#ifndef UV2\nvec2 uv2=vec2(0.,0.);\n#endif\n#ifdef BUMP\nif (vNormalInfos.x == 0.)\n{\nvNormalUV=vec2(normalMatrix*vec4((uv*1.0)/waveLength+time*windForce*windDirection,1.0,0.0));\n#ifdef BUMPSUPERIMPOSE\nvNormalUV2=vec2(normalMatrix*vec4((uv*0.721)/waveLength+time*1.2*windForce*windDirection,1.0,0.0));\n#endif\n}\nelse\n{\nvNormalUV=vec2(normalMatrix*vec4((uv2*1.0)/waveLength+time*windForce*windDirection ,1.0,0.0));\n#ifdef BUMPSUPERIMPOSE\nvNormalUV2=vec2(normalMatrix*vec4((uv2*0.721)/waveLength+time*1.2*windForce*windDirection ,1.0,0.0));\n#endif\n}\n#endif\n\n#include<clipPlaneVertex>\n\n#include<fogVertex>\n\n#include<shadowsVertex>[0..maxSimultaneousLights]\n\n#ifdef VERTEXCOLOR\nvColor=color;\n#endif\n\n#ifdef POINTSIZE\ngl_PointSize=pointSize;\n#endif\nvec3 p=position;\nfloat newY=(sin(((p.x/0.05)+time*waveSpeed))*waveHeight*windDirection.x*5.0)\n+(cos(((p.z/0.05)+time*waveSpeed))*waveHeight*windDirection.y*5.0);\np.y+=abs(newY);\ngl_Position=viewProjection*finalWorld*vec4(p,1.0);\n#ifdef REFLECTION\nworldPos=viewProjection*finalWorld*vec4(p,1.0);\n\nvPosition=position;\nvRefractionMapTexCoord.x=0.5*(worldPos.w+worldPos.x);\nvRefractionMapTexCoord.y=0.5*(worldPos.w+worldPos.y);\nvRefractionMapTexCoord.z=worldPos.w;\nworldPos=worldReflectionViewProjection*vec4(position,1.0);\nvReflectionMapTexCoord.x=0.5*(worldPos.w+worldPos.x);\nvReflectionMapTexCoord.y=0.5*(worldPos.w+worldPos.y);\nvReflectionMapTexCoord.z=worldPos.w;\n#endif\n#include<logDepthVertex>\n}\n";
-BABYLON.Effect.ShadersStore['waterPixelShader'] = "#ifdef LOGARITHMICDEPTH\n#extension GL_EXT_frag_depth : enable\n#endif\nprecision highp float;\n\nuniform vec3 vEyePosition;\nuniform vec4 vDiffuseColor;\n#ifdef SPECULARTERM\nuniform vec4 vSpecularColor;\n#endif\n\nvarying vec3 vPositionW;\n#ifdef NORMAL\nvarying vec3 vNormalW;\n#endif\n#ifdef VERTEXCOLOR\nvarying vec4 vColor;\n#endif\n\n#include<lightFragmentDeclaration>[0..maxSimultaneousLights]\n#include<lightsFragmentFunctions>\n#include<shadowsFragmentFunctions>\n\n#ifdef BUMP\nvarying vec2 vNormalUV;\nvarying vec2 vNormalUV2;\nuniform sampler2D normalSampler;\nuniform vec2 vNormalInfos;\n#endif\nuniform sampler2D refractionSampler;\nuniform sampler2D reflectionSampler;\n\nconst float LOG2=1.442695;\nuniform vec3 cameraPosition;\nuniform vec4 waterColor;\nuniform float colorBlendFactor;\nuniform vec4 waterColor2;\nuniform float colorBlendFactor2;\nuniform float bumpHeight;\nuniform float time;\n\nvarying vec3 vRefractionMapTexCoord;\nvarying vec3 vReflectionMapTexCoord;\nvarying vec3 vPosition;\n#include<clipPlaneFragmentDeclaration>\n#include<logDepthDeclaration>\n\n#include<fogFragmentDeclaration>\nvoid main(void) {\n\n#include<clipPlaneFragment>\nvec3 viewDirectionW=normalize(vEyePosition-vPositionW);\n\nvec4 baseColor=vec4(1.,1.,1.,1.);\nvec3 diffuseColor=vDiffuseColor.rgb;\n\nfloat alpha=vDiffuseColor.a;\n#ifdef BUMP\n#ifdef BUMPSUPERIMPOSE\nbaseColor=0.6*texture2D(normalSampler,vNormalUV)+0.4*texture2D(normalSampler,vec2(vNormalUV2.x,vNormalUV2.y));\n#else\nbaseColor=texture2D(normalSampler,vNormalUV);\n#endif\nvec3 bumpColor=baseColor.rgb;\n#ifdef ALPHATEST\nif (baseColor.a<0.4)\ndiscard;\n#endif\nbaseColor.rgb*=vNormalInfos.y;\n#else\nvec3 bumpColor=vec3(1.0);\n#endif\n#ifdef VERTEXCOLOR\nbaseColor.rgb*=vColor.rgb;\n#endif\n\n#ifdef NORMAL\nvec2 perturbation=bumpHeight*(baseColor.rg-0.5);\n#ifdef BUMPAFFECTSREFLECTION\nvec3 normalW=normalize(vNormalW+vec3(perturbation.x*8.0,0.0,perturbation.y*8.0));\nif (normalW.y<0.0) {\nnormalW.y=-normalW.y;\n}\n#else\nvec3 normalW=normalize(vNormalW);\n#endif\n#else\nvec3 normalW=vec3(1.0,1.0,1.0);\nvec2 perturbation=bumpHeight*(vec2(1.0,1.0)-0.5);\n#endif\n#ifdef FRESNELSEPARATE\n#ifdef REFLECTION\n\nvec3 eyeVector=normalize(vEyePosition-vPosition);\nvec2 projectedRefractionTexCoords=clamp(vRefractionMapTexCoord.xy/vRefractionMapTexCoord.z+perturbation*0.5,0.0,1.0);\nvec4 refractiveColor=texture2D(refractionSampler,projectedRefractionTexCoords);\nvec2 projectedReflectionTexCoords=clamp(vec2(\nvReflectionMapTexCoord.x/vReflectionMapTexCoord.z+perturbation.x*0.3,\nvReflectionMapTexCoord.y/vReflectionMapTexCoord.z+perturbation.y\n),0.0,1.0);\nvec4 reflectiveColor=texture2D(reflectionSampler,projectedReflectionTexCoords);\nvec3 upVector=vec3(0.0,1.0,0.0);\nfloat fresnelTerm=clamp(abs(pow(dot(eyeVector,upVector),3.0)),0.05,0.65);\nfloat IfresnelTerm=1.0-fresnelTerm;\nrefractiveColor=colorBlendFactor*waterColor+(1.0-colorBlendFactor)*refractiveColor;\nreflectiveColor=IfresnelTerm*colorBlendFactor2*waterColor+(1.0-colorBlendFactor2*IfresnelTerm)*reflectiveColor;\nvec4 combinedColor=refractiveColor*fresnelTerm+reflectiveColor*IfresnelTerm;\nbaseColor=combinedColor;\n#endif\n\nvec3 diffuseBase=vec3(0.,0.,0.);\nlightingInfo info;\nfloat shadow=1.;\n#ifdef SPECULARTERM\nfloat glossiness=vSpecularColor.a;\nvec3 specularBase=vec3(0.,0.,0.);\nvec3 specularColor=vSpecularColor.rgb;\n#else\nfloat glossiness=0.;\n#endif\n#include<lightFragment>[0..maxSimultaneousLights]\nvec3 finalDiffuse=clamp(baseColor.rgb,0.0,1.0);\n#ifdef VERTEXALPHA\nalpha*=vColor.a;\n#endif\n#ifdef SPECULARTERM\nvec3 finalSpecular=specularBase*specularColor;\n#else\nvec3 finalSpecular=vec3(0.0);\n#endif\n#else \n#ifdef REFLECTION\n\nvec3 eyeVector=normalize(vEyePosition-vPosition);\nvec2 projectedRefractionTexCoords=clamp(vRefractionMapTexCoord.xy/vRefractionMapTexCoord.z+perturbation,0.0,1.0);\nvec4 refractiveColor=texture2D(refractionSampler,projectedRefractionTexCoords);\nvec2 projectedReflectionTexCoords=clamp(vReflectionMapTexCoord.xy/vReflectionMapTexCoord.z+perturbation,0.0,1.0);\nvec4 reflectiveColor=texture2D(reflectionSampler,projectedReflectionTexCoords);\nvec3 upVector=vec3(0.0,1.0,0.0);\nfloat fresnelTerm=max(dot(eyeVector,upVector),0.0);\nvec4 combinedColor=refractiveColor*fresnelTerm+reflectiveColor*(1.0-fresnelTerm);\nbaseColor=colorBlendFactor*waterColor+(1.0-colorBlendFactor)*combinedColor;\n#endif\n\nvec3 diffuseBase=vec3(0.,0.,0.);\nlightingInfo info;\nfloat shadow=1.;\n#ifdef SPECULARTERM\nfloat glossiness=vSpecularColor.a;\nvec3 specularBase=vec3(0.,0.,0.);\nvec3 specularColor=vSpecularColor.rgb;\n#else\nfloat glossiness=0.;\n#endif\n#include<lightFragment>[0..maxSimultaneousLights]\nvec3 finalDiffuse=clamp(baseColor.rgb,0.0,1.0);\n#ifdef VERTEXALPHA\nalpha*=vColor.a;\n#endif\n#ifdef SPECULARTERM\nvec3 finalSpecular=specularBase*specularColor;\n#else\nvec3 finalSpecular=vec3(0.0);\n#endif\n#endif\n\nvec4 color=vec4(finalDiffuse+finalSpecular,alpha);\n#include<logDepthFragment>\n#include<fogFragment>\ngl_FragColor=color;\n}\n";

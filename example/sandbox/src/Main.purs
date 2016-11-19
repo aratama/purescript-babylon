@@ -12,7 +12,7 @@ import Data.Nullable (toMaybe, toNullable)
 import Data.Ring (negate)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition, setRenderingGroupId, setReceiveShadows)
+import Graphics.Babylon.AbstractMesh (getSkeleton, onCollisionPositionChangeObservable, setPosition, setReceiveShadows, setRenderingGroupId)
 import Graphics.Babylon.AbstractMesh (setIsPickable, setIsVisible, setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Camera (oRTHOGRAPHIC_CAMERA, setMode, setViewport, setOrthoLeft, setOrthoRight, setOrthoTop, setOrthoBottom)
 import Graphics.Babylon.Color3 (createColor3)
@@ -30,7 +30,7 @@ import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
 import Graphics.Babylon.Mesh (createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial)
 import Graphics.Babylon.Observable (add) as Observable
-import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
+import Graphics.Babylon.Scene (beginAnimation, createScene, fOGMODE_EXP, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
 import Graphics.Babylon.SceneLoader (importMesh)
 import Graphics.Babylon.ShadowGenerator (createShadowGenerator, getShadowMap, setBias, setUsePoissonSampling)
 import Graphics.Babylon.StandardMaterial (createStandardMaterial, setBackFaceCulling, setDiffuseColor, setDiffuseTexture, setDisableLighting, setReflectionTexture, setSpecularColor, standardMaterialToMaterial)
@@ -214,12 +214,14 @@ runApp canvasGL canvas2d = do
                 setPosition p mesh
                 setRenderingGroupId 1 mesh
                 setReceiveShadows true mesh
+                skeleton <- getSkeleton mesh
+                beginAnimation skeleton 0 30 true 1.0 (toNullable Nothing) (toNullable Nothing) scene
             modifyRef ref \(State state) -> State state {
                 alicia = result
             }
             pure unit
 
-    importMesh "" "/alicia/" "alicia.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
+    importMesh "" "/alice/" "alice.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
 
     onKeyDown \e -> do
         when (e.keyCode == 32) do

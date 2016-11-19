@@ -6,7 +6,7 @@ import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Node (Node)
 import Graphics.Babylon.Observable (Observable)
 import Graphics.Babylon.PhysicsImpostor (PhysicsImpostor)
-import Graphics.Babylon.Types (AbstractMesh, Mesh, Ray)
+import Graphics.Babylon.Types (AbstractMesh, Mesh, Ray, Skeleton)
 import Graphics.Babylon.Vector3 (Vector3)
 
 foreign import setCheckCollisions :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
@@ -48,3 +48,5 @@ foreign import onCollisionPositionChangeObservable  :: AbstractMesh -> Observabl
 foreign import setRenderingGroupId :: forall eff. Int -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setReceiveShadows  :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Skeleton

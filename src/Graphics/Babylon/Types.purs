@@ -15,3 +15,5 @@ foreign import data PhysicsPlugin :: *
 foreign import data ParticleSystem :: *
 
 foreign import data Skeleton :: *
+
+foreign import data Animatable :: *

@@ -160,3 +160,9 @@ exports.setReceiveShadows = function(receiveShadows){
         }
     }
 }
+
+exports.getSkeleton = function(mesh){
+    return function(){
+        return mesh.skeleton;
+    }
+}

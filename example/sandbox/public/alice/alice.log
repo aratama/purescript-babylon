@@ -1,0 +1,126 @@
+Exporter version: 5.1.0, Blender version: 2.78 (sub 0)
+========= Conversion from Blender to Babylon.js =========
+	Scene settings used:
+		selected layers only:  false
+		flat shading entire scene:  false
+		texture Method:  LEGACY
+		texture directory:  C:\Users\Kon\Documents\dev\purescript-babylon\example\sandbox\public\alice\
+	Python World class constructor completed
+	processing begun of skeleton:  alice, id:  0
+		processing begun of bone:  Root, index:  0
+		processing begun of bone:  pelvis, index:  1
+		processing begun of bone:  spine_01, index:  2
+		processing begun of bone:  spine_02, index:  3
+		processing begun of bone:  spine_03, index:  4
+		processing begun of bone:  neck_01, index:  5
+		processing begun of bone:  head, index:  6
+		processing begun of bone:  clavicle_l, index:  7
+		processing begun of bone:  upperarm_l, index:  8
+		processing begun of bone:  lowerarm_l, index:  9
+		processing begun of bone:  hand_l, index:  10
+		processing begun of bone:  index_01_l, index:  11
+		processing begun of bone:  index_02_l, index:  12
+		processing begun of bone:  index_03_l, index:  13
+		processing begun of bone:  middle_01_l, index:  14
+		processing begun of bone:  middle_02_l, index:  15
+		processing begun of bone:  middle_03_l, index:  16
+		processing begun of bone:  pinky_01_l, index:  17
+		processing begun of bone:  pinky_02_l, index:  18
+		processing begun of bone:  pinky_03_l, index:  19
+		processing begun of bone:  ring_01_l, index:  20
+		processing begun of bone:  ring_02_l, index:  21
+		processing begun of bone:  ring_03_l, index:  22
+		processing begun of bone:  thumb_01_l, index:  23
+		processing begun of bone:  thumb_02_l, index:  24
+		processing begun of bone:  thumb_03_l, index:  25
+		processing begun of bone:  clavicle_r, index:  26
+		processing begun of bone:  upperarm_r, index:  27
+		processing begun of bone:  lowerarm_r, index:  28
+		processing begun of bone:  hand_r, index:  29
+		processing begun of bone:  index_01_r, index:  30
+		processing begun of bone:  index_02_r, index:  31
+		processing begun of bone:  index_03_r, index:  32
+		processing begun of bone:  middle_01_r, index:  33
+		processing begun of bone:  middle_02_r, index:  34
+		processing begun of bone:  middle_03_r, index:  35
+		processing begun of bone:  pinky_01_r, index:  36
+		processing begun of bone:  pinky_02_r, index:  37
+		processing begun of bone:  pinky_03_r, index:  38
+		processing begun of bone:  ring_01_r, index:  39
+		processing begun of bone:  ring_02_r, index:  40
+		processing begun of bone:  ring_03_r, index:  41
+		processing begun of bone:  thumb_01_r, index:  42
+		processing begun of bone:  thumb_02_r, index:  43
+		processing begun of bone:  thumb_03_r, index:  44
+		processing begun of bone:  thigh_l, index:  45
+		processing begun of bone:  calf_l, index:  46
+		processing begun of bone:  foot_l, index:  47
+		processing begun of bone:  ball_l, index:  48
+		processing begun of bone:  thigh_r, index:  49
+		processing begun of bone:  calf_r, index:  50
+		processing begun of bone:  foot_r, index:  51
+		processing begun of bone:  ball_r, index:  52
+		processing action Action:  in[1 - 2], out[0 - 2]
+		processing action PoseLib:  in[1 - 2], out[10 - 12]
+	processing begun of mesh:  Bottoms
+		processing begun of Standard material:  DefaultSkin
+		processing begun of Standard material:  Shirts
+		processing begun of Standard material:  Skirt
+		processing begun of Standard material:  hair
+		processing begun of Standard material:  shoes
+		processing begun of multimaterial:  alice.Multimaterial#0
+		num positions      :  1470
+		num normals        :  1470
+		num uvs            :  2940
+		num uvs2           :  0
+		num colors         :  5880
+		num indices        :  5520
+		Skeleton stats:  
+			Total Influencers:  2068
+			Avg # of influencers per vertex:  1.4068
+			Highest # of influencers observed:  5, num vertices with this:  5
+			exported as 5 influencers
+			num skeletonWeights and skeletonIndices:  11760
+	processing begun of mesh:  Hair
+		registered as also a user of material:  DefaultSkin
+		registered as also a user of material:  Shirts
+		registered as also a user of material:  Skirt
+		registered as also a user of material:  hair
+		processing begun of multimaterial:  alice.Multimaterial#1
+		num positions      :  235
+		num normals        :  235
+		num uvs            :  470
+		num uvs2           :  0
+		num colors         :  0
+		num indices        :  1224
+		Skeleton stats:  
+			Total Influencers:  518
+			Avg # of influencers per vertex:  2.2043
+			Highest # of influencers observed:  6, num vertices with this:  3
+			exported as 6 influencers
+			num skeletonWeights and skeletonIndices:  1880
+	processing begun of mesh:  Body
+		registered as also a user of material:  DefaultSkin
+		registered as also a user of material:  Shirts
+		registered as also a user of material:  Skirt
+		registered as also a user of material:  hair
+		registered as also a user of material:  shoes
+		processing begun of multimaterial:  alice.Multimaterial#2
+		num positions      :  2836
+		num normals        :  2836
+		num uvs            :  5672
+		num uvs2           :  0
+		num colors         :  11344
+		num indices        :  14028
+		Skeleton stats:  
+			Total Influencers:  6171
+			Avg # of influencers per vertex:  2.176
+			Highest # of influencers observed:  6, num vertices with this:  8
+			exported as 6 influencers
+			num skeletonWeights and skeletonIndices:  22688
+	processing begun of camera (FreeCamera):  Camera
+	processing begun of light (HEMI):  Lamp
+========= Writing of scene file started =========
+========= Writing of scene file completed =========
+========= end of processing =========
+elapsed time:  0 min, 3.2088 secs

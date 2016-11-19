@@ -124,3 +124,23 @@ exports.setActiveCameras = function(cameras){
         }
     }
 }
+
+exports.beginAnimation = function(target){
+    return function(from){
+        return function(to){
+            return function(loop){
+                return function(speedRatio){
+                    return function(onAnimationEnd){
+                        return function(animatable){
+                            return function(scene){
+                                return function(){
+                                    return scene.beginAnimation(target, from, to, loop, speedRatio, onAnimationEnd, animatable);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

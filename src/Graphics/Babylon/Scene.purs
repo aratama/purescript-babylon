@@ -1,6 +1,8 @@
 module Graphics.Babylon.Scene where
 
 import Control.Monad.Eff (Eff)
+import Data.Foreign.Null (Null(..))
+import Data.Nullable (Nullable)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Camera (Camera)
@@ -8,7 +10,7 @@ import Graphics.Babylon.Color3 (Color3)
 import Graphics.Babylon.DebugLayer (DebugLayer)
 import Graphics.Babylon.Engine (Engine)
 import Graphics.Babylon.PickingInfo (PickingInfo)
-import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh, PhysicsPlugin)
+import Graphics.Babylon.Types (AbstractMesh, Mesh, PhysicsPlugin, Scene, Skeleton, Animatable)
 import Graphics.Babylon.Vector3 (Vector3)
 
 foreign import createScene :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Scene
@@ -44,3 +46,5 @@ foreign import enablePhysics :: forall eff. Vector3 -> PhysicsPlugin -> Scene ->
 foreign import setActiveCamera :: forall eff. Camera -> Scene -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setActiveCameras :: forall eff. Array Camera -> Scene -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import beginAnimation :: forall eff. Skeleton -> Int -> Int -> Boolean -> Number -> Nullable (Eff (babylon :: BABYLON | eff) Animatable) -> Nullable Animatable -> Scene -> Eff (babylon :: BABYLON | eff) Animatable
