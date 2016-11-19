@@ -1,5 +1,6 @@
 module Graphics.Babylon.Example.Sandbox.Main (main) where
 
+import Control.Alt (void)
 import Control.Alternative (pure)
 import Control.Bind (bind, when)
 import Control.Monad.Eff (Eff)
@@ -11,7 +12,7 @@ import Data.Nullable (toMaybe, toNullable)
 import Data.Ring (negate)
 import Data.Unit (Unit, unit)
 import Graphics.Babylon (Canvas, onDOMContentLoaded, querySelectorCanvas)
-import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition, setRenderingGroupId)
+import Graphics.Babylon.AbstractMesh (onCollisionPositionChangeObservable, setPosition, setRenderingGroupId, setReceiveShadows)
 import Graphics.Babylon.AbstractMesh (setIsPickable, setIsVisible, setCheckCollisions) as AbstractMesh
 import Graphics.Babylon.Camera (oRTHOGRAPHIC_CAMERA, setMode, setViewport, setOrthoLeft, setOrthoRight, setOrthoTop, setOrthoBottom)
 import Graphics.Babylon.Color3 (createColor3)
@@ -27,7 +28,7 @@ import Graphics.Babylon.FreeCamera (attachControl, createFreeCamera, freeCameraT
 import Graphics.Babylon.HemisphericLight (createHemisphericLight, hemisphericLightToLight)
 import Graphics.Babylon.Light (setDiffuse)
 import Graphics.Babylon.Material (setFogEnabled, setWireframe, setZOffset)
-import Graphics.Babylon.Mesh (setReceiveShadows, createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial)
+import Graphics.Babylon.Mesh (createBox, meshToAbstractMesh, setInfiniteDistance, setMaterial)
 import Graphics.Babylon.Observable (add) as Observable
 import Graphics.Babylon.Scene (createScene, fOGMODE_EXP, render, setActiveCamera, setActiveCameras, setCollisionsEnabled, setFogColor, setFogDensity, setFogEnd, setFogMode, setFogStart)
 import Graphics.Babylon.SceneLoader (importMesh)
@@ -166,15 +167,6 @@ runApp canvasGL canvas2d = do
         setInfiniteDistance true skyboxMesh
         pure skyboxMesh
 
-    player <- do
-        mesh <- createBox "player" 1.0 scene
-        p <- createVector3 0.0 20.0 0.0
-        setPosition p (meshToAbstractMesh mesh)
-        setRenderingGroupId 1 (meshToAbstractMesh mesh)
-        setReceiveShadows true mesh
-        pure mesh
-
-
     -- prepare materials
     materials <- do
         texture <- createTexture "texture.png" scene
@@ -210,16 +202,21 @@ runApp canvasGL canvas2d = do
         position: { x: 0.0, y: 20.0, z: 0.0 },
         velocity: { x: 0.0, y: 0.2, z: 0.0 },
         minimap: false,
-        totalFrames: 0
+        totalFrames: 0,
+        alicia: []
     }
 
-    initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials player
+    initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials
 
     let onSucc result = do
-            for_ result \mesh -> do
-                p <- createVector3 0.5 14.0 0.5
+            for_ result \mesh -> void do
+                p <- createVector3 0.5 13.0 0.5
                 setPosition p mesh
                 setRenderingGroupId 1 mesh
+                setReceiveShadows true mesh
+            modifyRef ref \(State state) -> State state {
+                alicia = result
+            }
             pure unit
 
     importMesh "" "/alicia/" "alicia.babylon" scene (toNullable (Just onSucc)) (toNullable Nothing) (toNullable Nothing)
@@ -235,7 +232,7 @@ runApp canvasGL canvas2d = do
             }
 
     engine # runRenderLoop do
-        update ref scene materials shadowMap cursor camera player
+        update ref scene materials shadowMap cursor camera
         render scene
 
 main :: forall eff. Eff (Effects eff) Unit

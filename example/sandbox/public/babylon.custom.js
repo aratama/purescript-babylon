@@ -31,7 +31,7 @@ var BABYLON;
             return str.toUpperCase();
         };
         // Returns -1 when value is a negative number and
-        // +1 when value is a positive number. 
+        // +1 when value is a positive number.
         MathTools.Sign = function (value) {
             value = +value; // convert to a number
             if (value === 0 || isNaN(value))
@@ -4510,7 +4510,7 @@ var BABYLON;
             var bytes = new Uint8Array(buffer);
             while (i < bytes.length) {
                 chr1 = bytes[i++];
-                chr2 = i < bytes.length ? bytes[i++] : Number.NaN; // Not sure if the index 
+                chr2 = i < bytes.length ? bytes[i++] : Number.NaN; // Not sure if the index
                 chr3 = i < bytes.length ? bytes[i++] : Number.NaN; // checks are needed here
                 enc1 = chr1 >> 2;
                 enc2 = ((chr1 & 3) << 4) | (chr2 >> 4);
@@ -6842,7 +6842,7 @@ var BABYLON;
         Engine.prototype.setState = function (culling, zOffset, force, reverseSide) {
             if (zOffset === void 0) { zOffset = 0; }
             if (reverseSide === void 0) { reverseSide = false; }
-            // Culling        
+            // Culling
             var showSide = reverseSide ? this._gl.FRONT : this._gl.BACK;
             var hideSide = reverseSide ? this._gl.BACK : this._gl.FRONT;
             var cullFace = this.cullBackFaces ? showSide : hideSide;
@@ -8073,7 +8073,7 @@ var BABYLON;
                     this.animations[i].deleteRange(name, deleteFrames);
                 }
             }
-            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
+            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
         };
         Node.prototype.getAnimationRange = function (name) {
             return this._ranges[name];
@@ -9166,7 +9166,7 @@ var BABYLON;
             },
             set: function (quaternion) {
                 this._rotationQuaternion = quaternion;
-                //reset the rotation vector. 
+                //reset the rotation vector.
                 if (quaternion && this.rotation.length()) {
                     this.rotation.copyFromFloats(0, 0, 0);
                 }
@@ -10099,7 +10099,7 @@ var BABYLON;
                     serializationObject.includedOnlyMeshesIds.push(mesh.id);
                 });
             }
-            // Animations  
+            // Animations
             BABYLON.Animation.AppendSerializedAnimations(this, serializationObject);
             serializationObject.ranges = this.serializeAnimationRanges();
             return serializationObject;
@@ -10795,7 +10795,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect      
+            // Get correct effect
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -11706,7 +11706,7 @@ var BABYLON;
             for (var i = 0, len = this._rigCameras.length; i < len; i++) {
                 var cam = this._rigCameras[i];
                 var rigPostProcess = cam._rigPostProcess;
-                // for VR rig, there does not have to be a post process 
+                // for VR rig, there does not have to be a post process
                 if (rigPostProcess) {
                     var isPass = rigPostProcess instanceof BABYLON.PassPostProcess;
                     if (isPass) {
@@ -11733,7 +11733,7 @@ var BABYLON;
             else {
                 this._postProcesses.splice(insertAt, 0, postProcess);
             }
-            this._cascadePostProcessesToRigCams(); // also ensures framebuffer invalidated            
+            this._cascadePostProcessesToRigCams(); // also ensures framebuffer invalidated
             return this._postProcesses.indexOf(postProcess);
         };
         Camera.prototype.detachPostProcess = function (postProcess, atIndices) {
@@ -11839,7 +11839,7 @@ var BABYLON;
             }
             this.cameraRigMode = mode;
             this._cameraRigParams = {};
-            //we have to implement stereo camera calcultating left and right viewpoints from interaxialDistance and target, 
+            //we have to implement stereo camera calcultating left and right viewpoints from interaxialDistance and target,
             //not from a given angle as it is now, but until that complete code rewriting provisional stereoHalfAngle value is introduced
             this._cameraRigParams.interaxialDistance = rigParams.interaxialDistance || 0.0637;
             this._cameraRigParams.stereoHalfAngle = BABYLON.Tools.ToRadians(this._cameraRigParams.interaxialDistance / 0.0637);
@@ -12938,9 +12938,9 @@ var BABYLON;
                     }
                     cacheSoloPointer = null;
                     previousPinchDistance = 0;
-                    //would be better to use pointers.remove(evt.pointerId) for multitouch gestures, 
-                    //but emptying completly pointers collection is required to fix a bug on iPhone : 
-                    //when changing orientation while pinching camera, one pointer stay pressed forever if we don't release all pointers  
+                    //would be better to use pointers.remove(evt.pointerId) for multitouch gestures,
+                    //but emptying completly pointers collection is required to fix a bug on iPhone :
+                    //when changing orientation while pinching camera, one pointer stay pressed forever if we don't release all pointers
                     //will be ok to put back pointers.remove(evt.pointerId); when iPhone bug corrected
                     pointA = pointB = undefined;
                     if (!noPreventDefault) {
@@ -13902,7 +13902,7 @@ var BABYLON;
             this.upperRadiusLimit = null;
             this.inertialPanningX = 0;
             this.inertialPanningY = 0;
-            //-- end properties for backward compatibility for inputs        
+            //-- end properties for backward compatibility for inputs
             this.zoomOnFactor = 1;
             this.targetScreenOffset = BABYLON.Vector2.Zero();
             this.allowUpsideDown = true;
@@ -13964,7 +13964,7 @@ var BABYLON;
             this.inputs.addKeyboard().addMouseWheel().addPointers().addGamepad();
         }
         Object.defineProperty(ArcRotateCamera.prototype, "angularSensibilityX", {
-            //-- begin properties for backward compatibility for inputs       
+            //-- begin properties for backward compatibility for inputs
             get: function () {
                 var pointers = this.inputs.attached["pointers"];
                 if (pointers)
@@ -14491,7 +14491,7 @@ var BABYLON;
             if (!this._scene.spritesEnabled || this._scene.spriteManagers.length === 0) {
                 return;
             }
-            // Sprites       
+            // Sprites
             var activeCamera = this._scene.activeCamera;
             var beforeSpritessDate = BABYLON.Tools.Now;
             for (var id = 0; id < this._scene.spriteManagers.length; id++) {
@@ -14632,7 +14632,7 @@ var BABYLON;
                     }
                     return 0;
                 });
-                // Rendering                
+                // Rendering
                 for (subIndex = 0; subIndex < sortedArray.length; subIndex++) {
                     submesh = sortedArray[subIndex];
                     submesh.render(true);
@@ -15662,7 +15662,7 @@ var BABYLON;
         Scene.prototype.removeMesh = function (toRemove) {
             var index = this.meshes.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found 
+                // Remove from the scene if mesh found
                 this.meshes.splice(index, 1);
             }
             //notify the collision coordinator
@@ -15673,7 +15673,7 @@ var BABYLON;
         Scene.prototype.removeSkeleton = function (toRemove) {
             var index = this.skeletons.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found 
+                // Remove from the scene if mesh found
                 this.skeletons.splice(index, 1);
             }
             return index;
@@ -15681,7 +15681,7 @@ var BABYLON;
         Scene.prototype.removeLight = function (toRemove) {
             var index = this.lights.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found 
+                // Remove from the scene if mesh found
                 this.lights.splice(index, 1);
             }
             this.onLightRemovedObservable.notifyObservers(toRemove);
@@ -15690,7 +15690,7 @@ var BABYLON;
         Scene.prototype.removeCamera = function (toRemove) {
             var index = this.cameras.indexOf(toRemove);
             if (index !== -1) {
-                // Remove from the scene if mesh found 
+                // Remove from the scene if mesh found
                 this.cameras.splice(index, 1);
             }
             // Remove from activeCameras
@@ -17518,7 +17518,7 @@ var BABYLON;
             if (parent === void 0) { parent = null; }
             if (clonePhysicsImpostor === void 0) { clonePhysicsImpostor = true; }
             _super.call(this, name, scene);
-            // Events 
+            // Events
             /**
              * An event triggered before rendering the mesh
              * @type {BABYLON.Observable}
@@ -17551,7 +17551,7 @@ var BABYLON;
                 }
                 // Deep copy
                 BABYLON.Tools.DeepCopy(source, this, ["name", "material", "skeleton", "instances"], ["_poseMatrix"]);
-                // Pivot                
+                // Pivot
                 this.setPivotMatrix(source.getPivotMatrix());
                 this.id = name + "." + source.id;
                 // Material
@@ -17567,7 +17567,7 @@ var BABYLON;
                         }
                     }
                 }
-                // Physics clone  
+                // Physics clone
                 var physicsEngine = this.getScene().getPhysicsEngine();
                 if (clonePhysicsImpostor && physicsEngine) {
                     var impostor = physicsEngine.getImpostorForPhysicsObject(source);
@@ -20010,7 +20010,7 @@ var BABYLON;
             }
             return intersectInfo;
         };
-        // Clone    
+        // Clone
         SubMesh.prototype.clone = function (newMesh, newRenderingMesh) {
             var result = new SubMesh(this.materialIndex, this.verticesStart, this.verticesCount, this.indexStart, this.indexCount, newMesh, newRenderingMesh, false);
             if (!this.IsGlobal) {
@@ -22133,32 +22133,32 @@ var BABYLON;
             for (var name in this._textures) {
                 this._effect.setTexture(name, this._textures[name]);
             }
-            // Float    
+            // Float
             for (name in this._floats) {
                 this._effect.setFloat(name, this._floats[name]);
             }
-            // Floats   
+            // Floats
             for (name in this._floatsArrays) {
                 this._effect.setArray(name, this._floatsArrays[name]);
             }
-            // Color3        
+            // Color3
             for (name in this._colors3) {
                 this._effect.setColor3(name, this._colors3[name]);
             }
-            // Color4      
+            // Color4
             for (name in this._colors4) {
                 var color = this._colors4[name];
                 this._effect.setFloat4(name, color.r, color.g, color.b, color.a);
             }
-            // Vector2        
+            // Vector2
             for (name in this._vectors2) {
                 this._effect.setVector2(name, this._vectors2[name]);
             }
-            // Vector3        
+            // Vector3
             for (name in this._vectors3) {
                 this._effect.setVector3(name, this._vectors3[name]);
             }
-            // Matrix      
+            // Matrix
             for (name in this._matrices) {
                 this._effect.setMatrix(name, this._matrices[name]);
             }
@@ -23821,7 +23821,7 @@ var BABYLON;
             _super.call(this, name, scene);
             this.ambientColor = new BABYLON.Color3(0, 0, 0);
             this.diffuseColor = new BABYLON.Color3(1, 1, 1);
-            this.specularColor = new BABYLON.Color3(1, 1, 1);
+            this.specularColor = new BABYLON.Color3(0, 0, 0);
             this.emissiveColor = new BABYLON.Color3(0, 0, 0);
             this.specularPower = 64;
             this.useAlphaFromDiffuseTexture = false;
@@ -23887,7 +23887,7 @@ var BABYLON;
         StandardMaterial.prototype.getAlphaTestTexture = function () {
             return this.diffuseTexture;
         };
-        // Methods   
+        // Methods
         StandardMaterial.prototype._checkCache = function (scene, mesh, useInstances) {
             if (!mesh) {
                 return true;
@@ -24147,7 +24147,7 @@ var BABYLON;
                     this._defines.INSTANCES = true;
                 }
             }
-            // Get correct effect      
+            // Get correct effect
             if (!this._defines.isEqual(this._cachedDefines)) {
                 this._defines.cloneTo(this._cachedDefines);
                 scene.resetCachedMaterial();
@@ -24261,7 +24261,7 @@ var BABYLON;
         };
         StandardMaterial.prototype.bind = function (world, mesh) {
             var scene = this.getScene();
-            // Matrices        
+            // Matrices
             this.bindOnlyWorldMatrix(world);
             // Bones
             BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
@@ -24289,7 +24289,7 @@ var BABYLON;
                         this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
                     }
                 }
-                // Textures     
+                // Textures
                 if (scene.texturesEnabled) {
                     if (this.diffuseTexture && StandardMaterial.DiffuseTextureEnabled) {
                         this._effect.setTexture("diffuseSampler", this.diffuseTexture);
@@ -26125,7 +26125,7 @@ var BABYLON;
             }
             this._currentRenderId = this._scene.getRenderId();
             this._scaledUpdateSpeed = this.updateSpeed * this._scene.getAnimationRatio();
-            // determine the number of particles we need to create   
+            // determine the number of particles we need to create
             var newParticles;
             if (this.manualEmitCount > -1) {
                 newParticles = this.manualEmitCount;
@@ -26552,7 +26552,7 @@ var BABYLON;
                         }
                     }
                 }
-                this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
+                this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
             }
         };
         Animation.prototype.getRange = function (name) {
@@ -27694,7 +27694,7 @@ var BABYLON;
                     this.bones[i].animations[0].deleteRange(name, deleteFrames);
                 }
             }
-            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]' 
+            this._ranges[name] = undefined; // said much faster than 'delete this._range[name]'
         };
         Skeleton.prototype.getAnimationRange = function (name) {
             return this._ranges[name];
@@ -31344,7 +31344,7 @@ var BABYLON;
             }
         };
         PostProcessRenderPipeline.prototype.dispose = function () {
-            // Must be implemented by children 
+            // Must be implemented by children
         };
         PostProcessRenderPipeline.PASS_EFFECT_NAME = "passEffect";
         PostProcessRenderPipeline.PASS_SAMPLER_NAME = "passSampler";
@@ -34118,7 +34118,7 @@ var BABYLON;
         DefaultLoadingScreen.prototype.displayLoadingUI = function () {
             var _this = this;
             if (this._loadingDiv) {
-                // Do not add a loading screen if there is already one  
+                // Do not add a loading screen if there is already one
                 return;
             }
             this._loadingDiv = document.createElement("div");
@@ -34278,7 +34278,7 @@ var BABYLON;
             try {
                 if (this.canUseWebAudio) {
                     this._audioContext = new AudioContext();
-                    // create a global volume gain node 
+                    // create a global volume gain node
                     this.masterGain = this._audioContext.createGain();
                     this.masterGain.gain.value = 1;
                     this.masterGain.connect(this._audioContext.destination);
@@ -34550,7 +34550,7 @@ var BABYLON;
         Sound.prototype._updateSpatialParameters = function () {
             if (this.spatialSound) {
                 if (this.useCustomAttenuation) {
-                    // Tricks to disable in a way embedded Web Audio attenuation 
+                    // Tricks to disable in a way embedded Web Audio attenuation
                     this._soundPanner.distanceModel = "linear";
                     this._soundPanner.maxDistance = Number.MAX_VALUE;
                     this._soundPanner.refDistance = 1;
@@ -35157,7 +35157,7 @@ var BABYLON;
             var up = SIMD.float32x4(upRef.x, upRef.y, upRef.z, 0);
             // cc.kmVec3Subtract(f, pCenter, pEye);
             var f = SIMD.float32x4.sub(center, eye);
-            // cc.kmVec3Normalize(f, f);    
+            // cc.kmVec3Normalize(f, f);
             var tmp = SIMD.float32x4.mul(f, f);
             tmp = SIMD.float32x4.add(tmp, SIMD.float32x4.add(SIMD.float32x4.swizzle(tmp, 1, 2, 0, 3), SIMD.float32x4.swizzle(tmp, 2, 0, 1, 3)));
             f = SIMD.float32x4.mul(f, SIMD.float32x4.reciprocalSqrtApproximation(tmp));
@@ -35744,15 +35744,15 @@ var BABYLON;
                     _this.buffer[src + i] = tps;
                 }
             };
-            // The fun part begin, sortedTable give us the ordered layout to obtain, to get that we have to move elements, but when we move an element: 
-            //  it replaces an existing one.I don't want to allocate a new Float32Array and do a raw copy, because it's awful (GC - wise), 
+            // The fun part begin, sortedTable give us the ordered layout to obtain, to get that we have to move elements, but when we move an element:
+            //  it replaces an existing one.I don't want to allocate a new Float32Array and do a raw copy, because it's awful (GC - wise),
             //  and I still want something with a good algorithm complexity.
-            // So here's the deal: we are going to swap elements, but we have to track the change of location of the element being replaced, 
+            // So here's the deal: we are going to swap elements, but we have to track the change of location of the element being replaced,
             //  we need sortTable for that, it contains the original layout of SortInfo object, not the sorted one.
             // The best way is to use an extra field in SortInfo, because potentially every element can be replaced.
-            // When we'll look for and element, we'll check if its swapedOffset is set, if so we reiterate the operation with the one there 
+            // When we'll look for and element, we'll check if its swapedOffset is set, if so we reiterate the operation with the one there
             //  until we find a SortInfo object without a swapedOffset which means we got the right location
-            // Yes, we may have to do multiple iterations to find the right location, but hey, it won't be huge: <3 in most cases, and it's better 
+            // Yes, we may have to do multiple iterations to find the right location, but hey, it won't be huge: <3 in most cases, and it's better
             //  than a double allocation of the whole float32Array or a O(n²/2) typical algorithm.
             for (var i = 0; i < count; i++) {
                 // Get the element to move
@@ -40452,7 +40452,7 @@ var BABYLON;
             else {
                 gii.opaqueDirty = true;
             }
-            this._clearFlags(BABYLON.SmartPropertyPrim.flagVisibilityChanged); // Reset the flag as we've handled the case            
+            this._clearFlags(BABYLON.SmartPropertyPrim.flagVisibilityChanged); // Reset the flag as we've handled the case
         };
         RenderablePrim2D.prototype._getFirstIndexInDataBuffer = function () {
             for (var _i = 0, _a = this._instanceDataParts; _i < _a.length; _i++) {
@@ -40608,7 +40608,7 @@ var BABYLON;
             }
             // Have to convert the coordinates to clip space which is ranged between [-1;1] on X and Y axis, with 0,0 being the left/bottom corner
             // Current coordinates are expressed in renderGroup coordinates ([0, renderGroup.actualSize.width|height]) with 0,0 being at the left/top corner
-            // So for X: 
+            // So for X:
             //  - tx.x = value * 2 / width: is to switch from [0, renderGroup.width] to [0, 2]
             //  - tx.w = (value * 2 / width) - 1: w stores the translation in renderGroup coordinates so (value * 2 / width) to switch to a clip space translation value. - 1 is to offset the overall [0;2] to [-1;1].
             var w = size.width;
@@ -41713,7 +41713,7 @@ var BABYLON;
             this.effectBorderInstanced = null;
         }
         Rectangle2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing 
+            // Do nothing if the shader is still loading/preparing
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -42143,7 +42143,7 @@ var BABYLON;
             this.effectBorder = null;
         }
         Ellipse2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing 
+            // Do nothing if the shader is still loading/preparing
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -42479,7 +42479,7 @@ var BABYLON;
             this.effectInstanced = null;
         }
         Sprite2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing 
+            // Do nothing if the shader is still loading/preparing
             if (!this.effectsReady) {
                 if ((this.effect && (!this.effect.isReady() || (this.effectInstanced && !this.effectInstanced.isReady())))) {
                     return false;
@@ -42832,7 +42832,7 @@ var BABYLON;
             this.effectInstanced = null;
         }
         Text2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing 
+            // Do nothing if the shader is still loading/preparing
             if (!this.effectsReady) {
                 if ((this.effect && (!this.effect.isReady() || (this.effectInstanced && !this.effectInstanced.isReady())))) {
                     return false;
@@ -43258,7 +43258,7 @@ var BABYLON;
             this.effectBorderInstanced = null;
         }
         Lines2DRenderCache.prototype.render = function (instanceInfo, context) {
-            // Do nothing if the shader is still loading/preparing 
+            // Do nothing if the shader is still loading/preparing
             if (!this.effectsReady) {
                 if ((this.effectFill && (!this.effectFill.isReady() || (this.effectFillInstanced && !this.effectFillInstanced.isReady()))) ||
                     (this.effectBorder && (!this.effectBorder.isReady() || (this.effectBorderInstanced && !this.effectBorderInstanced.isReady())))) {
@@ -45890,36 +45890,36 @@ var BABYLON;
                 for (var name in this._textures) {
                     this._effect.setTexture(name, this._textures[name]);
                 }
-                // Float    
+                // Float
                 for (name in this._floats) {
                     this._effect.setFloat(name, this._floats[name]);
                 }
-                // Float s   
+                // Float s
                 for (name in this._floatsArrays) {
                     this._effect.setArray(name, this._floatsArrays[name]);
                 }
-                // Color3        
+                // Color3
                 for (name in this._colors3) {
                     this._effect.setColor3(name, this._colors3[name]);
                 }
-                // Color4      
+                // Color4
                 for (name in this._colors4) {
                     var color = this._colors4[name];
                     this._effect.setFloat4(name, color.r, color.g, color.b, color.a);
                 }
-                // Vector2        
+                // Vector2
                 for (name in this._vectors2) {
                     this._effect.setVector2(name, this._vectors2[name]);
                 }
-                // Vector3        
+                // Vector3
                 for (name in this._vectors3) {
                     this._effect.setVector3(name, this._vectors3[name]);
                 }
-                // Vector4        
+                // Vector4
                 for (name in this._vectors4) {
                     this._effect.setVector4(name, this._vectors4[name]);
                 }
-                // Matrix      
+                // Matrix
                 for (name in this._matrices) {
                     this._effect.setMatrix(name, this._matrices[name]);
                 }
@@ -45957,42 +45957,42 @@ var BABYLON;
             for (var name in this._textures) {
                 serializationObject.textures[name] = this._textures[name].serialize();
             }
-            // Float    
+            // Float
             serializationObject.floats = {};
             for (name in this._floats) {
                 serializationObject.floats[name] = this._floats[name];
             }
-            // Float s   
+            // Float s
             serializationObject.floatArrays = {};
             for (name in this._floatsArrays) {
                 serializationObject.floatArrays[name] = this._floatsArrays[name];
             }
-            // Color3    
+            // Color3
             serializationObject.colors3 = {};
             for (name in this._colors3) {
                 serializationObject.colors3[name] = this._colors3[name].asArray();
             }
-            // Color4  
+            // Color4
             serializationObject.colors4 = {};
             for (name in this._colors4) {
                 serializationObject.colors4[name] = this._colors4[name].asArray();
             }
-            // Vector2  
+            // Vector2
             serializationObject.vectors2 = {};
             for (name in this._vectors2) {
                 serializationObject.vectors2[name] = this._vectors2[name].asArray();
             }
-            // Vector3        
+            // Vector3
             serializationObject.vectors3 = {};
             for (name in this._vectors3) {
                 serializationObject.vectors3[name] = this._vectors3[name].asArray();
             }
-            // Vector4        
+            // Vector4
             serializationObject.vectors4 = {};
             for (name in this._vectors4) {
                 serializationObject.vectors4[name] = this._vectors4[name].asArray();
             }
-            // Matrix      
+            // Matrix
             serializationObject.matrices = {};
             for (name in this._matrices) {
                 serializationObject.matrices[name] = this._matrices[name].asArray();
@@ -46015,35 +46015,35 @@ var BABYLON;
             for (var name in source.textures) {
                 material.setTexture(name, BABYLON.Texture.Parse(source.textures[name], scene, rootUrl));
             }
-            // Float    
+            // Float
             for (name in source.floats) {
                 material.setFloat(name, source.floats[name]);
             }
-            // Float s   
+            // Float s
             for (name in source.floatsArrays) {
                 material.setFloats(name, source.floatsArrays[name]);
             }
-            // Color3        
+            // Color3
             for (name in source.colors3) {
                 material.setColor3(name, BABYLON.Color3.FromArray(source.colors3[name]));
             }
-            // Color4      
+            // Color4
             for (name in source.colors4) {
                 material.setColor4(name, BABYLON.Color4.FromArray(source.colors4[name]));
             }
-            // Vector2        
+            // Vector2
             for (name in source.vectors2) {
                 material.setVector2(name, BABYLON.Vector2.FromArray(source.vectors2[name]));
             }
-            // Vector3        
+            // Vector3
             for (name in source.vectors3) {
                 material.setVector3(name, BABYLON.Vector3.FromArray(source.vectors3[name]));
             }
-            // Vector4        
+            // Vector4
             for (name in source.vectors4) {
                 material.setVector4(name, BABYLON.Vector4.FromArray(source.vectors4[name]));
             }
-            // Matrix      
+            // Matrix
             for (name in source.matrices) {
                 material.setMatrix(name, BABYLON.Matrix.FromArray(source.matrices[name]));
             }
@@ -46589,7 +46589,7 @@ var BABYLON;
                 //calculate the translation
                 var translation = mesh.getBoundingInfo().boundingBox.center.subtract(center).subtract(mesh.position).negate();
                 this._tmpPosition.copyFromFloats(translation.x, translation.y - mesh.getBoundingInfo().boundingBox.extendSize.y, translation.z);
-                //add it inverted to the delta 
+                //add it inverted to the delta
                 this._tmpDeltaPosition.copyFrom(mesh.getBoundingInfo().boundingBox.center.subtract(c));
                 this._tmpDeltaPosition.y += mesh.getBoundingInfo().boundingBox.extendSize.y;
                 mesh.setPivotMatrix(oldPivot);
@@ -48023,14 +48023,14 @@ var BABYLON;
 })(BABYLON || (BABYLON = {}));
 
 // All the credit goes to this project and the guy who's behind it https://github.com/mapbox/earcut
-// Huge respect for a such great lib. 
+// Huge respect for a such great lib.
 // Earcut license:
 // Copyright (c) 2016, Mapbox
-// 
+//
 // Permission to use, copy, modify, and/or distribute this software for any purpose
 // with or without fee is hereby granted, provided that the above copyright notice
 // and this permission notice appear in all copies.
-// 
+//
 // THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES WITH
 // REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
 // FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY SPECIAL, DIRECT,
@@ -48593,7 +48593,7 @@ var BABYLON;
     // `flip()`, and `interpolate()` methods that behave analogous to the ones
     // defined by `BABYLON.CSG.Vertex`. This class provides `normal` so convenience
     // functions like `BABYLON.CSG.sphere()` can return a smooth vertex normal, but `normal`
-    // is not used anywhere else. 
+    // is not used anywhere else.
     // Same goes for uv, it allows to keep the original vertex uv coordinates of the 2 meshes
     var Vertex = (function () {
         function Vertex(pos, normal, uv) {
@@ -48712,7 +48712,7 @@ var BABYLON;
     // # class Polygon
     // Represents a convex polygon. The vertices used to initialize a polygon must
     // be coplanar and form a convex loop.
-    // 
+    //
     // Each convex polygon has a `shared` property, which is shared between all
     // polygons that are clones of each other or were split from the same polygon.
     // This can be used to define per-polygon properties (such as surface color).
@@ -49137,9 +49137,9 @@ var BABYLON;
     BABYLON.VRDistortionCorrectionPostProcess = VRDistortionCorrectionPostProcess;
 })(BABYLON || (BABYLON = {}));
 
-// Mainly based on these 2 articles : 
+// Mainly based on these 2 articles :
 // Creating an universal virtual touch joystick working for all Touch models thanks to Hand.JS : http://blogs.msdn.com/b/davrous/archive/2013/02/22/creating-an-universal-virtual-touch-joystick-working-for-all-touch-models-thanks-to-hand-js.aspx
-// & on Seb Lee-Delisle original work: http://seb.ly/2011/04/multi-touch-game-controller-in-javascripthtml5-for-ipad/ 
+// & on Seb Lee-Delisle original work: http://seb.ly/2011/04/multi-touch-game-controller-in-javascripthtml5-for-ipad/
 var BABYLON;
 (function (BABYLON) {
     (function (JoystickAxis) {
@@ -49339,7 +49339,7 @@ var BABYLON;
         VirtualJoystick.prototype.setActionOnTouch = function (action) {
             this._action = action;
         };
-        // Define which axis you'd like to control for left & right 
+        // Define which axis you'd like to control for left & right
         VirtualJoystick.prototype.setAxisForLeftRight = function (axis) {
             switch (axis) {
                 case JoystickAxis.X:
@@ -49352,7 +49352,7 @@ var BABYLON;
                     break;
             }
         };
-        // Define which axis you'd like to control for up & down 
+        // Define which axis you'd like to control for up & down
         VirtualJoystick.prototype.setAxisForUpDown = function (axis) {
             switch (axis) {
                 case JoystickAxis.X:
@@ -49606,7 +49606,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect      
+            // Get correct effect
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -52202,7 +52202,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect      
+            // Get correct effect
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -52629,7 +52629,7 @@ var BABYLON;
                 attribs.push("world2");
                 attribs.push("world3");
             }
-            // Get correct effect      
+            // Get correct effect
             var join = defines.join("\n");
             if (this._cachedDefines !== join) {
                 this._cachedDefines = join;
@@ -53085,11 +53085,11 @@ var BABYLON;
 //
 //  This post-process allows the modification of rendered colors by using
 //  a 'look-up table' (LUT). This effect is also called Color Grading.
-// 
+//
 //  The object needs to be provided an url to a texture containing the color
 //  look-up table: the texture must be 256 pixels wide and 16 pixels high.
 //  Use an image editing software to tweak the LUT to match your needs.
-// 
+//
 //  For an example of a color LUT, see here:
 //      http://udn.epicgames.com/Three/rsrc/Three/ColorGrading/RGBTable16x1.png
 //  For explanations on color grading, see here:
@@ -53997,7 +53997,7 @@ var BABYLON;
         ReflectionProbe.prototype.dispose = function () {
             var index = this._scene.reflectionProbes.indexOf(this);
             if (index !== -1) {
-                // Remove from the scene if found 
+                // Remove from the scene if found
                 this._scene.reflectionProbes.splice(index, 1);
             }
             if (this._renderTargetTexture) {
@@ -55382,7 +55382,7 @@ var BABYLON;
 })(BABYLON || (BABYLON = {}));
 
 //_______________________________________________________________
-// Extracted from CubeMapGen: 
+// Extracted from CubeMapGen:
 // https://code.google.com/archive/p/cubemapgen/
 //
 // Following https://seblagarde.wordpress.com/2012/06/10/amd-cubemapgen-for-physically-based-rendering/
@@ -55499,7 +55499,7 @@ var BABYLON;
                 if (this.maxNumMipLevels == 0) {
                     this.maxNumMipLevels = PMREMGenerator.CP_MAX_MIPLEVELS;
                 }
-                //first miplevel size 
+                //first miplevel size
                 mipLevelSize = this.outputSize;
                 //Iterate over mip chain, and init ArrayBufferView for mip-chain
                 for (j = 0; j < this.maxNumMipLevels; j++) {
@@ -55529,25 +55529,25 @@ var BABYLON;
             //--------------------------------------------------------------------------------------
             //Cube map filtering and mip chain generation.
             // the cube map filtereing is specified using a number of parameters:
-            // Filtering per miplevel is specified using 2D cone angle (in degrees) that 
-            //  indicates the region of the hemisphere to filter over for each tap. 
-            //                
-            // Note that the top mip level is also a filtered version of the original input images 
+            // Filtering per miplevel is specified using 2D cone angle (in degrees) that
+            //  indicates the region of the hemisphere to filter over for each tap.
+            //
+            // Note that the top mip level is also a filtered version of the original input images
             //  as well in order to create mip chains for diffuse environment illumination.
             // The cone angle for the top level is specified by a_BaseAngle.  This can be used to
             //  generate mipchains used to store the resutls of preintegration across the hemisphere.
             //
-            // Then the mip angle used to genreate the next level of the mip chain from the first level 
+            // Then the mip angle used to genreate the next level of the mip chain from the first level
             //  is a_InitialMipAngle
             //
-            // The angle for the subsequent levels of the mip chain are specified by their parents 
+            // The angle for the subsequent levels of the mip chain are specified by their parents
             //  filtering angle and a per-level scale and bias
             //   newAngle = oldAngle * a_MipAnglePerLevelScale;
             //
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.filterCubeMapMipChain = function () {
                 // First, take count of the lighting model to modify SpecularPower
-                // var refSpecularPower = (a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN || a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN_BRDF) ? a_MCO.SpecularPower / GetSpecularPowerFactorToMatchPhong(a_MCO.SpecularPower) : a_MCO.SpecularPower; 
+                // var refSpecularPower = (a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN || a_MCO.LightingModel == CP_LIGHTINGMODEL_BLINN_BRDF) ? a_MCO.SpecularPower / GetSpecularPowerFactorToMatchPhong(a_MCO.SpecularPower) : a_MCO.SpecularPower;
                 // var refSpecularPower = this.specularPower; // Only Phong BRDF yet. This explains the line below using this.specularpower.
                 //Cone angle start (for generating subsequent mip levels)
                 var currentSpecularPower = this.specularPower;
@@ -55601,14 +55601,14 @@ var BABYLON;
             //Builds the following lookup tables prior to filtering:
             //  -normalizer cube map
             //  -tap weight lookup table
-            // 
+            //
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.precomputeFilterLookupTables = function (srcCubeMapWidth) {
                 var srcTexelAngle;
                 var iCubeFace;
                 //clear pre-existing normalizer cube map
                 this._normCubeMap = [];
-                //Normalized vectors per cubeface and per-texel solid angle 
+                //Normalized vectors per cubeface and per-texel solid angle
                 this.buildNormalizerSolidAngleCubemap(srcCubeMapWidth);
             };
             //--------------------------------------------------------------------------------------
@@ -55681,12 +55681,12 @@ var BABYLON;
                 PMREMGenerator._vectorTemp.x += faceAxis[0];
                 PMREMGenerator._vectorTemp.y += faceAxis[1];
                 PMREMGenerator._vectorTemp.z += faceAxis[2];
-                //normalize vector              
+                //normalize vector
                 PMREMGenerator._vectorTemp.normalize();
                 return PMREMGenerator._vectorTemp;
             };
             //--------------------------------------------------------------------------------------
-            // Convert 3D vector to cubemap face texel coordinates and face idx 
+            // Convert 3D vector to cubemap face texel coordinates and face idx
             // note the U and V coords are integer coords and range from 0 to size-1
             //  this routine can be used to generate a normalizer cube map
             //
@@ -55705,7 +55705,7 @@ var BABYLON;
             selects one of the cube map face's 2D mipmap sets based on the largest magnitude coordinate direction
             the major axis direction). The target column in the table below explains how the major axis direction
             maps to the 2D image of a particular cube map target.
-    
+
             major axis
             direction     target                              sc     tc    ma
             ----------    ---------------------------------   ---    ---   ---
@@ -55715,7 +55715,7 @@ var BABYLON;
             -ry          GL_TEXTURE_CUBE_MAP_NEGATIVE_Y_EXT   +rx    -rz   ry
             +rz          GL_TEXTURE_CUBE_MAP_POSITIVE_Z_EXT   +rx    -ry   rz
             -rz          GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_EXT   -rx    -ry   rz
-    
+
             Using the sc, tc, and ma determined by the major axis direction as specified in the table above,
             an updated (s,t) is calculated as follows
             s   =   ( sc/|ma| + 1 ) / 2
@@ -55805,20 +55805,20 @@ var BABYLON;
                 return solidAngle;
             };
             //--------------------------------------------------------------------------------------
-            //The key to the speed of these filtering routines is to quickly define a per-face 
-            //  bounding box of pixels which enclose all the taps in the filter kernel efficiently.  
-            //  Later these pixels are selectively processed based on their dot products to see if 
+            //The key to the speed of these filtering routines is to quickly define a per-face
+            //  bounding box of pixels which enclose all the taps in the filter kernel efficiently.
+            //  Later these pixels are selectively processed based on their dot products to see if
             //  they reside within the filtering cone.
             //
-            //This is done by computing the smallest per-texel angle to get a conservative estimate 
+            //This is done by computing the smallest per-texel angle to get a conservative estimate
             // of the number of texels needed to be covered in width and height order to filter the
-            // region.  the bounding box for the center taps face is defined first, and if the 
-            // filtereing region bleeds onto the other faces, bounding boxes for the other faces are 
+            // region.  the bounding box for the center taps face is defined first, and if the
+            // filtereing region bleeds onto the other faces, bounding boxes for the other faces are
             // defined next
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.filterCubeSurfaces = function (srcCubeMap, srcSize, dstCubeMap, dstSize, filterConeAngle, specularPower) {
-                // note that pixels within these regions may be rejected 
-                // based on the anlge    
+                // note that pixels within these regions may be rejected
+                // based on the anlge
                 var iCubeFace;
                 var u;
                 var v;
@@ -55847,7 +55847,7 @@ var BABYLON;
                 if (filterSize < 1) {
                     filterSize = 1;
                 }
-                // dotProdThresh threshold based on cone angle to determine whether or not taps 
+                // dotProdThresh threshold based on cone angle to determine whether or not taps
                 //  reside within the cone angle
                 var dotProdThresh = Math.cos((Math.PI / 180.0) * filterAngle);
                 // process required faces
@@ -55861,7 +55861,7 @@ var BABYLON;
                             this.clearFilterExtents(filterExtents);
                             //define per-face filter extents
                             this.determineFilterExtents(centerTapDir, srcSize, filterSize, filterExtents);
-                            //perform filtering of src faces using filter extents 
+                            //perform filtering of src faces using filter extents
                             var vect = this.processFilterExtents(centerTapDir, dotProdThresh, filterExtents, srcCubeMap, srcSize, specularPower);
                             dstCubeMap[iCubeFace][(v * dstSize + u) * this.numChannels + 0] = vect.x;
                             dstCubeMap[iCubeFace][(v * dstSize + u) * this.numChannels + 1] = vect.y;
@@ -55881,9 +55881,9 @@ var BABYLON;
             //--------------------------------------------------------------------------------------
             //Define per-face bounding box filter extents
             //
-            // These define conservative texel regions in each of the faces the filter can possibly 
-            // process.  When the pixels in the regions are actually processed, the dot product  
-            // between the tap vector and the center tap vector is used to determine the weight of 
+            // These define conservative texel regions in each of the faces the filter can possibly
+            // process.  When the pixels in the regions are actually processed, the dot product
+            // between the tap vector and the center tap vector is used to determine the weight of
             // the tap and whether or not the tap is within the cone.
             //
             //--------------------------------------------------------------------------------------
@@ -55911,11 +55911,11 @@ var BABYLON;
                 var minV = filterExtents[faceIdx].min.y;
                 var maxU = filterExtents[faceIdx].max.x;
                 var maxV = filterExtents[faceIdx].max.y;
-                //bleed over amounts for face across u=0 edge (left)    
+                //bleed over amounts for face across u=0 edge (left)
                 bleedOverAmount[0] = (bboxSize - u);
                 bleedOverBBoxMin[0] = minV;
                 bleedOverBBoxMax[0] = maxV;
-                //bleed over amounts for face across u=1 edge (right)    
+                //bleed over amounts for face across u=1 edge (right)
                 bleedOverAmount[1] = (u + bboxSize) - (srcSize - 1);
                 bleedOverBBoxMin[1] = minV;
                 bleedOverBBoxMax[1] = maxV;
@@ -55932,19 +55932,19 @@ var BABYLON;
                     if (bleedOverAmount[i] > 0) {
                         neighborFace = PMREMGenerator._sgCubeNgh[faceIdx][i][0];
                         neighborEdge = PMREMGenerator._sgCubeNgh[faceIdx][i][1];
-                        //For certain types of edge abutments, the bleedOverBBoxMin, and bleedOverBBoxMax need to 
-                        //  be flipped: the cases are 
+                        //For certain types of edge abutments, the bleedOverBBoxMin, and bleedOverBBoxMax need to
+                        //  be flipped: the cases are
                         // if a left   edge mates with a left or bottom  edge on the neighbor
                         // if a top    edge mates with a top or right edge on the neighbor
                         // if a right  edge mates with a right or top edge on the neighbor
                         // if a bottom edge mates with a bottom or left  edge on the neighbor
-                        //Seeing as the edges are enumerated as follows 
-                        // left   =0 
-                        // right  =1 
-                        // top    =2 
-                        // bottom =3            
-                        // 
-                        // so if the edge enums are the same, or the sum of the enums == 3, 
+                        //Seeing as the edges are enumerated as follows
+                        // left   =0
+                        // right  =1
+                        // top    =2
+                        // bottom =3
+                        //
+                        // so if the edge enums are the same, or the sum of the enums == 3,
                         //  the bbox needs to be flipped
                         if ((i == neighborEdge) || ((i + neighborEdge) == 3)) {
                             bleedOverBBoxMin[i] = (srcSize - 1) - bleedOverBBoxMin[i];
@@ -55974,13 +55974,13 @@ var BABYLON;
                         filterExtents[neighborFace].clampMin(0, 0, 0);
                         filterExtents[neighborFace].clampMax(srcSize - 1, srcSize - 1, 0);
                     }
-                    //If the bleed over amount bleeds past the adjacent face onto the opposite face 
-                    // from the center tap face, then process the opposite face entirely for now. 
-                    //Note that the cases in which this happens, what usually happens is that 
-                    // more than one edge bleeds onto the opposite face, and the bounding box 
+                    //If the bleed over amount bleeds past the adjacent face onto the opposite face
+                    // from the center tap face, then process the opposite face entirely for now.
+                    //Note that the cases in which this happens, what usually happens is that
+                    // more than one edge bleeds onto the opposite face, and the bounding box
                     // encompasses the entire cube map face.
                     if (bleedOverAmount[i] > srcSize) {
-                        //determine opposite face 
+                        //determine opposite face
                         switch (faceIdx) {
                             case PMREMGenerator.CP_FACE_X_POS:
                                 oppositeFaceIdx = PMREMGenerator.CP_FACE_X_NEG;
@@ -56010,13 +56010,13 @@ var BABYLON;
                 }
             };
             //--------------------------------------------------------------------------------------
-            //ProcessFilterExtents 
-            //  Process bounding box in each cube face 
+            //ProcessFilterExtents
+            //  Process bounding box in each cube face
             //
             //--------------------------------------------------------------------------------------
             PMREMGenerator.prototype.processFilterExtents = function (centerTapDir, dotProdThresh, filterExtents, srcCubeMap, srcSize, specularPower) {
-                //accumulators are 64-bit floats in order to have the precision needed 
-                // over a summation of a large number of pixels 
+                //accumulators are 64-bit floats in order to have the precision needed
+                // over a summation of a large number of pixels
                 var dstAccum = [0, 0, 0, 0];
                 var weightAccum = 0;
                 var k = 0;
@@ -56056,7 +56056,7 @@ var BABYLON;
                                     var weight = this._normCubeMap[iFaceIdx][startIndexNormCubeMap + normCubeRowWalk + 3];
                                     // Here we decide if we use a Phong/Blinn or a Phong/Blinn BRDF.
                                     // Phong/Blinn BRDF is just the Phong/Blinn model multiply by the cosine of the lambert law
-                                    // so just adding one to specularpower do the trick.					   
+                                    // so just adding one to specularpower do the trick.
                                     weight *= Math.pow(tapDotProd, (specularPower + IsPhongBRDF));
                                     //iterate over channels
                                     for (k = 0; k < nSrcChannels; k++) {
@@ -56112,7 +56112,7 @@ var BABYLON;
                 var iCorner = 0;
                 var cornerNumPtrs = [0, 0, 0, 0, 0, 0, 0, 0]; //indexed by corner and face idx
                 var faceCornerStartIndicies = [[], [], [], []]; //corner pointers for face keeping track of the face they belong to.
-                // note that if functionality to filter across the three texels for each corner, then 
+                // note that if functionality to filter across the three texels for each corner, then
                 //indexed by corner and face idx. the array contains the face the start points belongs to.
                 var cornerPtr = [
                     [[], [], []],
@@ -56190,7 +56190,7 @@ var BABYLON;
                     // e.g. CP_EDGE_LEFT, CP_EDGE_RIGHT, CP_EDGE_TOP, CP_EDGE_BOTTOM
                     switch (edge) {
                         case PMREMGenerator.CP_EDGE_LEFT:
-                            // no change to faceEdgeStartPtr  
+                            // no change to faceEdgeStartPtr
                             edgeWalk = this.numChannels * cubeMapSize;
                             break;
                         case PMREMGenerator.CP_EDGE_RIGHT:
@@ -56198,7 +56198,7 @@ var BABYLON;
                             edgeWalk = this.numChannels * cubeMapSize;
                             break;
                         case PMREMGenerator.CP_EDGE_TOP:
-                            // no change to faceEdgeStartPtr  
+                            // no change to faceEdgeStartPtr
                             edgeWalk = this.numChannels;
                             break;
                         case PMREMGenerator.CP_EDGE_BOTTOM:
@@ -56206,19 +56206,19 @@ var BABYLON;
                             edgeWalk = this.numChannels;
                             break;
                     }
-                    //For certain types of edge abutments, the neighbor edge walk needs to 
-                    //  be flipped: the cases are 
+                    //For certain types of edge abutments, the neighbor edge walk needs to
+                    //  be flipped: the cases are
                     // if a left   edge mates with a left or bottom  edge on the neighbor
                     // if a top    edge mates with a top or right edge on the neighbor
                     // if a right  edge mates with a right or top edge on the neighbor
                     // if a bottom edge mates with a bottom or left  edge on the neighbor
-                    //Seeing as the edges are enumerated as follows 
-                    // left   =0 
-                    // right  =1 
-                    // top    =2 
-                    // bottom =3            
-                    // 
-                    //If the edge enums are the same, or the sum of the enums == 3, 
+                    //Seeing as the edges are enumerated as follows
+                    // left   =0
+                    // right  =1
+                    // top    =2
+                    // bottom =3
+                    //
+                    //If the edge enums are the same, or the sum of the enums == 3,
                     //  the neighbor edge walk needs to be flipped
                     if ((edge == neighborEdge) || ((edge + neighborEdge) == 3)) {
                         switch (neighborEdge) {
@@ -56244,7 +56244,7 @@ var BABYLON;
                         //swapped direction neighbor edge walk
                         switch (neighborEdge) {
                             case PMREMGenerator.CP_EDGE_LEFT:
-                                //no change to neighborEdgeStartPtr for this case since it points 
+                                //no change to neighborEdgeStartPtr for this case since it points
                                 // to the upper left corner already
                                 neighborEdgeWalk = this.numChannels * cubeMapSize;
                                 break;
@@ -56253,7 +56253,7 @@ var BABYLON;
                                 neighborEdgeWalk = this.numChannels * cubeMapSize;
                                 break;
                             case PMREMGenerator.CP_EDGE_TOP:
-                                //no change to neighborEdgeStartPtr for this case since it points 
+                                //no change to neighborEdgeStartPtr for this case since it points
                                 // to the upper left corner already
                                 neighborEdgeWalk = this.numChannels;
                                 break;
@@ -56263,7 +56263,7 @@ var BABYLON;
                                 break;
                         }
                     }
-                    //Perform edge walk, to average across the 12 edges and smoothly propagate change to 
+                    //Perform edge walk, to average across the 12 edges and smoothly propagate change to
                     //nearby neighborhood
                     //step ahead one texel on edge
                     edgeStartIndex += edgeWalk;
@@ -56310,7 +56310,7 @@ var BABYLON;
             PMREMGenerator.CP_EDGE_RIGHT = 1;
             PMREMGenerator.CP_EDGE_TOP = 2;
             PMREMGenerator.CP_EDGE_BOTTOM = 3;
-            //corners of CUBE map (P or N specifys if it corresponds to the 
+            //corners of CUBE map (P or N specifys if it corresponds to the
             //  positive or negative direction each of X, Y, and Z
             PMREMGenerator.CP_CORNER_NNN = 0;
             PMREMGenerator.CP_CORNER_NNP = 1;
@@ -56321,8 +56321,8 @@ var BABYLON;
             PMREMGenerator.CP_CORNER_PPN = 6;
             PMREMGenerator.CP_CORNER_PPP = 7;
             PMREMGenerator._vectorTemp = new BABYLON.Vector4(0, 0, 0, 0);
-            //3x2 matrices that map cube map indexing vectors in 3d 
-            // (after face selection and divide through by the 
+            //3x2 matrices that map cube map indexing vectors in 3d
+            // (after face selection and divide through by the
             //  _ABSOLUTE VALUE_ of the max coord)
             // into NVC space
             //Note this currently assumes the D3D cube face ordering and orientation
@@ -56354,10 +56354,10 @@ var BABYLON;
             ];
             //------------------------------------------------------------------------------
             // D3D cube map face specification
-            //   mapping from 3D x,y,z cube map lookup coordinates 
+            //   mapping from 3D x,y,z cube map lookup coordinates
             //   to 2D within face u,v coordinates
             //
-            //   --------------------> U direction 
+            //   --------------------> U direction
             //   |                   (within-face texture space)
             //   |         _____
             //   |        |     |
@@ -56373,8 +56373,8 @@ var BABYLON;
             //   v   V direction
             //      (within-face texture space)
             //------------------------------------------------------------------------------
-            //Information about neighbors and how texture coorrdinates change across faces 
-            //  in ORDER of left, right, top, bottom (e.g. edges corresponding to u=0, 
+            //Information about neighbors and how texture coorrdinates change across faces
+            //  in ORDER of left, right, top, bottom (e.g. edges corresponding to u=0,
             //  u=1, v=0, v=1 in the 2D coordinate system of the particular face.
             //Note this currently assumes the D3D cube face ordering and orientation
             PMREMGenerator._sgCubeNgh = [
@@ -56425,7 +56425,7 @@ var BABYLON;
                 [PMREMGenerator.CP_FACE_Z_NEG, PMREMGenerator.CP_EDGE_TOP],
                 [PMREMGenerator.CP_FACE_Z_NEG, PMREMGenerator.CP_EDGE_BOTTOM]
             ];
-            //Information about which of the 8 cube corners are correspond to the 
+            //Information about which of the 8 cube corners are correspond to the
             //  the 4 corners in each cube face
             //  the order is upper left, upper right, lower left, lower right
             PMREMGenerator._sgCubeCornerList = [
@@ -57409,7 +57409,7 @@ var BABYLON;
             saturation = ColorCurves.clamp(saturation, -100, 100);
             exposure = ColorCurves.clamp(exposure, -100, 100);
             // Remap the slider/config filter density with non-linear mapping and also scale by half
-            // so that the maximum filter density is only 50% control. This provides fine control 
+            // so that the maximum filter density is only 50% control. This provides fine control
             // for small values and reasonable range.
             density = ColorCurves.applyColorGradingSliderNonlinear(density);
             density *= 0.5;
@@ -57982,7 +57982,7 @@ var BABYLON;
             this.reflectionColor = new BABYLON.Color3(0.5, 0.5, 0.5);
             this.emissiveColor = new BABYLON.Color3(0, 0, 0);
             /**
-    
+
              * AKA Glossiness in other nomenclature.
              */
             this.microSurface = 0.9;
@@ -58576,7 +58576,7 @@ var BABYLON;
         };
         PBRMaterial.prototype.bind = function (world, mesh) {
             this._myScene = this.getScene();
-            // Matrices        
+            // Matrices
             this.bindOnlyWorldMatrix(world);
             // Bones
             BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
@@ -58591,7 +58591,7 @@ var BABYLON;
                         this._effect.setColor4("emissiveRightColor", this.emissiveFresnelParameters.rightColor, this.emissiveFresnelParameters.bias);
                     }
                 }
-                // Textures        
+                // Textures
                 if (this._myScene.texturesEnabled) {
                     if (this.albedoTexture && BABYLON.StandardMaterial.DiffuseTextureEnabled) {
                         this._effect.setTexture("albedoSampler", this.albedoTexture);
@@ -58680,7 +58680,7 @@ var BABYLON;
                         this._cameraColorGradingScaleOffset.x = this._cameraColorGradingInfos.z * slicePixelSizeU; // Extent of lookup range in U for a single slice so that range corresponds to (size-1) texels, for example 7/64
                         this._cameraColorGradingScaleOffset.y = this._cameraColorGradingInfos.z /
                             this._cameraColorGradingInfos.y; // Extent of lookup range in V for a single slice so that range corresponds to (size-1) texels, for example 7/8
-                        this._cameraColorGradingScaleOffset.z = 0.5 * slicePixelSizeU; // Offset of lookup range in U to align sample position with texel centre, for example 0.5/64 
+                        this._cameraColorGradingScaleOffset.z = 0.5 * slicePixelSizeU; // Offset of lookup range in U to align sample position with texel centre, for example 0.5/64
                         this._cameraColorGradingScaleOffset.w = 0.5 * slicePixelSizeV; // Offset of lookup range in V to align sample position with texel centre, for example 0.5/8
                         this._effect.setFloat4("vCameraColorGradingScaleOffset", this._cameraColorGradingScaleOffset.x, this._cameraColorGradingScaleOffset.y, this._cameraColorGradingScaleOffset.z, this._cameraColorGradingScaleOffset.w);
                     }
@@ -59774,7 +59774,7 @@ var BABYLON;
         SkyMaterial.prototype.getAlphaTestTexture = function () {
             return null;
         };
-        // Methods   
+        // Methods
         SkyMaterial.prototype._checkCache = function (scene, mesh, useInstances) {
             if (!mesh) {
                 return true;
@@ -59821,7 +59821,7 @@ var BABYLON;
                     }
                 }
             }
-            // Get correct effect      
+            // Get correct effect
             if (!this._defines.isEqual(this._cachedDefines) || !this._effect) {
                 this._defines.cloneTo(this._cachedDefines);
                 scene.resetCachedMaterial();
@@ -59862,7 +59862,7 @@ var BABYLON;
         };
         SkyMaterial.prototype.bind = function (world, mesh) {
             var scene = this.getScene();
-            // Matrices        
+            // Matrices
             this.bindOnlyWorldMatrix(world);
             this._effect.setMatrix("viewProjection", scene.getTransformMatrix());
             if (scene.getCachedMaterial() !== this) {
@@ -60242,7 +60242,7 @@ var BABYLON;
                 }
             }
             this._mesh = mesh;
-            // Get correct effect      
+            // Get correct effect
             if (!this._defines.isEqual(this._cachedDefines)) {
                 this._defines.cloneTo(this._cachedDefines);
                 scene.resetCachedMaterial();
@@ -60312,13 +60312,13 @@ var BABYLON;
         };
         WaterMaterial.prototype.bind = function (world, mesh) {
             var scene = this.getScene();
-            // Matrices        
+            // Matrices
             this.bindOnlyWorldMatrix(world);
             this._effect.setMatrix("viewProjection", scene.getTransformMatrix());
             // Bones
             BABYLON.MaterialHelper.BindBonesParameters(mesh, this._effect);
             if (scene.getCachedMaterial() !== this) {
-                // Textures        
+                // Textures
                 if (this.bumpTexture && BABYLON.StandardMaterial.BumpTextureEnabled) {
                     this._effect.setTexture("normalSampler", this.bumpTexture);
                     this._effect.setFloat2("vNormalInfos", this.bumpTexture.coordinatesIndex, this.bumpTexture.level);

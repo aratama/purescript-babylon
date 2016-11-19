@@ -4,6 +4,7 @@ output
 example/sandbox/public/index.js
 example/sandbox/public/worker.js
 .psc-ide-port
+*.blend1
 
 # Windows image file caches
 Thumbs.db

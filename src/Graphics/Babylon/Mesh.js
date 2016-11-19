@@ -60,13 +60,6 @@ exports.setPosition = function(position){
     }
 }
 
-exports.setReceiveShadows = function(receiveShadows){
-    return function(mesh){
-        return function(){
-            mesh.receiveShadows = receiveShadows;
-        }
-    }
-}
 
 
 exports.mergeMeshes = function(meshes){

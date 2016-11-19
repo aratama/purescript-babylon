@@ -152,3 +152,11 @@ exports.setRenderingGroupId = function(value){
         }
     }
 }
+
+exports.setReceiveShadows = function(receiveShadows){
+    return function(mesh){
+        return function(){
+            mesh.receiveShadows = receiveShadows;
+        }
+    }
+}

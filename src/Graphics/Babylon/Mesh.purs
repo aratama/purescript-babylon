@@ -24,8 +24,6 @@ foreign import createGround :: forall eff . String -> Int -> Int -> Int -> Scene
 
 foreign import setPosition :: forall eff . Vector3 -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setReceiveShadows  :: forall eff. Boolean -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
-
 foreign import mergeMeshes :: forall eff. Array Mesh -> Boolean -> Boolean -> Eff (babylon :: BABYLON | eff) Mesh
 
 foreign import setMaterial :: forall eff. Material -> Mesh -> Eff (babylon :: BABYLON | eff) Unit

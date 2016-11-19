@@ -118,8 +118,8 @@ pickBlock scene cursor (State state) screenX screenY = do
 
     if getHit pickingInfo then pickup else pure Nothing
 
-update :: forall eff. Ref State -> Scene -> Materials -> ShadowMap -> Mesh -> FreeCamera -> Mesh -> Eff (Effects eff) Unit
-update ref scene materials shadowMap cursor camera player = do
+update :: forall eff. Ref State -> Scene -> Materials -> ShadowMap -> Mesh -> FreeCamera -> Eff (Effects eff) Unit
+update ref scene materials shadowMap cursor camera = do
 
         modifyRef ref \(State state) -> State state { totalFrames = state.totalFrames + 1 }
 
@@ -146,11 +146,11 @@ update ref scene materials shadowMap cursor camera player = do
 
 
         when (mod state.totalFrames 10 == 0) do
-            let shadowRange = 2
+            let shadowRange = 0
             let ci = runChunkIndex cameraPositionChunkIndex
             chunks <- runSTArray do
                 list <- emptySTArray
-                pushSTArray list (meshToAbstractMesh player)
+                for_ state.alicia \mesh -> pushSTArray list mesh
                 forE (ci.x - shadowRange) (ci.x + shadowRange) \dx -> do
                     forE (ci.y - shadowRange) (ci.y + shadowRange) \dy -> do
                         forE (ci.z - shadowRange) (ci.z + shadowRange) \dz -> do
@@ -195,6 +195,7 @@ update ref scene materials shadowMap cursor camera player = do
 
         do
             State st@{ terrain } <- readRef ref
+
             let next = {
                         x: state.position.x + state.velocity.x,
                         y: state.position.y + state.velocity.y,
@@ -217,8 +218,9 @@ update ref scene materials shadowMap cursor camera player = do
 
             writeRef ref (State st')
 
-            position <- createVector3 st'.position.x (st'.position.y + 0.501) st'.position.z
-            AbstractMesh.setPosition position (meshToAbstractMesh player)
+            for_ st.alicia \mesh -> void do
+                position <- createVector3 st'.position.x (st'.position.y + 0.501) st'.position.z
+                AbstractMesh.setPosition position mesh
 
 
 

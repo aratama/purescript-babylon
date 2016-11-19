@@ -49,8 +49,8 @@ collesionEnabledRange = 1
 enableWaterMaterial :: Boolean
 enableWaterMaterial = false
 
-initializeUI :: forall eff. Canvas -> CanvasElement -> Ref State -> Mesh -> FreeCamera -> TargetCamera -> Scene -> Materials -> Mesh -> Eff (Effects eff) Unit
-initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials player = do
+initializeUI :: forall eff. Canvas -> CanvasElement -> Ref State -> Mesh -> FreeCamera -> TargetCamera -> Scene -> Materials -> Eff (Effects eff) Unit
+initializeUI canvasGL canvas2d ref cursor camera miniMapCamera scene materials = do
 
 
     onMouseMove \e -> do
