@@ -7,12 +7,4 @@ Gates of Babylonjs (http://www.babylonjs.com/) for PureScript.
 
 Experimental. Far from complete APIs.
 
-## build
 
-```
-$ psc --version
-0.10.2
-$ npm install
-$ bower update
-$ npm run build
-```

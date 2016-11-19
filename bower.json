@@ -19,13 +19,5 @@
     "purescript-dom": "^3.1.0"
   },
   "devDependencies": {
-    "purescript-st": "^2.0.0",
-    "purescript-strongcheck": "^2.0.0",
-    "purescript-aff": "^2.0.1",
-    "purescript-now": "^2.0.0",
-    "purescript-maps": "^2.0.1",
-    "purescript-console": "^2.0.0",
-    "purescript-canvas": "^2.0.0",
-    "purescript-newtype": "^1.1.0"
   }
 }
