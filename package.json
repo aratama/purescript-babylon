@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+      "build": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs"
   },
   "author": "",
   "license": "ISC",
