@@ -26,7 +26,7 @@ foreign import setPosition :: forall eff . Vector3 -> Mesh -> Eff (babylon :: BA
 
 foreign import mergeMeshes :: forall eff. Array Mesh -> Boolean -> Boolean -> Eff (babylon :: BABYLON | eff) Mesh
 
-foreign import setMaterial :: forall eff. Material -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
+
 
 foreign import setInfiniteDistance :: forall eff. Boolean -> Mesh -> Eff (babylon :: BABYLON | eff) Unit
 

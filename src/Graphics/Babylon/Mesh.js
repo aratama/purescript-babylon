@@ -73,13 +73,6 @@ exports.mergeMeshes = function(meshes){
 }
 
 
-exports.setMaterial = function(mat){
-    return function(mesh){
-        return function(){
-            mesh.material = mat;
-        }
-    }
-}
 
 
 exports.setInfiniteDistance = function(value){

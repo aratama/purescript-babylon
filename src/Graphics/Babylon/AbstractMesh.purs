@@ -3,6 +3,7 @@ module Graphics.Babylon.AbstractMesh where
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
+import Graphics.Babylon.Material (Material)
 import Graphics.Babylon.Node (Node)
 import Graphics.Babylon.Observable (Observable)
 import Graphics.Babylon.PhysicsImpostor (PhysicsImpostor)
@@ -50,3 +51,5 @@ foreign import setRenderingGroupId :: forall eff. Int -> AbstractMesh -> Eff (ba
 foreign import setReceiveShadows  :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Skeleton
+
+foreign import setMaterial :: forall eff. Material -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit

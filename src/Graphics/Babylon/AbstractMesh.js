@@ -166,3 +166,11 @@ exports.getSkeleton = function(mesh){
         return mesh.skeleton;
     }
 }
+
+exports.setMaterial = function(mat){
+    return function(mesh){
+        return function(){
+            mesh.material = mat;
+        }
+    }
+}
