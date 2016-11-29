@@ -13,8 +13,12 @@ import Graphics.Babylon.Vector3 (Vector3)
 foreign import data ShaderMaterial :: *
 
 type ShaderMaterialOptions = {
+    needAlphaBlending :: Boolean,
+    needAlphaTesting :: Boolean,
+    attributes :: Array String,
     uniforms :: Array String,
-    samplers :: Array String
+    samplers :: Array String,
+    defines :: Array String
 }
 
 foreign import createShaderMaterial :: forall eff. String -> Scene -> String -> ShaderMaterialOptions -> Eff (babylon :: BABYLON | eff) ShaderMaterial
