@@ -6,6 +6,10 @@ exports.createTexture = function(path){
     }
 }
 
+exports.textureToBaseTexture = function(tex){
+    return tex;
+}
+
 exports.sKYBOX_MODE = BABYLON.Texture.SKYBOX_MODE;
 
 exports.setCoordinatesMode = function(value){

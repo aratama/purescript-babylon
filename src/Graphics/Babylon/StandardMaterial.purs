@@ -30,4 +30,3 @@ foreign import setSpecularColor :: forall eff. Color3 -> StandardMaterial -> Eff
 
 foreign import setSpecularPower :: forall eff. Number -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import setHasAlpha :: forall eff. Boolean -> StandardMaterial -> Eff (babylon :: BABYLON | eff) Unit
