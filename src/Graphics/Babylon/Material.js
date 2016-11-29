@@ -21,3 +21,11 @@ exports.setWireframe = function(value){
         }
     }
 }
+
+exports.setAlpha = function(value){
+    return function(mat){
+        return function(){
+            mat.alpha = value;
+        }
+    }
+}
