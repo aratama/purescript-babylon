@@ -70,3 +70,10 @@ exports.setSpecularPower = function(specularPower){
     }
 }
 
+exports.setUseAlphaFromDiffuseTexture = function(useAlphaFromDiffuseTexture){
+    return function(mat){
+        return function(){
+            mat.useAlphaFromDiffuseTexture = useAlphaFromDiffuseTexture;
+        }
+    }
+}
