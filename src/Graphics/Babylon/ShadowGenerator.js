@@ -30,7 +30,7 @@ exports.setRenderList = function(renderList){
     return function(shadowMap){
         return function(){
             shadowMap.renderList = renderList.filter(function(mesh){
-                return 0 < mesh.getTotalVertices();
+                return (0 < mesh.getTotalVertices()) && ( ( ! mesh.skeleton) || mesh.skeleton.getTransformMatrices(mesh) );
             });
         }
     }
