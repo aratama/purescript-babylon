@@ -16,4 +16,6 @@ foreign import data ParticleSystem :: *
 
 foreign import data Skeleton :: *
 
+foreign import data AnimationRange :: *
+
 foreign import data Animatable :: *
