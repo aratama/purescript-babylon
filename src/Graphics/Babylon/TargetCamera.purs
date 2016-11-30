@@ -21,3 +21,5 @@ foreign import getCameraRotation :: forall eff. TargetCamera -> Eff (babylon :: 
 foreign import getRotation :: forall eff. TargetCamera -> Eff (babylon :: BABYLON | eff) Vector3
 
 foreign import setTarget :: forall eff . Vector3 -> TargetCamera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import getTarget :: forall eff . TargetCamera -> Eff (babylon :: BABYLON | eff) Vector3

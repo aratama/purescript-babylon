@@ -40,3 +40,9 @@ exports.setTarget = function(position){
         }
     }
 }
+
+exports.getTarget = function(camera){
+    return function(){
+        return camera.getTarget();
+    }
+}
