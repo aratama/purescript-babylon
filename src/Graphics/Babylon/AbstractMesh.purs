@@ -38,6 +38,8 @@ foreign import getPosition :: forall eff. AbstractMesh -> Eff (babylon :: BABYLO
 
 foreign import setPosition :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
+foreign import setRotation :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
 foreign import setPhysicsImpostor :: forall eff. PhysicsImpostor -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setIsVisible :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit

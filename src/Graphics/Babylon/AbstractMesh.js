@@ -117,6 +117,14 @@ exports.setPosition = function(position){
     }
 }
 
+exports.setRotation = function(rotation){
+    return function(mesh){
+        return function(){
+            mesh.rotation = rotation;
+        }
+    }
+}
+
 exports.setPhysicsImpostor = function(impostor){
     return function(mesh){
         return function(){
