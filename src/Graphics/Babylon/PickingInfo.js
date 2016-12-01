@@ -3,7 +3,7 @@ exports.getPickedMesh = function(info){
 
 }
 
-exports.getPickedPoint = function(info){
+exports._getPickedPoint = function(info){
     return info.pickedPoint;
 }
 
