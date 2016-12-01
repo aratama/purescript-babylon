@@ -24,6 +24,14 @@ exports.add = function(v){
     }
 }
 
+exports.subtract = function(v){
+    return function(r){
+        return function(){
+            return v.subtract(r);
+        }
+    }
+}
+
 exports.runVector3 = function(v){
     return function(){
         return { x: v.x, y: v.y, z: v.z }
