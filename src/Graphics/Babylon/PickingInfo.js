@@ -1,4 +1,4 @@
-exports.getPickedMesh = function(info){
+exports._getPickedMesh = function(info){
     return info.pickedMesh;
 
 }
