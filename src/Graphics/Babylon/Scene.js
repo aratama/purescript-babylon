@@ -98,6 +98,20 @@ exports.pick = function(x){
     }
 }
 
+exports.pickWithRay = function(ray){
+    return function(predicate){
+        return function(fastCheck){
+            return function(scene){
+                return function(){
+                    return scene.pickWithRay(ray, function(mesh){
+                        return predicate(mesh)();
+                    }, fastCheck);
+                }
+            }
+        }
+    }
+}
+
 
 exports.enablePhysics = function(gravity){
     return function(plugin){
