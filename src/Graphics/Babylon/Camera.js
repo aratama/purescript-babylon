@@ -63,3 +63,19 @@ exports.setViewport = function(viewport){
         }
     }
 }
+
+exports.setMaxZ = function(maxZ){
+    return function(camera){
+        return function(){
+            camera.maxZ = maxZ;
+        }
+    }
+}
+
+exports.setMinZ = function(minZ){
+    return function(camera){
+        return function(){
+            camera.minZ = minZ;
+        }
+    }
+}

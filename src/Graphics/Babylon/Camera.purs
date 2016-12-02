@@ -29,3 +29,7 @@ foreign import setOrthoTop :: forall eff. Number -> Camera -> Eff (babylon :: BA
 foreign import setOrthoBottom :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setViewport :: forall eff. Viewport -> Camera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setMinZ :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setMaxZ :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit
