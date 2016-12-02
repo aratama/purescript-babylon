@@ -32,6 +32,12 @@ exports.subtract = function(v){
     }
 }
 
+exports.length = function(v){
+    return function(){
+        return v.length();
+    }
+}
+
 exports.runVector3 = function(v){
     return function(){
         return { x: v.x, y: v.y, z: v.z }

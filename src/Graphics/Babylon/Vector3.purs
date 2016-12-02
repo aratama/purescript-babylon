@@ -14,6 +14,8 @@ foreign import add :: forall eff. Vector3 -> Vector3 -> Eff (babylon :: BABYLON 
 
 foreign import subtract :: forall eff. Vector3 -> Vector3 -> Eff (babylon :: BABYLON | eff) Vector3
 
+foreign import length :: forall eff. Vector3 -> Eff (babylon :: BABYLON | eff) Number
+
 foreign import runVector3 :: forall eff. Vector3 -> Eff (babylon :: BABYLON | eff) { x :: Number, y :: Number, z :: Number }
 
 foreign import toVector3 :: forall eff. { x :: Number, y :: Number, z :: Number } -> Eff (babylon :: BABYLON | eff) Vector3
