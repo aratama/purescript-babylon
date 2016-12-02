@@ -182,3 +182,12 @@ exports.setMaterial = function(mat){
         }
     }
 }
+
+
+exports.setVisibility = function(visibility){
+    return function(mesh){
+        return function(){
+            mesh.visibility = visibility;
+        }
+    }
+}

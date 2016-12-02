@@ -55,3 +55,5 @@ foreign import setReceiveShadows  :: forall eff. Boolean -> AbstractMesh -> Eff 
 foreign import getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Skeleton
 
 foreign import setMaterial :: forall eff. Material -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setVisibility :: forall eff. Number -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
