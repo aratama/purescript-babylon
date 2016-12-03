@@ -33,3 +33,5 @@ foreign import setViewport :: forall eff. Viewport -> Camera -> Eff (babylon :: 
 foreign import setMinZ :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import setMaxZ :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setFOV :: forall eff. Number -> Camera -> Eff (babylon :: BABYLON | eff) Unit

@@ -79,3 +79,11 @@ exports.setMinZ = function(minZ){
         }
     }
 }
+
+exports.setFOV = function(fov){
+    return function(camera){
+        return function(){
+            camera.fov = fov;
+        }
+    }
+}
