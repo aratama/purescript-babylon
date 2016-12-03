@@ -6,7 +6,7 @@ exports.getAnimationRange = function(name){
     }
 }
 
-exports.beginAnimation = function(name){
+exports._beginAnimation = function(name){
     return function(loop){
         return function(speedRatio){
             return function(onAnimationEnd){
