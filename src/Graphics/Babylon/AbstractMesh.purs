@@ -1,6 +1,8 @@
 module Graphics.Babylon.AbstractMesh where
 
 import Control.Monad.Eff (Eff)
+import Data.Maybe (Maybe)
+import Data.Nullable (Nullable, toMaybe)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Material (Material)
@@ -9,6 +11,7 @@ import Graphics.Babylon.Observable (Observable)
 import Graphics.Babylon.PhysicsImpostor (PhysicsImpostor)
 import Graphics.Babylon.Types (AbstractMesh, Mesh, Ray, Skeleton)
 import Graphics.Babylon.Vector3 (Vector3)
+import Prelude ((<$>))
 
 foreign import setCheckCollisions :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
@@ -52,7 +55,10 @@ foreign import setRenderingGroupId :: forall eff. Int -> AbstractMesh -> Eff (ba
 
 foreign import setReceiveShadows  :: forall eff. Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) Skeleton
+foreign import _getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) (Nullable Skeleton)
+
+getSkeleton  :: forall eff. AbstractMesh -> Eff (babylon :: BABYLON | eff) (Maybe Skeleton)
+getSkeleton mesh = toMaybe <$> _getSkeleton mesh
 
 foreign import setMaterial :: forall eff. Material -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
