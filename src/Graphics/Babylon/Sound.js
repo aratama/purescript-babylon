@@ -21,3 +21,11 @@ exports.play = function(sound){
         sound.play();
     };
 };
+
+exports.setVolume = function(volume){
+    return function(sound){
+        return function(){
+            sound.setVolume(volume);
+        };
+    };
+};
