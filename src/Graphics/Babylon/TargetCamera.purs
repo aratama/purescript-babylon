@@ -2,13 +2,7 @@ module Graphics.Babylon.TargetCamera where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Camera (Camera)
-import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Vector2 (Vector2)
-import Graphics.Babylon.Vector3 (Vector3)
-
-foreign import data TargetCamera :: *
+import Graphics.Babylon.Types (BABYLON, Scene, TargetCamera, Vector2, Vector3, Camera)
 
 foreign import createTargetCamera :: forall eff. String -> Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) TargetCamera
 

@@ -1,12 +1,9 @@
-module Graphics.Babylon.PickingInfo (PickingInfo, getPickedMesh, getPickedPoint, getHit) where
+module Graphics.Babylon.PickingInfo (getPickedMesh, getPickedPoint, getHit) where
 
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
-import Graphics.Babylon.Types (AbstractMesh)
-import Graphics.Babylon.Vector3 (Vector3)
+import Graphics.Babylon.Types (AbstractMesh, PickingInfo, Vector3)
 import Prelude ((<<<))
-
-foreign import data PickingInfo :: *
 
 foreign import _getPickedMesh :: PickingInfo -> Nullable AbstractMesh
 

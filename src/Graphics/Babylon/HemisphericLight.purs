@@ -2,12 +2,7 @@
 module Graphics.Babylon.HemisphericLight where
 
 import Control.Monad.Eff (Eff)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Light (Light)
-
-foreign import data HemisphericLight :: *
+import Graphics.Babylon.Types (BABYLON, Scene, HemisphericLight, Vector3, Light)
 
 foreign import createHemisphericLight :: forall eff . String -> Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) HemisphericLight
 

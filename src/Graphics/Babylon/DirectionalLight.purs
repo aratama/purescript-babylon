@@ -2,13 +2,7 @@
 module Graphics.Babylon.DirectionalLight where
 
 import Control.Monad.Eff (Eff)
-
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Light (Light)
-
-foreign import data DirectionalLight :: *
+import Graphics.Babylon.Types (BABYLON, Scene, DirectionalLight, Light, Vector3)
 
 foreign import createDirectionalLight:: forall eff . String -> Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) DirectionalLight
 

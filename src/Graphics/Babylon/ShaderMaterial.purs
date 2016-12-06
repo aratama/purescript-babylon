@@ -2,24 +2,7 @@ module Graphics.Babylon.ShaderMaterial where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Color3 (Color3)
-import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.Texture (Texture)
-import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Vector3 (Vector3)
-
-
-foreign import data ShaderMaterial :: *
-
-type ShaderMaterialOptions = {
-    needAlphaBlending :: Boolean,
-    needAlphaTesting :: Boolean,
-    attributes :: Array String,
-    uniforms :: Array String,
-    samplers :: Array String,
-    defines :: Array String
-}
+import Graphics.Babylon.Types (BABYLON, Scene, ShaderMaterial, ShaderMaterialOptions, Vector3, Texture, Material, Color3)
 
 foreign import createShaderMaterial :: forall eff. String -> Scene -> String -> ShaderMaterialOptions -> Eff (babylon :: BABYLON | eff) ShaderMaterial
 

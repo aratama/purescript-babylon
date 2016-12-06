@@ -3,20 +3,11 @@ module Graphics.Babylon.Scene where
 import Control.Monad.Eff (Eff)
 import Data.Nullable (Nullable)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Camera (Camera)
-import Graphics.Babylon.Color3 (Color3)
-import Graphics.Babylon.DebugLayer (DebugLayer)
-import Graphics.Babylon.Engine (Engine)
-import Graphics.Babylon.PickingInfo (PickingInfo)
-import Graphics.Babylon.Types (AbstractMesh, Animatable, PhysicsPlugin, Ray, Scene, Skeleton)
-import Graphics.Babylon.Vector3 (Vector3)
+import Graphics.Babylon.Types (BABYLON, Camera, Color3, DebugLayer,Engine, PickingInfo, AbstractMesh, Animatable, PhysicsPlugin, Ray, Scene, Skeleton, Vector3, FogMode)
 
 foreign import createScene :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Scene
 
 foreign import render :: forall eff. Scene -> Eff (babylon :: BABYLON | eff) Unit
-
-foreign import data FogMode :: *
 
 foreign import fOGMODE_EXP :: FogMode
 

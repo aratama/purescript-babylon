@@ -2,17 +2,7 @@ module Graphics.Babylon.ShadowGenerator where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.DirectionalLight (DirectionalLight)
-import Graphics.Babylon.Types (AbstractMesh, Mesh)
-
-
-
-foreign import data ShadowGenerator :: *
-
-foreign import data ShadowMap :: *
-
-foreign import data RenderList :: *
+import Graphics.Babylon.Types (BABYLON, AbstractMesh, Mesh, ShadowGenerator, ShadowMap, RenderList, DirectionalLight)
 
 foreign import createShadowGenerator :: forall eff. Int -> DirectionalLight -> Eff (babylon :: BABYLON | eff) ShadowGenerator
 

@@ -4,8 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toMaybe)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Types (Animatable, AnimationRange, Skeleton)
+import Graphics.Babylon.Types (BABYLON, Animatable, AnimationRange, Skeleton)
 import Prelude ((<$>))
 
 foreign import getAnimationRange :: forall eff. String -> Skeleton -> Eff (babylon :: BABYLON | eff) AnimationRange

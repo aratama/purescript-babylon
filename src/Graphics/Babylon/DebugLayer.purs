@@ -5,10 +5,7 @@ import DOM.HTML.Types (HTMLElement)
 import Data.Maybe (Maybe)
 import Data.Nullable (Nullable, toNullable)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-
-
-foreign import data DebugLayer :: *
+import Graphics.Babylon.Types (BABYLON, DebugLayer)
 
 foreign import _show :: forall eff. Boolean -> Boolean -> Nullable HTMLElement -> DebugLayer -> Eff (babylon :: BABYLON | eff) Unit
 

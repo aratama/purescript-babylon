@@ -5,7 +5,7 @@
   "authors": [
     "aratama <aratama@example.com>"
   ],
-  "license": "ISC",
+  "license": "Apache-2.0",
   "homepage": "",
   "ignore": [
     "**/.*",
@@ -15,7 +15,6 @@
     "tests"
   ],
   "dependencies": {
-    "purescript-eff": "^2.0.0",
     "purescript-dom": "^3.1.0",
     "purescript-aff": "^2.0.1"
   },

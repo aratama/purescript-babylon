@@ -2,17 +2,7 @@ module Graphics.Babylon.Sound where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Types (Scene)
-
-foreign import data Sound :: *
-
-type CreateSoundOptions = {
-    loop :: Boolean,
-    autoplay :: Boolean,
-    playbackRate :: Number,
-    volume :: Number
-}
+import Graphics.Babylon.Types (BABYLON, Scene, Sound, CreateSoundOptions)
 
 defaultCreateSoundOptions :: CreateSoundOptions
 defaultCreateSoundOptions = {

@@ -2,13 +2,7 @@ module Graphics.Babylon.Camera where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Viewport (Viewport)
-
-foreign import data Camera :: *
-
-foreign import data CameraMode :: *
+import Graphics.Babylon.Types (BABYLON, Camera, CameraMode, Vector3, Viewport)
 
 foreign import pERSPECTIVE_CAMERA :: CameraMode
 

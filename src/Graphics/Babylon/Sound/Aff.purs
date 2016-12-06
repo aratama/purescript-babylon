@@ -4,9 +4,7 @@ import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Exception (Error)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Sound (Sound, CreateSoundOptions)
-import Graphics.Babylon.Types (Scene)
+import Graphics.Babylon.Types (BABYLON, Scene, Sound, CreateSoundOptions)
 
 foreign import _loadSound :: forall eff. String -> String -> Scene -> CreateSoundOptions -> (Error -> Eff (babylon :: BABYLON | eff) Unit) -> (Sound -> Eff (babylon :: BABYLON | eff) Unit) -> Eff (babylon :: BABYLON | eff) Unit
 

@@ -4,10 +4,7 @@ module Graphics.Babylon.Engine where
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import Data.Unit (Unit)
-
-import Graphics.Babylon (BABYLON, Canvas)
-
-foreign import data Engine :: *
+import Graphics.Babylon.Types (BABYLON, Canvas, Engine)
 
 foreign import createEngine :: forall eff. Canvas -> Boolean -> Eff (babylon :: BABYLON | eff) Engine
 

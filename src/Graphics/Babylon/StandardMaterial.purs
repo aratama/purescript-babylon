@@ -2,13 +2,7 @@ module Graphics.Babylon.StandardMaterial where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Color3 (Color3)
-import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Texture (Texture)
-
-foreign import data StandardMaterial :: *
+import Graphics.Babylon.Types (BABYLON, Scene, Texture, Material, Color3, StandardMaterial)
 
 foreign import createStandardMaterial :: forall eff. String -> Scene -> Eff (babylon :: BABYLON | eff) StandardMaterial
 

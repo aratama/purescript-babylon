@@ -6,7 +6,7 @@
     "build": "eslint src && psc bower_components/purescript-*/src/**/*.purs src/**/*.purs"
   },
   "author": "",
-  "license": "ISC",
+  "license": "Apache-2.0",
   "directories": {},
   "description": "",
   "devDependencies": {

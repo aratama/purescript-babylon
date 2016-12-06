@@ -4,12 +4,7 @@ import Control.Monad.Eff (Eff)
 import Data.Foreign (Foreign)
 import Data.Maybe (Maybe(..))
 import Data.Nullable (Nullable, toNullable)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Types (Scene)
-
-foreign import data IPhysicsEnabledObject :: *
-
-foreign import data PhysicsImpostor :: *
+import Graphics.Babylon.Types (BABYLON, Scene, IPhysicsEnabledObject, PhysicsImpostor)
 
 type PhysicsImpostorParameters = {
     mass :: Number,

@@ -1,13 +1,10 @@
-module Graphics.Babylon where
+module Graphics.Babylon.Util where
 
 import Control.Monad.Eff (Eff)
 import DOM (DOM)
 import Data.Nullable (Nullable)
+import Graphics.Babylon.Types (Canvas)
 import Prelude (Unit)
-
-foreign import data BABYLON :: !
-
-foreign import data Canvas :: *
 
 foreign import onDOMContentLoaded :: forall eff. Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
 

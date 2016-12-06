@@ -3,11 +3,7 @@ module Graphics.Babylon.Mesh where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
-import Graphics.Babylon.PhysicsImpostor (IPhysicsEnabledObject)
+import Graphics.Babylon.Types (BABYLON, AbstractMesh, Scene, Mesh, IPhysicsEnabledObject, Vector3)
 
 foreign import meshToAbstractMesh :: Mesh -> AbstractMesh
 

@@ -2,12 +2,7 @@ module Graphics.Babylon.WaterMaterial where
 
 import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Material (Material)
-import Graphics.Babylon.Texture (Texture)
-import Graphics.Babylon.Types (AbstractMesh, Scene)
-
-foreign import data WaterMaterial :: *
+import Graphics.Babylon.Types (BABYLON, AbstractMesh, Scene, WaterMaterial, Texture, Material)
 
 foreign import createWaterMaterial :: forall eff. String -> Scene -> Eff (babylon :: BABYLON | eff) WaterMaterial
 

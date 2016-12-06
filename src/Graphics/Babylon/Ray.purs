@@ -1,9 +1,7 @@
 module Graphics.Babylon.Ray where
 
 import Control.Monad.Eff (Eff)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Types (Ray)
+import Graphics.Babylon.Types (BABYLON, Ray, Vector3)
 
 foreign import createRay :: forall eff. Vector3 -> Vector3 -> Eff (babylon :: BABYLON | eff) Ray
 

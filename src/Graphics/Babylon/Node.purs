@@ -1,6 +1,6 @@
 module Graphics.Babylon.Node where
 
-foreign import data Node :: *
+import DOM.Node.Types (Node)
 
 foreign import getName :: Node -> String
 

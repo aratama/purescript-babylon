@@ -1,17 +1,7 @@
 module Graphics.Babylon.Sprite2D where
 
 import Control.Monad.Eff (Eff)
-import Data.Nullable (Nullable)
-import Graphics.Babylon (BABYLON)
-import Graphics.Babylon.Texture (Texture)
-import Graphics.Babylon.Size (Size)
-import Graphics.Babylon.Prim2DBase (Prim2DBase)
-
-foreign import data Sprite2D :: *
-
-type Sprite2DOptions = {
-    spriteSize :: Nullable Size
-}
+import Graphics.Babylon.Types (BABYLON, Prim2DBase, Sprite2D, Sprite2DOptions, Texture)
 
 foreign import createSprite2D :: forall eff. Texture -> Sprite2DOptions -> Eff (babylon :: BABYLON | eff) Sprite2D
 

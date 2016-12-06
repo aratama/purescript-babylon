@@ -2,9 +2,7 @@ module Graphics.Babylon.Vector3 where
 
 import Control.Monad.Eff (Eff)
 
-import Graphics.Babylon (BABYLON)
-
-foreign import data Vector3 :: *
+import Graphics.Babylon.Types (BABYLON, Vector3)
 
 foreign import createVector3 :: forall eff. Number -> Number -> Number -> Eff (babylon :: BABYLON | eff) Vector3
 
