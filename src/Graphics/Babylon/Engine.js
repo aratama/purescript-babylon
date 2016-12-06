@@ -28,3 +28,9 @@ exports.switchFullscreen = function(requestPointerLock){
         };
     };
 };
+
+exports.getDeltaTime = function(engine){
+    return function(){
+        return engine.getDeltaTime();
+    };
+};

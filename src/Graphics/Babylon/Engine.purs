@@ -14,3 +14,5 @@ foreign import createEngine :: forall eff. Canvas -> Boolean -> Eff (babylon :: 
 foreign import runRenderLoop :: forall eff. Eff (dom :: DOM, babylon :: BABYLON | eff) Unit -> Engine -> Eff (dom :: DOM, babylon :: BABYLON | eff) Unit
 
 foreign import switchFullscreen :: forall eff. Boolean -> {} -> Engine -> Eff (dom :: DOM, babylon :: BABYLON | eff) Unit
+
+foreign import getDeltaTime :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Number
