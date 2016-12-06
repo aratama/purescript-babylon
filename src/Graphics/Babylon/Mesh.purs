@@ -6,7 +6,6 @@ import Data.Unit (Unit)
 
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Vector3 (Vector3)
-import Graphics.Babylon.Material (Material)
 import Graphics.Babylon.Types (AbstractMesh, Scene, Mesh)
 import Graphics.Babylon.PhysicsImpostor (IPhysicsEnabledObject)
 

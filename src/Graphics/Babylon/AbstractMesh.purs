@@ -9,7 +9,7 @@ import Graphics.Babylon.Material (Material)
 import Graphics.Babylon.Node (Node)
 import Graphics.Babylon.Observable (Observable)
 import Graphics.Babylon.PhysicsImpostor (PhysicsImpostor)
-import Graphics.Babylon.Types (AbstractMesh, Mesh, Ray, Skeleton)
+import Graphics.Babylon.Types (AbstractMesh, Ray, Skeleton)
 import Graphics.Babylon.Vector3 (Vector3)
 import Prelude ((<$>))
 
@@ -23,7 +23,7 @@ foreign import moveWithCollisions :: forall eff. Vector3 -> AbstractMesh -> Eff 
 
 foreign import intersects :: forall eff. Ray -> Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
-foreign import intersectsMesh :: forall eff. Mesh -> Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
+foreign import intersectsMesh :: forall eff. AbstractMesh -> Boolean -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import intersectsPoint :: forall eff. Vector3 -> AbstractMesh -> Eff (babylon :: BABYLON | eff) Unit
 

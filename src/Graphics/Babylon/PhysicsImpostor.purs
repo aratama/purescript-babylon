@@ -3,8 +3,7 @@ module Graphics.Babylon.PhysicsImpostor where
 import Control.Monad.Eff (Eff)
 import Data.Foreign (Foreign)
 import Data.Maybe (Maybe(..))
-import Data.Nullable (Nullable, toMaybe, toNullable)
-import Data.Unit (Unit)
+import Data.Nullable (Nullable, toNullable)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Types (Scene)
 

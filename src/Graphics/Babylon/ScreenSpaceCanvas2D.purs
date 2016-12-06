@@ -4,7 +4,6 @@ import Control.Monad.Eff (Eff)
 import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 import Graphics.Babylon.Types (Scene)
-import Graphics.Babylon.Size (Size)
 import Graphics.Babylon.Prim2DBase (Prim2DBase)
 
 foreign import data ScreenSpaceCanvas2D :: *

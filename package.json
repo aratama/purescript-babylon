@@ -3,11 +3,13 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-      "build": "psc bower_components/purescript-*/src/**/*.purs src/**/*.purs"
+    "build": "eslint src && psc bower_components/purescript-*/src/**/*.purs src/**/*.purs"
   },
   "author": "",
   "license": "ISC",
-  "directories": {
-  },
-  "description": ""
+  "directories": {},
+  "description": "",
+  "devDependencies": {
+    "eslint": "^3.11.1"
+  }
 }

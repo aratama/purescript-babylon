@@ -1,3 +1,7 @@
+/* global BABYLON */
+
+"use strict";
+
 exports.createCubeTexture = function(path){
     return function(scene){
         return function(){
@@ -13,10 +17,10 @@ exports.createCubeTexture = function(path){
 
 
             return tex;
-        }
-    }
-}
+        };
+    };
+};
 
 exports.cubeTextureToTexture = function(tex){
     return tex;
-}
+};

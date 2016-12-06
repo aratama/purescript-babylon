@@ -1,3 +1,7 @@
+/* global BABYLON */
+
+"use strict";
+
 exports._loadMesh = function(meshesNames){
     return function(rootUrl){
         return function(sceneFilename){
@@ -9,20 +13,20 @@ exports._loadMesh = function(meshesNames){
                                 BABYLON.SceneLoader.ImportMesh(
                                     meshesNames, rootUrl, sceneFilename, scene,
                                     function(result){
-                                        onsuccess(result)()
+                                        onsuccess(result)();
                                     },
                                     function(e){
-                                        progressCallBack(e)()
+                                        progressCallBack(e)();
                                     },
                                     function(e){
-                                        onerror(e)()
+                                        onerror(e)();
                                     }
                                 );
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
+                            };
+                        };
+                    };
+                };
+            };
+        };
+    };
+};

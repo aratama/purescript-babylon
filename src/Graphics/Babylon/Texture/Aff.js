@@ -1,3 +1,7 @@
+/* global BABYLON */
+
+"use strict";
+
 exports._loadTexture = function(path){
     return function(scene){
         return function(options){
@@ -14,9 +18,9 @@ exports._loadTexture = function(path){
                                 reject(new Error())();
                             }
                         );
-                    }
-                }
-            }
-        }
-    }
-}
+                    };
+                };
+            };
+        };
+    };
+};

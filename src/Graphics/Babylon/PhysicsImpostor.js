@@ -1,14 +1,18 @@
+/* global BABYLON */
+
+"use strict";
+
 exports.createPhysicsImpostor = function(object){
     return function(type){
         return function(options){
             return function(scene){
                 return function(){
                     return new BABYLON.PhysicsImpostor(object, type, options, scene);
-                }
-            }
-        }
-    }
-}
+                };
+            };
+        };
+    };
+};
 
 exports.sphereImpostor = BABYLON.PhysicsImpostor.SphereImpostor;
 

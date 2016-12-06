@@ -1,7 +1,6 @@
 module Graphics.Babylon.Viewport where
 
 import Control.Monad.Eff (Eff)
-import Data.Unit (Unit)
 import Graphics.Babylon (BABYLON)
 
 foreign import data Viewport :: *
