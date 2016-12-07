@@ -1,4 +1,4 @@
-module Graphics.Babylon.Texture.Aff where
+module Graphics.Babylon.Aff.Texture where
 
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)

@@ -1,4 +1,4 @@
-module Graphics.Babylon.SceneLoader.Aff where
+module Graphics.Babylon.Aff.SceneLoader where
 
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)

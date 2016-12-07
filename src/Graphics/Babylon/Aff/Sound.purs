@@ -1,4 +1,4 @@
-module Graphics.Babylon.Sound.Aff (loadSound) where
+module Graphics.Babylon.Aff.Sound (loadSound) where
 
 import Control.Monad.Aff (Aff, makeAff)
 import Control.Monad.Eff (Eff)
