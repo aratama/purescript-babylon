@@ -1,9 +1,10 @@
 {
   "name": "purescript-babylon",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "main": "index.js",
   "scripts": {
-    "build": "eslint src && psc bower_components/purescript-*/src/**/*.purs src/**/*.purs"
+    "build": "eslint src && psc bower_components/purescript-*/src/**/*.purs src/**/*.purs",
+    "docs": "pulp docs"
   },
   "author": "",
   "license": "Apache-2.0",
