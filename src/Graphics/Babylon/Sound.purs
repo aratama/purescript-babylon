@@ -16,4 +16,6 @@ foreign import createSound :: forall eff. String -> String -> Scene -> (Unit -> 
 
 foreign import play :: forall eff. Sound -> Eff (babylon :: BABYLON | eff) Unit
 
+foreign import stop :: forall eff. Sound -> Eff (babylon :: BABYLON | eff) Unit
+
 foreign import setVolume :: forall eff. Number -> Sound -> Eff (babylon :: BABYLON | eff) Unit

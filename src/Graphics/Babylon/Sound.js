@@ -22,6 +22,12 @@ exports.play = function(sound){
     };
 };
 
+exports.stop = function(sound){
+    return function(){
+        sound.stop();
+    };
+};
+
 exports.setVolume = function(volume){
     return function(sound){
         return function(){
