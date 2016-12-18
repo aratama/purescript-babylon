@@ -34,3 +34,9 @@ exports.getDeltaTime = function(engine){
         return engine.getDeltaTime();
     };
 };
+
+exports.resize = function(engine){
+    return function(){
+        engine.resize();
+    };
+};

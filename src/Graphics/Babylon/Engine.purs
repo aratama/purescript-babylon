@@ -13,3 +13,5 @@ foreign import runRenderLoop :: forall eff. Eff (dom :: DOM, babylon :: BABYLON 
 foreign import switchFullscreen :: forall eff. Boolean -> {} -> Engine -> Eff (dom :: DOM, babylon :: BABYLON | eff) Unit
 
 foreign import getDeltaTime :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Number
+
+foreign import resize :: forall eff. Engine -> Eff (babylon :: BABYLON | eff) Unit
