@@ -162,3 +162,10 @@ exports.beginAnimation = function(target){
         };
     };
 };
+
+
+exports.getMeshes = function(scene){
+    return function(){
+        return scene.meshes;
+    };
+};

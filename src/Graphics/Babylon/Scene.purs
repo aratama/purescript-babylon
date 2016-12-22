@@ -40,3 +40,5 @@ foreign import setActiveCamera :: forall eff. Camera -> Scene -> Eff (babylon ::
 foreign import setActiveCameras :: forall eff. Array Camera -> Scene -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import beginAnimation :: forall eff. Skeleton -> Int -> Int -> Boolean -> Number -> Nullable (Eff (babylon :: BABYLON | eff) Animatable) -> Nullable Animatable -> Scene -> Eff (babylon :: BABYLON | eff) Animatable
+
+foreign import getMeshes :: forall eff. Scene -> Eff (babylon :: BABYLON | eff) (Array AbstractMesh)
