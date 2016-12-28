@@ -46,3 +46,28 @@ exports.setWindForce = function(windForce){
     };
 };
 
+exports.setWaterColor = function(waterColor){
+    return function(mat){
+        return function(){
+            mat.waterColor = waterColor;
+        };
+    };
+};
+
+exports.setColorBlendFactor = function(colorBlendFactor){
+    return function(mat){
+        return function(){
+            mat.colorBlendFactor = colorBlendFactor;
+        };
+    };
+};
+
+
+
+
+exports.clearRenderList = function(mat){
+    return function(){
+        mat.getRenderList().length = 0;
+    };
+};
+
