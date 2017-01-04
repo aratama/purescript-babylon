@@ -62,12 +62,30 @@ exports.setColorBlendFactor = function(colorBlendFactor){
     };
 };
 
+exports.enableRenderTargets = function(enableRenderTargets){
+    return function(mat){
+        return function(){
+            if(mat.enableRenderTargets){
+                mat.enableRenderTargets(enableRenderTargets);
+            }
+        };
+    };
+};
 
+exports.setBackFaceCulling = function(backFaceCulling){
+    return function(mat){
+        return function(){
+            mat.backFaceCulling = backFaceCulling;
+        };
+    };
+};
 
 
 exports.clearRenderList = function(mat){
     return function(){
-        mat.getRenderList().length = 0;
+        if(mat.getRenderList){
+            mat.getRenderList().length = 0;
+        }
     };
 };
 

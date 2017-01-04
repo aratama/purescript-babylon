@@ -21,3 +21,7 @@ foreign import setWaterColor :: forall eff. Color3 -> WaterMaterial -> Eff (baby
 foreign import setColorBlendFactor :: forall eff. Number -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
 
 foreign import clearRenderList :: forall eff. WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import setBackFaceCulling :: forall eff. Boolean -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+
+foreign import enableRenderTargets :: forall eff. Boolean -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit 
