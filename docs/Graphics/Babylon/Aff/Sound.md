@@ -3,7 +3,7 @@
 #### `loadSound`
 
 ``` purescript
-loadSound :: forall eff. String -> String -> Scene -> CreateSoundOptions -> Aff (babylon :: BABYLON | eff) Sound
+loadSound :: forall eff. String -> String -> Scene -> CreateSoundOptions -> Aff ("babylon" :: BABYLON | eff) Sound
 ```
 
 

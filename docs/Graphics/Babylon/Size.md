@@ -3,7 +3,7 @@
 #### `createSize`
 
 ``` purescript
-createSize :: forall eff. Int -> Int -> Eff (babylon :: BABYLON | eff) Size
+createSize :: forall eff. Int -> Int -> Eff ("babylon" :: BABYLON | eff) Size
 ```
 
 

@@ -3,7 +3,7 @@
 #### `createWaterMaterial`
 
 ``` purescript
-createWaterMaterial :: forall eff. String -> Scene -> Eff (babylon :: BABYLON | eff) WaterMaterial
+createWaterMaterial :: forall eff. String -> Scene -> Eff ("babylon" :: BABYLON | eff) WaterMaterial
 ```
 
 #### `waterMaterialToMaterial`
@@ -15,25 +15,55 @@ waterMaterialToMaterial :: WaterMaterial -> Material
 #### `setBumpTexture`
 
 ``` purescript
-setBumpTexture :: forall eff. Texture -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+setBumpTexture :: forall eff. Texture -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 #### `addToRenderList`
 
 ``` purescript
-addToRenderList :: forall eff. AbstractMesh -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+addToRenderList :: forall eff. AbstractMesh -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 #### `setWaveHeight`
 
 ``` purescript
-setWaveHeight :: forall eff. Number -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+setWaveHeight :: forall eff. Number -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 #### `setWindForce`
 
 ``` purescript
-setWindForce :: forall eff. Number -> WaterMaterial -> Eff (babylon :: BABYLON | eff) Unit
+setWindForce :: forall eff. Number -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
+```
+
+#### `setWaterColor`
+
+``` purescript
+setWaterColor :: forall eff. Color3 -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
+```
+
+#### `setColorBlendFactor`
+
+``` purescript
+setColorBlendFactor :: forall eff. Number -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
+```
+
+#### `clearRenderList`
+
+``` purescript
+clearRenderList :: forall eff. WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
+```
+
+#### `setBackFaceCulling`
+
+``` purescript
+setBackFaceCulling :: forall eff. Boolean -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
+```
+
+#### `enableRenderTargets`
+
+``` purescript
+enableRenderTargets :: forall eff. Boolean -> WaterMaterial -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 

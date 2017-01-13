@@ -3,7 +3,7 @@
 #### `createDirectionalLight`
 
 ``` purescript
-createDirectionalLight :: forall eff. String -> Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) DirectionalLight
+createDirectionalLight :: forall eff. String -> Vector3 -> Scene -> Eff ("babylon" :: BABYLON | eff) DirectionalLight
 ```
 
 #### `directionalLightToLight`

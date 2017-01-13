@@ -3,7 +3,7 @@
 #### `add`
 
 ``` purescript
-add :: forall a eff. (a -> Eff (babylon :: BABYLON | eff) Unit) -> Observable a -> Eff (babylon :: BABYLON | eff) Unit
+add :: forall a eff. (a -> Eff ("babylon" :: BABYLON | eff) Unit) -> Observable a -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 

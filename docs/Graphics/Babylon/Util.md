@@ -3,13 +3,19 @@
 #### `onDOMContentLoaded`
 
 ``` purescript
-onDOMContentLoaded :: forall eff. Eff (dom :: DOM | eff) Unit -> Eff (dom :: DOM | eff) Unit
+onDOMContentLoaded :: forall eff. Eff ("dom" :: DOM | eff) Unit -> Eff ("dom" :: DOM | eff) Unit
 ```
 
 #### `querySelectorCanvas`
 
 ``` purescript
-querySelectorCanvas :: forall eff. String -> Eff (dom :: DOM | eff) (Nullable Canvas)
+querySelectorCanvas :: forall eff. String -> Eff ("dom" :: DOM | eff) (Nullable Canvas)
+```
+
+#### `querySelectorCanvasAff`
+
+``` purescript
+querySelectorCanvasAff :: forall eff. String -> Aff ("dom" :: DOM | eff) Canvas
 ```
 
 

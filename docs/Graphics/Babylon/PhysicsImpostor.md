@@ -3,7 +3,7 @@
 #### `PhysicsImpostorParameters`
 
 ``` purescript
-type PhysicsImpostorParameters = { mass :: Number, friction :: Nullable Number, restitution :: Nullable Number, nativeOptions :: Nullable Foreign }
+type PhysicsImpostorParameters = { "mass" :: Number, "friction" :: Nullable Number, "restitution" :: Nullable Number, "nativeOptions" :: Nullable Foreign }
 ```
 
 #### `defaultPhysicsImpostorParameters`
@@ -15,7 +15,7 @@ defaultPhysicsImpostorParameters :: PhysicsImpostorParameters
 #### `PhysicsImpostorType`
 
 ``` purescript
-data PhysicsImpostorType :: *
+data PhysicsImpostorType :: Type
 ```
 
 #### `sphereImpostor`
@@ -63,7 +63,7 @@ heightmapImpostor :: PhysicsImpostorType
 #### `createPhysicsImpostor`
 
 ``` purescript
-createPhysicsImpostor :: forall eff. IPhysicsEnabledObject -> PhysicsImpostorType -> PhysicsImpostorParameters -> Scene -> Eff (babylon :: BABYLON | eff) PhysicsImpostor
+createPhysicsImpostor :: forall eff. IPhysicsEnabledObject -> PhysicsImpostorType -> PhysicsImpostorParameters -> Scene -> Eff ("babylon" :: BABYLON | eff) PhysicsImpostor
 ```
 
 

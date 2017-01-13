@@ -3,7 +3,7 @@
 #### `setHasAlpha`
 
 ``` purescript
-setHasAlpha :: forall eff. Boolean -> BaseTexture -> Eff (babylon :: BABYLON | eff) Unit
+setHasAlpha :: forall eff. Boolean -> BaseTexture -> Eff ("babylon" :: BABYLON | eff) Unit
 ```
 
 

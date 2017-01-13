@@ -3,7 +3,7 @@
 #### `createHemisphericLight`
 
 ``` purescript
-createHemisphericLight :: forall eff. String -> Vector3 -> Scene -> Eff (babylon :: BABYLON | eff) HemisphericLight
+createHemisphericLight :: forall eff. String -> Vector3 -> Scene -> Eff ("babylon" :: BABYLON | eff) HemisphericLight
 ```
 
 #### `hemisphericLightToLight`

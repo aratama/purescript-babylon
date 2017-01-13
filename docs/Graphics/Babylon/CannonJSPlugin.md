@@ -3,7 +3,7 @@
 #### `createCannonJSPlugin`
 
 ``` purescript
-createCannonJSPlugin :: forall eff. Eff (babylon :: BABYLON | eff) PhysicsPlugin
+createCannonJSPlugin :: forall eff. Eff ("babylon" :: BABYLON | eff) PhysicsPlugin
 ```
 
 

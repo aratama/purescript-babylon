@@ -3,7 +3,7 @@
 #### `createTexture`
 
 ``` purescript
-createTexture :: forall eff. String -> Scene -> CreateTextureOptions eff -> Eff (babylon :: BABYLON | eff) Texture
+createTexture :: forall eff. String -> Scene -> CreateTextureOptions eff -> Eff ("babylon" :: BABYLON | eff) Texture
 ```
 
 #### `defaultCreateTextureOptions`
@@ -33,7 +33,7 @@ sKYBOX_MODE :: CoordinatesMode
 #### `setCoordinatesMode`
 
 ``` purescript
-setCoordinatesMode :: forall eff. CoordinatesMode -> Texture -> Eff (babylon :: BABYLON | eff) Texture
+setCoordinatesMode :: forall eff. CoordinatesMode -> Texture -> Eff ("babylon" :: BABYLON | eff) Texture
 ```
 
 
